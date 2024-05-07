@@ -138,12 +138,11 @@ export type FormElementData =
     | TextareaElementData
     | RichTextElementData
 
-export function isInput(field: Field): field is Input {
+export function isInput(field: any): field is Input {
     return [Field.DATE, Field.EMAIL, Field.PASSWORD, Field.SEARCH, Field.TEL, Field.TEXT, Field.URL, Field.NUMBER].includes(field)
 }
 
 export function isImageInput(field: any): field is ImageInputElementData {
-    console.log(field, Field.IMAGE)
     return field === Field.IMAGE
 }
 

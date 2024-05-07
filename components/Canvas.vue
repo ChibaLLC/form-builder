@@ -23,7 +23,7 @@ import {
   type TextareaElementData
 } from "~/typings";
 import {h, render} from "vue";
-import type {VNode} from "@vue/runtime-core";
+
 
 const FieldComponent = resolveComponent("Renderer")
 
@@ -38,10 +38,15 @@ const props = defineProps({
 })
 
 class Elements {
-  dataElements: FormElementData[] = []
-  elements: Array<{ index: number, node: VNode }> = []
+  private _elements: Array<FormElementData & { index: number }> = []
+  private renderedElements: Array<number> = []
+  private target: HTMLElement;
 
-  initialiseElementData(field: Field) {
+  constructor(target: HTMLElement) {
+    this.target = target
+  }
+
+  private initialiseElementData(field: Field) {
     let component = {} as any
     if (isInput(field)) {
       component = {
@@ -132,35 +137,72 @@ class Elements {
       } satisfies RichTextElementData
     }
 
-    component.index = this.dataElements.length
-    return component as FormElementData
+    component.index = this._elements.length
+    return component as FormElementData & { index: number }
   }
 
   add(fieldName: Field) {
-    const data = this.initialiseElementData(fieldName)
-    const node = h(FieldComponent, {data: data})
-    this.elements.push({index: data.index || this.elements.length, node: node})
+    this._elements.push(this.initialiseElementData(fieldName))
+    return this;
   }
 
-  render(target: HTMLElement) {
-    this.elements.map(el => {
+  render() {
+    this._elements.map(el => {
+      if (this.isRendered(el)) return
       const anchor = document.createElement('div')
       anchor.dataset.identity = el.index.toString()
-      render(el.node, anchor)
-      target.appendChild(anchor)
+      const node = h(FieldComponent, {data: el})
+      render(node, anchor)
+      this.renderedElements.push(el.index)
+      this.target.appendChild(anchor)
     })
+    return this;
   }
 
-  update(index: number, data: FormElementData){
+  isRendered(el: FormElementData) {
+    return this.renderedElements.some(no => no === el.index)
+  }
 
+  update(index: number, data: FormElementData) {
+    const element = h(FieldComponent, {data: data})
+    const anchor = document.createElement('div')
+
+    anchor.dataset.identity = index.toString()
+    render(element, anchor)
+
+    const replacement = this.target.querySelector(`[data-identity="${index}"]`)
+    if (replacement) {
+      replacement.replaceWith(anchor)
+    } else {
+      this.target.appendChild(anchor)
+    }
+    return this;
+  }
+
+  move(id: number, newIndex: number) {
+    const element = this._elements[id]
+    this._elements.splice(id, 1)
+    this._elements.splice(newIndex, 0, element)
+    this._elements = this._elements.map((el, index) => ({...el, index}))
+    this.render()
+    return this;
+  }
+
+  get elements() {
+    return this._elements
+  }
+
+  get(index: number) {
+    return this._elements[index]
   }
 }
 
 onMounted(() => {
+  const elements = new Elements(container.value!)
   dropzone.value?.addEventListener('drop', (e) => {
     e.preventDefault()
     if (!props.draggedElement) return console.warn('No dragged element')
-
+    elements.add(props.draggedElement).render()
     dropzone.value?.classList.remove('active')
   })
 
@@ -177,9 +219,7 @@ onMounted(() => {
 </script>
 <template>
   <form class="bg-blue-950 h-fit min-h-32 rounded mt-8" ref="dropzone">
-    <div ref="container">
-
-    </div>
+    <div ref="container"></div>z
   </form>
 </template>
 <style>

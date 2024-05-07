@@ -19,10 +19,14 @@ const props = defineProps({
   data: {
     type: Object as PropType<FormElementData>,
     required: true
+  },
+  edit: {
+    type: Boolean as PropType<boolean>,
+    default: true
   }
 })
 
-async function parseOptions(options: ElementOptions): Promise<{ label: string, value: string }[]> {
+function parseOptions(options: ElementOptions): Promise<{ label: string, value: string }[]> {
   function format(item: any) {
     if (Array.isArray(item)) {
       return item.map((option) => {
@@ -64,72 +68,216 @@ async function parseOptions(options: ElementOptions): Promise<{ label: string, v
     case 'string':
       if (options.startsWith('http')) {
         try {
-          return await $fetch<string>(options, {responseType: 'text'}).then(format)
+          return $fetch<string>(options, {responseType: 'text'}).then(format)
         } catch (e) {
-          return []
+          return Promise.resolve([])
         }
       } else {
         try {
-          return format(options)
+          return Promise.resolve(format(options))
         } catch (e) {
-          return []
+          return Promise.resolve([])
         }
       }
     case 'object':
-      return format(options)
+      return Promise.resolve(format(options))
     default:
-      return []
+      return Promise.resolve([])
   }
 }
 
-switch (props.element.type) {
+switch (props.data.type) {
   case Field.SELECT:
   case Field.RADIO:
   case Field.CHECKBOX:
-    props.element.options = await parseOptions(props.element.options)
+    parseOptions(props.data.options).then(options => {
+      props.data.options = options
+    })
     break
 }
 </script>
 <template>
-  <template v-if="isImageInput(props.type)">
-    <input type="file"/>
-  </template>
-  <template v-else-if="isInput(props.type)">
-    <input type="date"/>
-  </template>
-  <template v-else-if="isStatic(props.type)">
-    <p>{{ data.text }}</p>
-  </template>
-  <template v-else-if="isTextarea(props.type)">
-    <textarea></textarea>
-  </template>
-  <template v-else-if="isSelect(props.type)">
-    <select>
-      <option v-for="option in data.options" :key="option.value" :value="option.value">{{ option.label }}</option>
-    </select>
-  </template>
-  <template v-else-if="isRadio(props.type)">
-    <div v-for="option in data.options">
-      <input type="radio" :value="option.value"/>
-      <label>{{ option.label }}</label>
+  <div class="container" draggable="true">
+    <div v-if="isStatic(data.type)">
+      <p class="static">{{ data.text }}</p>
     </div>
-  </template>
-  <template v-else-if="isCheckbox(props.type)">
-    <div v-for="option in data.options">
-      <input type="checkbox" :value="option.value"/>
-      <label>{{ option.label }}</label>
+
+    <div v-else-if="isImageInput(data.type)">
+      <label for="label">
+        <input autocomplete="off" type="text" id="label" class="label" :class="{edit: 'edit'}" v-model="data.label"
+               placeholder="Add a label"/>
+      </label>
+      <label for="description" v-if="data.description || edit">
+        <input autocomplete="off" type="text" id="description" class="description" :class="{edit: 'edit'}"
+               v-model="data.description"
+               placeholder="Add a description (optional)"/>
+      </label>
+      <input autocomplete="off" v-if="!edit" type="file"/>
     </div>
-  </template>
-  <template v-else-if="isFileInput(props.type)">
-    <input type="file"/>
-  </template>
-  <template v-else-if="isInput(props.type)">
-    <input :type="data.type"/>
-  </template>
-  <template v-else-if="isButton(props.type)">
-    <button @click="data.onClick || (() => {})" :type="data.inputType">{{ data.text }}</button>
-  </template>
-  <template v-else>
-    <p>Unknown element type</p>
-  </template>
+
+    <div v-else-if="isTextarea(data.type)">
+      <label for="textarea">
+        <input autocomplete="off" type="text" id="textarea" class="label" :class="{edit: 'edit'}" v-model="data.label"
+               placeholder="Add a label"/>
+      </label>
+      <label for="description" v-if="data.description || edit">
+        <input autocomplete="off" type="text" id="description" class="description" :class="{edit: 'edit'}"
+               v-model="data.description"
+               placeholder="Add a description (optional)"/>
+      </label>
+      <textarea class="textarea"></textarea>
+    </div>
+
+    <div v-else-if="isSelect(data.type)">
+      <label for="select">
+        <input autocomplete="off" type="text" id="select" class="label" :class="{edit: 'edit'}" v-model="data.label"
+               placeholder="Add a label"/>
+      </label>
+      <label for="description" v-if="data.description || edit">
+        <input autocomplete="off" type="text" id="description" class="description" :class="{edit: 'edit'}"
+               v-model="data.description"
+               placeholder="Add a description (optional)"/>
+      </label>
+      <select v-if="!edit">
+        <option v-for="option in data.options" :key="option.value" :value="option.value">{{ option.label }}</option>
+      </select>
+      <div v-else class="adoptions">
+
+      </div>
+    </div>
+
+    <div v-else-if="isRadio(data.type)">
+      <div v-for="option in data.options">
+        <div v-if="!edit">
+          <label>{{ option.label }}</label>
+          <input autocomplete="off" type="radio" :value="option.value"/>
+        </div>
+        <div v-else class="adoptions">
+
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="isCheckbox(data.type)">
+      <div v-for="option in data.options">
+        <div v-if="!edit">
+          <label>{{ option.label }}</label>
+          <input autocomplete="off" type="checkbox" :value="option.value"/>
+        </div>
+        <div v-else class="adoptions">
+
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="isFileInput(data.type)">
+      <label for="label">
+        <input autocomplete="off" type="text" id="label" class="label" :class="{edit: 'edit'}" v-model="data.label"
+               placeholder="Add a label"/>
+      </label>
+      <label for="description" v-if="data.description || edit">
+        <input autocomplete="off" type="text" id="description" class="description" :class="{edit: 'edit'}"
+               v-model="data.description"
+               placeholder="Add a description (optional)"/>
+      </label>
+      <input autocomplete="off" type="file" :accept="data.accept"/>
+    </div>
+
+    <div v-else-if="isButton(data.type)">
+      <button @click="data.onClick || (() => {})" :type="data.inputType">{{ data.text }}</button>
+    </div>
+
+    <div v-else-if="isInput(data.type)">
+      <label for="label">
+        <input autocomplete="off" type="text" id="label" class="label" :class="{edit: 'edit'}" v-model="data.label"
+               placeholder="Add a label"/>
+      </label>
+      <label for="description" v-if="data.description || edit">
+        <input autocomplete="off" type="text" id="description" class="description" :class="{edit: 'edit'}"
+               v-model="data.description"
+               placeholder="Add a description (optional)"/>
+      </label>
+      <input autocomplete="off" :type="data.inputType"/>
+    </div>
+
+    <div v-else>
+      <p class="text-red">Unknown element type</p>
+    </div>
+  </div>
 </template>
+<style scoped lang="scss">
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem 0;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    width: 80%;
+
+    > input, > select, > textarea {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.25rem;
+    }
+
+    label {
+      width: fit-content;
+
+      &:first-child {
+        margin-top: 1rem;
+      }
+
+      &:not(:focus) {
+        input {
+          all: unset;
+          cursor: pointer;
+          transition: padding 0.25s, border-radius 0.25s;
+
+          &::placeholder {
+            color: #bbb;
+          }
+
+          &.label {
+            font-weight: bold;
+            color: white;
+          }
+
+          &.description {
+            margin-bottom: 0.8em;
+            font-size: 0.9rem;
+            color: white;
+          }
+        }
+      }
+
+      &:focus-within,
+      &:focus {
+        input {
+          cursor: text;
+          background-color: #f0f0f0;
+          border-radius: 0.25rem;
+          padding: 0.5rem;
+          color: black !important;
+
+          transition: padding 0.25s, border-radius 0.25s;
+        }
+      }
+
+      &:hover:not(:focus-within) {
+        input::placeholder {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    &.adoptions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+}
+</style>
