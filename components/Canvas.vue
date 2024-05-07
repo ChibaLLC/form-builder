@@ -22,13 +22,14 @@ import {
   type StaticElementData,
   type TextareaElementData
 } from "~/typings";
-import {h, render} from "vue";
+import { h, render, Suspense } from "vue";
 
 
 const FieldComponent = resolveComponent("Renderer")
 
 const container = ref<HTMLElement | null>(null)
 const dropzone = ref<HTMLElement | null>(null)
+const edit = ref(true)
 
 const props = defineProps({
   draggedElement: {
@@ -151,8 +152,8 @@ class Elements {
       if (this.isRendered(el)) return
       const anchor = document.createElement('div')
       anchor.dataset.identity = el.index.toString()
-      const node = h(FieldComponent, {data: el})
-      render(node, anchor)
+      const node = h(FieldComponent, { data: el, edit: edit })
+      render(h(Suspense, null, node), anchor)
       this.renderedElements.push(el.index)
       this.target.appendChild(anchor)
     })
@@ -164,11 +165,11 @@ class Elements {
   }
 
   update(index: number, data: FormElementData) {
-    const element = h(FieldComponent, {data: data})
+    const element = h(FieldComponent, { data: data, edit: edit })
     const anchor = document.createElement('div')
 
     anchor.dataset.identity = index.toString()
-    render(element, anchor)
+    render(h(Suspense, null, element), anchor)
 
     const replacement = this.target.querySelector(`[data-identity="${index}"]`)
     if (replacement) {
@@ -179,11 +180,22 @@ class Elements {
     return this;
   }
 
+  delete(index: number) {
+    const element = this.target.querySelector(`[data-identity="${index}"]`)
+    if (element) {
+      element.remove()
+    }
+    this._elements = this._elements.filter(el => el.index !== index)
+    this.renderedElements = this.renderedElements.filter(el => el !== index)
+    this.render()
+    return this;
+  }
+
   move(id: number, newIndex: number) {
     const element = this._elements[id]
     this._elements.splice(id, 1)
     this._elements.splice(newIndex, 0, element)
-    this._elements = this._elements.map((el, index) => ({...el, index}))
+    this._elements = this._elements.map((el, index) => ({ ...el, index }))
     this.render()
     return this;
   }
@@ -218,11 +230,18 @@ onMounted(() => {
 })
 </script>
 <template>
-  <form class="bg-blue-950 h-fit min-h-32 rounded mt-8" ref="dropzone">
-    <div ref="container"></div>z
-  </form>
+  <div class="mt-8">
+    <div class="flex justify-end bg-blue-950 text-white w-fit ml-auto mb-2 mt-2 px-4 py-2 rounded cursor-pointer"
+      @click="edit = !edit">
+      <span v-if="!edit">Edit</span>
+      <span v-else>Preview</span>
+    </div>
+    <form class="bg-blue-950 h-fit min-h-32 rounded pb-6" ref="dropzone">
+      <div ref="container"></div>
+    </form>
+  </div>
 </template>
-<style>
+<style scoped lang="scss">
 #dropzone.active {
   @apply bg-blue-800;
 }
