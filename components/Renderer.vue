@@ -17,7 +17,6 @@ import {
   type RadioElementData,
   type CheckboxElementData
 } from "~/typings";
-import {render} from "vue";
 
 const props = defineProps({
   data: {
@@ -39,12 +38,12 @@ function parseOptions(options: ElementOptions | undefined): Promise<{ label: str
     if (Array.isArray(item)) {
       return item.map((option) => {
         if (typeof option === 'string') {
-          return {label: option, value: option}
+          return { label: option, value: option }
         } else {
           if (option.label && option.value) {
             return option
           } else {
-            return Object.keys(option).map((key) => ({label: key, value: option[key]}))
+            return Object.keys(option).map((key) => ({ label: key, value: option[key] }))
           }
         }
       })
@@ -54,7 +53,7 @@ function parseOptions(options: ElementOptions | undefined): Promise<{ label: str
       try {
         return format(JSON.parse(item))
       } catch (e) {
-        return item.split(', ').map((option) => ({label: option, value: option}))
+        return item.split(', ').map((option) => ({ label: option, value: option }))
       }
     }
 
@@ -62,7 +61,7 @@ function parseOptions(options: ElementOptions | undefined): Promise<{ label: str
       if (item.label && item.value) {
         return [item]
       } else {
-        return Object.keys(item).map((key) => ({label: key, value: item[key]}))
+        return Object.keys(item).map((key) => ({ label: key, value: item[key] }))
       }
     }
 
@@ -76,7 +75,7 @@ function parseOptions(options: ElementOptions | undefined): Promise<{ label: str
     case 'string':
       if (options.startsWith('http')) {
         try {
-          return $fetch<string>(options, {responseType: 'text'}).then(format)
+          return $fetch<string>(options, { responseType: 'text' }).then(format)
         } catch (e) {
           return Promise.resolve([])
         }
@@ -107,20 +106,29 @@ function hasOptions(data: FormElementData): data is SelectElementData | RadioEle
 
 if (hasOptions(props.data)) {
   parseOptions(props.data.options)
-      .then(options => {
-        // @ts-ignore
-        props.data.options = options
-      })
+    .then(options => {
+      // @ts-ignore
+      props.data.options = options
+    })
 }
 
 watch(props.edit, (value) => {
   _edit.value = !value
 })
+
+const emit = defineEmits<{
+  delete: [idx: number]
+}>()
 </script>
 <template>
-  <div class="container">
-    <div>
-
+  <div class="container relative">
+    <div class="cursor-pointer relative" @click="emit('delete', data.index!)">
+      <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+        class="right-0 absolute top-4">
+        <path fill-rule="evenodd" clip-rule="evenodd"
+          d="M12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22ZM8.96965 8.96967C9.26254 8.67678 9.73742 8.67678 10.0303 8.96967L12 10.9394L13.9696 8.96969C14.2625 8.6768 14.7374 8.6768 15.0303 8.96969C15.3232 9.26258 15.3232 9.73746 15.0303 10.0303L13.0606 12L15.0303 13.9697C15.3232 14.2625 15.3232 14.7374 15.0303 15.0303C14.7374 15.3232 14.2625 15.3232 13.9696 15.0303L12 13.0607L10.0303 15.0303C9.73744 15.3232 9.26256 15.3232 8.96967 15.0303C8.67678 14.7374 8.67678 14.2626 8.96967 13.9697L10.9393 12L8.96965 10.0303C8.67676 9.73744 8.67676 9.26256 8.96965 8.96967Z"
+          fill="#d22020" />
+      </svg>
     </div>
     <div v-if="isStatic(data.type)">
       <p class="static">{{ data.text }}</p>
@@ -128,24 +136,24 @@ watch(props.edit, (value) => {
 
     <div v-else-if="isImageInput(data.type)">
       <label for="label">
-        <input :disabled="_edit" autocomplete="off" type="text" id="label" class="label"
-               v-model="data.label" placeholder="Add a label"/>
+        <input :disabled="_edit" autocomplete="off" type="text" id="label" class="label" v-model="data.label"
+          placeholder="Add a label" />
       </label>
       <label for="description" v-if="data.description || edit">
         <input :disabled="_edit" autocomplete="off" type="text" id="description" class="description"
-               v-model="data.description" placeholder="Add a description (optional)"/>
+          v-model="data.description" placeholder="Add a description (optional)" />
       </label>
-      <input autocomplete="off" v-if="!edit" type="file"/>
+      <input autocomplete="off" v-if="!edit" type="file" />
     </div>
 
     <div v-else-if="isTextarea(data.type)">
       <label for="textarea">
         <input :disabled="_edit" autocomplete="off" type="text" id="textarea" class="label" v-model="data.label"
-               placeholder="Add a label"/>
+          placeholder="Add a label" />
       </label>
       <label for="description" v-if="data.description || edit">
         <input :disabled="_edit" autocomplete="off" type="text" id="description" class="description"
-               v-model="data.description" placeholder="Add a description (optional)"/>
+          v-model="data.description" placeholder="Add a description (optional)" />
       </label>
       <textarea class="textarea"></textarea>
     </div>
@@ -153,11 +161,11 @@ watch(props.edit, (value) => {
     <div v-else-if="isSelect(data.type)">
       <label for="select">
         <input :disabled="_edit" autocomplete="off" type="text" id="select" class="label" v-model="data.label"
-               placeholder="Add a label"/>
+          placeholder="Add a label" />
       </label>
       <label for="description" v-if="data.description || edit">
         <input :disabled="_edit" autocomplete="off" type="text" id="description" class="description"
-               v-model="data.description" placeholder="Add a description (optional)"/>
+          v-model="data.description" placeholder="Add a description (optional)" />
       </label>
       <select v-if="!edit">
         <option v-for="option in data.options" :key="option.value" :value="option.value">{{ option.label }}</option>
@@ -171,7 +179,7 @@ watch(props.edit, (value) => {
       <div v-for="option in data.options">
         <div v-if="!edit">
           <label>{{ option.label }}</label>
-          <input autocomplete="off" type="radio" :value="option.value"/>
+          <input autocomplete="off" type="radio" :value="option.value" />
         </div>
         <div v-else class="adoptions">
 
@@ -183,7 +191,7 @@ watch(props.edit, (value) => {
       <div v-for="option in data.options">
         <div v-if="!edit">
           <label>{{ option.label }}</label>
-          <input autocomplete="off" type="checkbox" :value="option.value"/>
+          <input autocomplete="off" type="checkbox" :value="option.value" />
         </div>
         <div v-else class="adoptions">
 
@@ -194,13 +202,13 @@ watch(props.edit, (value) => {
     <div v-else-if="isFileInput(data.type)">
       <label for="label">
         <input :disabled="_edit" autocomplete="off" type="text" id="label" class="label" v-model="data.label"
-               placeholder="Add a label"/>
+          placeholder="Add a label" />
       </label>
       <label for="description" v-if="data.description || edit">
         <input :disabled="_edit" autocomplete="off" type="text" id="description" class="description"
-               v-model="data.description" placeholder="Add a description (optional)"/>
+          v-model="data.description" placeholder="Add a description (optional)" />
       </label>
-      <input autocomplete="off" type="file" :accept="data.accept"/>
+      <input autocomplete="off" type="file" :accept="data.accept" />
     </div>
 
     <div v-else-if="isButton(data.type)">
@@ -210,13 +218,13 @@ watch(props.edit, (value) => {
     <div v-else-if="isInput(data.type)">
       <label for="label">
         <input :disabled="_edit" autocomplete="off" type="text" id="label" class="label" v-model="data.label"
-               placeholder="Add a label"/>
+          placeholder="Add a label" />
       </label>
       <label for="description" v-if="data.description || edit">
         <input :disabled="_edit" autocomplete="off" type="text" id="description" class="description"
-               v-model="data.description" placeholder="Add a description (optional)"/>
+          v-model="data.description" placeholder="Add a description (optional)" />
       </label>
-      <input autocomplete="off" :type="data.inputType"/>
+      <input autocomplete="off" :type="data.inputType" />
     </div>
 
     <div v-else>
@@ -230,15 +238,15 @@ watch(props.edit, (value) => {
   flex-direction: column;
   padding: 0.4rem 0;
 
-  > div {
+  >div {
     display: flex;
     flex-direction: column;
     margin: auto;
     width: 80%;
 
-    > input,
-    > select,
-    > textarea {
+    >input,
+    >select,
+    >textarea {
       padding: 0.5rem;
       border: 1px solid #ccc;
       border-radius: 0.25rem;

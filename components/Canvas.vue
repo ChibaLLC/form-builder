@@ -152,7 +152,13 @@ class Elements {
       if (this.isRendered(el)) return
       const anchor = document.createElement('div')
       anchor.dataset.identity = el.index.toString()
-      const node = h(FieldComponent, { data: el, edit: edit })
+      const node = h(FieldComponent, {
+        data: el,
+        edit: edit,
+        onDelete: (idx: number) => {
+          this.delete(idx)
+        }
+      })
       render(h(Suspense, null, node), anchor)
       this.renderedElements.push(el.index)
       this.target.appendChild(anchor)
@@ -165,7 +171,13 @@ class Elements {
   }
 
   update(index: number, data: FormElementData) {
-    const element = h(FieldComponent, { data: data, edit: edit })
+    const element = h(FieldComponent, {
+      data: data,
+      edit: edit,
+      onDelete: (idx: number) => {
+        this.delete(idx)
+      }
+    })
     const anchor = document.createElement('div')
 
     anchor.dataset.identity = index.toString()
@@ -243,6 +255,6 @@ onMounted(() => {
 </template>
 <style scoped lang="scss">
 #dropzone.active {
-  @apply bg-blue-800;
+  @apply bg-blue-800 animate-pulse;
 }
 </style>

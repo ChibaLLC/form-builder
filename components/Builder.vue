@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import {Field} from '~/typings';
 
-const draggedElement = ref<Field | null>(null)
+const draggedElement = ref<Field | undefined>(undefined)
 
 function setDragged(value: Field) {
   draggedElement.value = value
 }
 </script>
 <template>
-  <div class="flex w-[100svw] h-[100svh] bg-blue-400">
+  <div class="flex max-w-[100svw] max-h-[100svh]">
     <div class="flex-1">
       <Panel @dragstart="setDragged"/>
     </div>
