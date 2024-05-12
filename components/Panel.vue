@@ -58,6 +58,19 @@ const emit = defineEmits(['dragstart'])
         </template>
       </Picker>
     </li>
+    <li>
+      <Picker @dragstart="emit('dragstart', Field.STORE)">
+        <template #icon>
+          <Icon name="store" />
+        </template>
+        <template #title>
+          <h3>Store</h3>
+        </template>
+        <template #description>
+          <p>A store page</p>
+        </template>
+      </Picker>
+    </li>
   </ul>
 </template>
 

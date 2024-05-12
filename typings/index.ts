@@ -15,7 +15,8 @@ export enum Field {
     BUTTON = 'button',
     STATIC = 'static',
     TEXTAREA = 'textarea',
-    RICHTEXT = 'richtext'
+    RICHTEXT = 'richtext',
+    STORE = 'store',
 }
 
 export enum ImageTypeEnum {
@@ -45,12 +46,16 @@ export type ElementOptions = Array<{ value: string, label: string }> | URL | Pro
 }>> | (() => Promise<Array<{ value: string, label: string }>>) | `http${string}`
 
 export type _ElementData = {
+    type: any,
+    label: string,
+    inputType: string,
+    text?: string,
+    accept?: string | undefined,
+    onClick?: () => void,
+    options?: any,
     index?: number,
-    type: unknown,
-    inputType: unknown,
     placeholder?: string,
     rules?: Array<'required' | `max:${number}` | `min:${number}` | `same:${string}`>,
-    label?: string,
     description?: string,
 }
 
@@ -62,8 +67,8 @@ export type StaticElementData = {
 
 export type SelectElementData = _ElementData & {
     type: Field.SELECT,
-    value?: string,
     inputType: Field.SELECT,
+    value?: string,
     autocomplete?: boolean,
     options: ElementOptions | undefined
 }

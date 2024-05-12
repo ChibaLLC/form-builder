@@ -17,12 +17,13 @@ import {
   isSelect,
   isStatic,
   isTextarea,
-  type RadioElementData, type RichTextElementData,
+  type RadioElementData,
+  type RichTextElementData,
   type SelectElementData,
   type StaticElementData,
   type TextareaElementData
 } from "~/typings";
-import { h, render, Suspense } from "vue";
+import {h, render, Suspense} from "vue";
 
 
 const FieldComponent = resolveComponent("Renderer")
@@ -61,17 +62,17 @@ class Elements {
 
     if (isImageInput(field)) {
       component = {
-        type: Field.IMAGE,
-        inputType: Field.IMAGE,
+        type: Field.IMAGE as any,
+        inputType: Field.IMAGE as any,
         label: '',
-        accept: undefined
+        accept: undefined,
       } satisfies ImageInputElementData
     }
 
     if (isFileInput(field)) {
       component = {
-        type: Field.FILE,
-        inputType: Field.FILE,
+        type: Field.FILE as any,
+        inputType: Field.FILE as any,
         label: '',
         accept: undefined
       } satisfies FileInputElementData
@@ -79,8 +80,8 @@ class Elements {
 
     if (isCheckbox(field)) {
       component = {
-        type: Field.CHECKBOX,
-        inputType: Field.CHECKBOX,
+        type: Field.CHECKBOX as any,
+        inputType: Field.CHECKBOX as any,
         label: '',
         value: false,
         options: undefined
@@ -89,8 +90,8 @@ class Elements {
 
     if (isButton(field)) {
       component = {
-        type: Field.BUTTON,
-        inputType: 'submit',
+        type: Field.BUTTON as any,
+        inputType: 'submit' as any,
         label: '',
         onClick: undefined
       } satisfies ButtonElementData
@@ -98,8 +99,8 @@ class Elements {
 
     if (isRadio(field)) {
       component = {
-        type: Field.RADIO,
-        inputType: Field.RADIO,
+        type: Field.RADIO as any,
+        inputType: Field.RADIO as any,
         label: '',
         value: '',
         options: undefined
@@ -115,8 +116,8 @@ class Elements {
 
     if (isTextarea(field)) {
       component = {
-        type: Field.TEXTAREA,
-        inputType: Field.TEXTAREA,
+        type: Field.TEXTAREA as any,
+        inputType: Field.TEXTAREA as any,
         label: '',
         placeholder: '',
         value: ''
@@ -125,8 +126,9 @@ class Elements {
 
     if (isSelect(field)) {
       component = {
-        type: Field.SELECT,
-        inputType: Field.SELECT,
+        label: '',
+        type: Field.SELECT as any,
+        inputType: Field.SELECT as any,
         options: undefined
       } satisfies SelectElementData
     }
@@ -207,7 +209,7 @@ class Elements {
     const element = this._elements[id]
     this._elements.splice(id, 1)
     this._elements.splice(newIndex, 0, element)
-    this._elements = this._elements.map((el, index) => ({ ...el, index }))
+    this._elements = this._elements.map((el, index) => ({...el, index}))
     this.render()
     return this;
   }
@@ -244,11 +246,11 @@ onMounted(() => {
 <template>
   <div class="mt-8">
     <div class="flex justify-end bg-blue-950 text-white w-fit ml-auto mb-2 mt-2 px-4 py-2 rounded cursor-pointer"
-      @click="edit = !edit">
+         @click="edit = !edit">
       <span v-if="!edit">Edit</span>
       <span v-else>Preview</span>
     </div>
-    <form class="bg-blue-950 h-fit min-h-32 rounded pb-6" ref="dropzone">
+    <form class="bg-blue-950 h-fit min-h-32 rounded pb-6" ref="dropzone" @submit.prevent>
       <div ref="container"></div>
     </form>
   </div>
@@ -256,5 +258,10 @@ onMounted(() => {
 <style scoped lang="scss">
 #dropzone.active {
   @apply bg-blue-800 animate-pulse;
+}
+
+#dropzone {
+  width: 100%;
+  transition: width 0.3s;
 }
 </style>
