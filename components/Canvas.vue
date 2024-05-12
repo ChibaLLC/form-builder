@@ -23,7 +23,7 @@ import {
   type StaticElementData,
   type TextareaElementData
 } from "~/typings";
-import {h, render, Suspense} from "vue";
+import { h, render } from "vue";
 
 
 const FieldComponent = resolveComponent("Renderer")
@@ -34,8 +34,16 @@ const edit = ref(true)
 
 const props = defineProps({
   draggedElement: {
-    type: String as PropType<Field>,
+    type: Object as PropType<Ref<Field>>,
     required: false
+  },
+  index: {
+    type: Number,
+    required: true
+  },
+  elements: {
+    type: Object as PropType<Ref<Array<FormElementData>>>,
+    required: true
   }
 })
 
@@ -161,7 +169,7 @@ class Elements {
           this.delete(idx)
         }
       })
-      render(h(Suspense, null, node), anchor)
+      render(node, anchor)
       this.renderedElements.push(el.index)
       this.target.appendChild(anchor)
     })
@@ -183,7 +191,7 @@ class Elements {
     const anchor = document.createElement('div')
 
     anchor.dataset.identity = index.toString()
-    render(h(Suspense, null, element), anchor)
+    render(element, anchor)
 
     const replacement = this.target.querySelector(`[data-identity="${index}"]`)
     if (replacement) {
@@ -209,7 +217,7 @@ class Elements {
     const element = this._elements[id]
     this._elements.splice(id, 1)
     this._elements.splice(newIndex, 0, element)
-    this._elements = this._elements.map((el, index) => ({...el, index}))
+    this._elements = this._elements.map((el, index) => ({ ...el, index }))
     this.render()
     return this;
   }
@@ -227,8 +235,8 @@ onMounted(() => {
   const elements = new Elements(container.value!)
   dropzone.value?.addEventListener('drop', (e) => {
     e.preventDefault()
-    if (!props.draggedElement) return console.warn('No dragged element')
-    elements.add(props.draggedElement).render()
+    if (!props.draggedElement?.value) return console.warn('No dragged element')
+    elements.add(props.draggedElement.value).render()
     dropzone.value?.classList.remove('active')
   })
 
@@ -245,12 +253,16 @@ onMounted(() => {
 </script>
 <template>
   <div class="mt-8">
-    <div class="flex justify-end bg-blue-950 text-white w-fit ml-auto mb-2 mt-2 px-4 py-2 rounded cursor-pointer"
-         @click="edit = !edit">
-      <span v-if="!edit">Edit</span>
-      <span v-else>Preview</span>
+    <div class="flex justify-between">
+      <div class="bg-blue-950 text-white w-fit mb-2 mt-2 px-4 py-2 rounded cursor-pointer"  @click="edit = !edit">
+        <span v-if="!edit">Edit</span>
+        <span v-else>Preview</span>
+      </div>
+      <div class="bg-red-950 text-white w-fit ml-2 mb-2 mt-2 px-4 py-2 rounded cursor-pointer" @click="$emit('delete', index)">
+        <span>Delete</span>
+      </div>
     </div>
-    <form class="bg-blue-950 h-fit min-h-32 rounded pb-6" ref="dropzone" @submit.prevent>
+    <form class="bg-blue-950 h-fit min-h-32 rounded pb-6 relative" ref="dropzone" @submit.prevent>
       <div ref="container"></div>
     </form>
   </div>
@@ -258,10 +270,5 @@ onMounted(() => {
 <style scoped lang="scss">
 #dropzone.active {
   @apply bg-blue-800 animate-pulse;
-}
-
-#dropzone {
-  width: 100%;
-  transition: width 0.3s;
 }
 </style>

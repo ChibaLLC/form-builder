@@ -67,7 +67,7 @@ const emit = defineEmits(['dragstart'])
           <h3>Store</h3>
         </template>
         <template #description>
-          <p>A store page</p>
+          <p>A store section</p>
         </template>
       </Picker>
     </li>
