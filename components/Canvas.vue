@@ -252,17 +252,17 @@ onMounted(() => {
 })
 </script>
 <template>
-  <div class="mt-8">
+  <div class="w-full m-auto max-w-[800px]">
     <div class="flex justify-between">
-      <div class="bg-blue-950 text-white w-fit mb-2 mt-2 px-4 py-2 rounded cursor-pointer"  @click="edit = !edit">
+      <div class="bg-emerald-700 text-white w-fit mb-2 mt-2 px-4 py-2 rounded cursor-pointer"  @click="edit = !edit">
         <span v-if="!edit">Edit</span>
         <span v-else>Preview</span>
       </div>
-      <div class="bg-red-950 text-white w-fit ml-2 mb-2 mt-2 px-4 py-2 rounded cursor-pointer" @click="$emit('delete', index)">
+      <div class="bg-red-800 text-white w-fit ml-2 mb-2 mt-2 px-4 py-2 rounded cursor-pointer" @click="$emit('delete', index)">
         <span>Delete</span>
       </div>
     </div>
-    <form class="bg-blue-950 h-fit min-h-32 rounded pb-6 relative" ref="dropzone" @submit.prevent>
+    <form class="bg-white h-fit min-h-32 rounded pb-6 relative" ref="dropzone" @submit.prevent>
       <div ref="container"></div>
     </form>
   </div>

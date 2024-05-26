@@ -1,77 +1,131 @@
 <script setup lang="ts">
-import { Field } from '~/typings';
+import {Field} from '~/typings';
+import type {CSSProperties} from "vue";
 
 const emit = defineEmits(['dragstart'])
+
+const props = defineProps({
+  styles: {
+    type: Object as PropType<CSSProperties>,
+    required: true
+  }
+})
+
+const colors = computed(() => {
+  return {
+    backgroundColor: props.styles.backgroundColor,
+    color: props.styles.color,
+    "--accent": (() => {
+      const color = props.styles.backgroundColor!
+      const r = parseInt(color.slice(1, 3), 16)
+      const g = parseInt(color.slice(3, 5), 16)
+      const b = parseInt(color.slice(5, 7), 16)
+      return (r * 0.299 + g * 0.587 + b * 0.114) > 186 ? "#000" : "#FFF"
+    })()
+  }
+})
 </script>
 
 <template>
-  <ul ref="ul">
-    <li>
-      <Picker @dragstart="emit('dragstart', Field.EMAIL)">
-        <template #icon>
-          <Icon name="mail" />
-        </template>
-        <template #title>
-          <h3>Email</h3>
-        </template>
-        <template #description>
-          <p>A field for inputting an email</p>
-        </template>
-      </Picker>
-    </li>
-    <li>
-      <Picker @dragstart="emit('dragstart', Field.TEXT)">
-        <template #icon>
-          <Icon name="text" />
-        </template>
-        <template #title>
-          <h3>Text</h3>
-        </template>
-        <template #description>
-          <p>A field for inputting text</p>
-        </template>
-      </Picker>
-    </li>
-    <li>
-      <Picker @dragstart="emit('dragstart', Field.CHECKBOX)">
-        <template #icon>
-          <Icon name="check" />
-        </template>
-        <template #title>
-          <h3>Checkbox</h3>
-        </template>
-        <template #description>
-          <p>A field for adding a checkbox, can be used to multiple values from a predefined set.</p>
-        </template>
-      </Picker>
-    </li>
-    <li>
-      <Picker @dragstart="emit('dragstart', Field.SELECT)">
-        <template #icon>
-          <Icon name="select" />
-        </template>
-        <template #title>
-          <h3>Select</h3>
-        </template>
-        <template #description>
-          <p>A field for adding a dropdown selection.</p>
-        </template>
-      </Picker>
-    </li>
-    <li>
-      <Picker @dragstart="emit('dragstart', Field.STORE)">
-        <template #icon>
-          <Icon name="store" />
-        </template>
-        <template #title>
-          <h3>Store</h3>
-        </template>
-        <template #description>
-          <p>A store section</p>
-        </template>
-      </Picker>
-    </li>
-  </ul>
+  <div class="panel" :style="{...styles, ...colors}">
+    <div class="search-box">
+      <Icon name="search" class="search-icon" :styles='{width: "20px", height: "20px"}'/>
+      <input placeholder="Search Elements" class="search"/>
+    </div>
+    <ul ref="flex" class="w-full overflow-hidden flex flex-col gap-2">
+      <li>
+        <Picker @dragstart="emit('dragstart', Field.EMAIL)">
+          <template #icon>
+            <Icon name="mail" :styles='{width: "15px", height: "15px"}'/>
+          </template>
+          <template #title>
+            <h3>Email</h3>
+          </template>
+          <template #description>
+            <p>A field for inputting an email</p>
+          </template>
+        </Picker>
+      </li>
+      <li>
+        <Picker @dragstart="emit('dragstart', Field.TEXT)">
+          <template #icon>
+            <Icon name="text" :styles='{width: "15px", height: "15px"}'/>
+          </template>
+          <template #title>
+            <h3>Text</h3>
+          </template>
+          <template #description>
+            <p>A field for inputting text</p>
+          </template>
+        </Picker>
+      </li>
+      <li>
+        <Picker @dragstart="emit('dragstart', Field.CHECKBOX)">
+          <template #icon>
+            <Icon name="check" :styles='{width: "15px", height: "15px"}'/>
+          </template>
+          <template #title>
+            <h3>Checkbox</h3>
+          </template>
+          <template #description>
+            <p>A field for adding a checkbox</p>
+          </template>
+        </Picker>
+      </li>
+      <li>
+        <Picker @dragstart="emit('dragstart', Field.SELECT)">
+          <template #icon>
+            <Icon name="select" :styles='{width: "15px", height: "15px"}'/>
+          </template>
+          <template #title>
+            <h3>Select</h3>
+          </template>
+          <template #description>
+            <p>A field for adding a dropdown.</p>
+          </template>
+        </Picker>
+      </li>
+    </ul>
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped lang="scss">
+.panel {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    .search-icon {
+      position: absolute;
+      color: #737373;
+      margin-left: 0.3rem;
+    }
+
+    .search {
+      width: 100%;
+      padding: 0.5rem 0 0.5rem 1.8rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      background-color: #323232;
+
+      &::placeholder {
+        color: #737373;
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+}
+</style>

@@ -182,3 +182,12 @@ export function isRichText(field: any): field is Field.RICHTEXT {
 export function isTextarea(field: any): field is Field.TEXTAREA {
     return field === Field.TEXTAREA
 }
+
+export type Item = {
+    index: number,
+    qtty: number,
+    store: number,
+    name: string,
+    price: number,
+    images: Array<string>
+}
