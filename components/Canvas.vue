@@ -269,6 +269,6 @@ onMounted(() => {
 </template>
 <style scoped lang="scss">
 #dropzone.active {
-  @apply bg-blue-800 animate-pulse;
+  border: 2px dashed #333;
 }
 </style>

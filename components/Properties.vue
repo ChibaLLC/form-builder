@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { type CSSProperties } from "vue";
 defineProps({
   styles: {
     type: Object as PropType<CSSProperties>,
@@ -18,5 +19,6 @@ defineProps({
   width: 100%;
   height: 100svh;
   background-color: #262626;
+  padding: 1rem;
 }
 </style>

@@ -90,7 +90,7 @@ defineProps({
     </div>
     <div class="relative w-full mt-0 px-10 pt-8 flex flex-col">
       <div ref="canvasContainer" class="flex flex-col gap-4 w-full"></div>
-      <div class="w-full flex px-3 max-w-[800px]">
+      <div class="w-full mx-auto flex px-3 max-w-[800px]">
         <div
           class="text-white flex w-20 bg-white rounded border-solid border-[#262626] shadow-md border-opacity-10 m-auto -mt-2 z-10"
           style="border-width: 1px;">

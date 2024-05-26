@@ -205,9 +205,9 @@ function removeOption(value: string) {
       </select>
       <div v-else class="adoptions">
         <div v-if="options.length > 0" class="mb-4">
-          <h3 class="text-gray-200 text-sm">Current Options</h3>
-          <ol class="text-gray-300 list-decimal ml-4 text-sm">
-            <li v-for="option in options" class="p-0.5 hover:bg-slate-700">
+          <h3 class="text-gray-400 text-sm">Current Options</h3>
+          <ol class="text-gray-400 list-decimal ml-4 text-sm">
+            <li v-for="option in options" class="p-0.5 hover:bg-gray-200">
               <div class="flex align-middle justify-between px-1">
                 <span>{{ capitalise(option.value) }}</span>
                 <span class="cursor-pointer">
@@ -222,7 +222,7 @@ function removeOption(value: string) {
           </ol>
         </div>
         <div v-else class="mb-2">
-          <p class="text-gray-200 text-sm">No options added</p>
+          <p class="text-gray-400 text-sm">No options added</p>
         </div>
         <input placeholder="Add Option" @keydown.enter="addOption" />
       </div>
@@ -323,18 +323,18 @@ function removeOption(value: string) {
           text-overflow: ellipsis;
 
           &::placeholder {
-            color: #bbb;
+            color: #4e4e4e;
           }
 
           &.label {
             font-weight: bold;
-            color: white;
+            color: black;
           }
 
           &.description {
             margin-bottom: 0.8em;
             font-size: 0.9rem;
-            color: white;
+            color: black;
           }
         }
       }
@@ -373,7 +373,7 @@ function removeOption(value: string) {
       width: 100px;
 
       &::placeholder {
-        color: #bbb;
+        color: #4e4e4e;
         text-decoration: underline;
 
       }
@@ -396,7 +396,7 @@ function removeOption(value: string) {
     }
 
     .other {
-      color: white;
+      color: black;
       font-weight: 400;
     }
   }
