@@ -10,7 +10,7 @@ defineProps({
 
 <template>
   <div class="properties" :style="styles">
-    <h1>Properties</h1>
+    <h1 class="font-bold">Properties</h1>
   </div>
 </template>
 

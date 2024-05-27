@@ -23,7 +23,7 @@ import {
   type StaticElementData,
   type TextareaElementData
 } from "~/typings";
-import { h, render } from "vue";
+import {h, render} from "vue";
 
 
 const FieldComponent = resolveComponent("Renderer")
@@ -31,10 +31,12 @@ const FieldComponent = resolveComponent("Renderer")
 const container = ref<HTMLElement | null>(null)
 const dropzone = ref<HTMLElement | null>(null)
 const edit = ref(true)
+const movingElement = ref<HTMLElement | null>(null)
+const latestEnter = ref<HTMLElement | null>(null)
 
 const props = defineProps({
   draggedElement: {
-    type: Object as PropType<Ref<Field>>,
+    type: Object as PropType<Ref<Field | undefined>>,
     required: false
   },
   index: {
@@ -162,6 +164,12 @@ class Elements {
       if (this.isRendered(el)) return
       const anchor = document.createElement('div')
       anchor.dataset.identity = el.index.toString()
+      anchor.addEventListener("dragenter", e => {
+        latestEnter.value = anchor
+      })
+      anchor.addEventListener("dragstart", e => {
+        movingElement.value = anchor
+      })
       const node = h(FieldComponent, {
         data: el,
         edit: edit,
@@ -217,7 +225,9 @@ class Elements {
     const element = this._elements[id]
     this._elements.splice(id, 1)
     this._elements.splice(newIndex, 0, element)
-    this._elements = this._elements.map((el, index) => ({ ...el, index }))
+    this._elements = this._elements.map((el, index) => ({...el, index}))
+    this.renderedElements = []
+    this.target.innerHTML = ''
     this.render()
     return this;
   }
@@ -231,13 +241,25 @@ class Elements {
   }
 }
 
+function repositionElement(elements: Elements, event: DragEvent) {
+  if (!latestEnter.value) return console.log("No element to reposition")
+  if (latestEnter.value === movingElement.value) return
+
+  const movingIndex = Number(movingElement.value?.dataset.identity)
+  const newIndex = Number(latestEnter.value?.dataset.identity)
+  elements.move(movingIndex, newIndex)
+}
+
+
 onMounted(() => {
   const elements = new Elements(container.value!)
   dropzone.value?.addEventListener('drop', (e) => {
     e.preventDefault()
-    if (!props.draggedElement?.value) return console.warn('No dragged element')
+    if (!props.draggedElement?.value) return repositionElement(elements, e)
+
     elements.add(props.draggedElement.value).render()
     dropzone.value?.classList.remove('active')
+    props.draggedElement.value = undefined
   })
 
   dropzone.value?.addEventListener('dragover', (e) => {
@@ -254,11 +276,12 @@ onMounted(() => {
 <template>
   <div class="w-full m-auto max-w-[800px]">
     <div class="flex justify-between">
-      <div class="bg-emerald-700 text-white w-fit mb-2 mt-2 px-4 py-2 rounded cursor-pointer"  @click="edit = !edit">
+      <div class="bg-emerald-700 text-white w-fit mb-2 mt-2 px-4 py-2 rounded cursor-pointer" @click="edit = !edit">
         <span v-if="!edit">Edit</span>
         <span v-else>Preview</span>
       </div>
-      <div class="bg-red-800 text-white w-fit ml-2 mb-2 mt-2 px-4 py-2 rounded cursor-pointer" @click="$emit('delete', index)">
+      <div class="bg-red-800 text-white w-fit ml-2 mb-2 mt-2 px-4 py-2 rounded cursor-pointer"
+           @click="$emit('delete', index)">
         <span>Delete</span>
       </div>
     </div>

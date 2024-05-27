@@ -154,7 +154,7 @@ function removeOption(value: string) {
 }
 </script>
 <template>
-  <div class="container relative">
+  <div class="container relative" :draggable="_edit" data-parent="canvas">
     <div class="cursor-pointer relative" @click="emit('delete', data.index! as any)" v-if="_edit">
       <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
         class="right-0 absolute top-4">
@@ -271,7 +271,7 @@ function removeOption(value: string) {
 
     <div v-else-if="isInput(data.type)">
       <label for="label">
-        <input :disabled="!_edit" autocomplete="off" type="text" id="label" class="label" v-model="data['label']"
+        <input :disabled="!_edit" autocomplete="off" :type="data.inputType" id="label" class="label" v-model="data['label']"
           placeholder="Add a label" />
       </label>
       <label for="description" v-if="data['description'] || edit">

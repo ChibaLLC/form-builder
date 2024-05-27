@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { render } from 'vue';
+import {type CSSProperties, render} from 'vue';
 import { Field, type FormElementData, type Item } from '~/typings';
 
 const canvasContainer = ref<HTMLElement | null>(null)
