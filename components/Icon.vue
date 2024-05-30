@@ -16,8 +16,8 @@ const props = defineProps({
   }
 })
 
-function clean(svg: string | undefined) {
-  if (!svg) return ''
+function clean(svg: string | null | undefined) {
+  if (!svg) return 'ℹ️'
   const rules = Object.entries(props.styles)
     .map(([key, value]) => {
       const kebab = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
@@ -28,41 +28,15 @@ function clean(svg: string | undefined) {
     .replace(/fill="#[0-9a-fA-F]+"/g, 'fill="currentColor"')
 }
 
-async function fetchIcon() {
-  return await $fetch<string>(`${window.location.origin}/icons/${props.name}.svg`, {
-    responseType: 'text'
-  }).then(text => {
-    return clean(text)
-  }).catch(e => {
-    console.error('Failed to fetch icon', e)
-    return Promise.resolve(undefined)
-  })
-}
-
-const icon = useState<string | undefined>(() => undefined)
-if (process.server) {
-  // I don't know the implications of this, but it seems to work as intended
-  const { readFile } = await import('fs/promises')
-  icon.value = await readFile(`./public/icons/${props.name}.svg`, 'utf-8')
-    .then(text => {
-      return clean(text)
-    })
-    .catch((e) => {
-      console.error(e)
-      return Promise.resolve(undefined)
-    })
-} else if (!icon.value && process.client) {
-  icon.value = await fetchIcon()
-}
-
-
-watch(() => props.name, async () => {
-  icon.value = await fetchIcon()
+const {data} = await useFetch<string>(`/icons/${props.name}.svg`, {
+  responseType: 'text',
+  watch: [props]
+}).catch(e => {
+  console.error('Failed to fetch icon', e)
+  return Promise.resolve({data: null})
 })
 
-watch(() => props.styles, () => {
-  icon.value = clean(icon.value)
-})
+const icon = computed(() => clean(data?.value))
 </script>
 
 <template>

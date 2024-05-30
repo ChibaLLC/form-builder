@@ -3,38 +3,25 @@ import {Field} from '~/typings';
 import type {CSSProperties} from "vue";
 
 const emit = defineEmits(['dragstart'])
+const displayFields = ref(true)
 
-const props = defineProps({
+defineProps({
   styles: {
     type: Object as PropType<CSSProperties>,
     required: true
   }
 })
-
-const colors = computed(() => {
-  return {
-    backgroundColor: props.styles.backgroundColor,
-    color: props.styles.color,
-    "--accent": (() => {
-      const color = props.styles.backgroundColor!
-      const r = parseInt(color.slice(1, 3), 16)
-      const g = parseInt(color.slice(3, 5), 16)
-      const b = parseInt(color.slice(5, 7), 16)
-      return (r * 0.299 + g * 0.587 + b * 0.114) > 186 ? "#000" : "#FFF"
-    })()
-  }
-})
 </script>
 
 <template>
-  <div class="panel" :style="{...styles, ...colors}">
+  <div class="panel" :style="styles">
     <div class="search-box">
       <Icon name="search" class="search-icon" :styles='{width: "20px", height: "20px"}'/>
       <input placeholder="Search Elements" class="search"/>
     </div>
-    <ul ref="flex" class="w-full overflow-hidden flex flex-col gap-2">
+    <ul class="w-full overflow-hidden flex flex-col gap-2" v-if="displayFields">
       <li>
-        <Picker @dragstart="emit('dragstart', Field.EMAIL)">
+        <PickerElement @dragstart="emit('dragstart', Field.EMAIL)">
           <template #icon>
             <Icon name="mail" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -44,10 +31,10 @@ const colors = computed(() => {
           <template #description>
             <p>A field for inputting an email</p>
           </template>
-        </Picker>
+        </PickerElement>
       </li>
       <li>
-        <Picker @dragstart="emit('dragstart', Field.TEXT)">
+        <PickerElement @dragstart="emit('dragstart', Field.TEXT)">
           <template #icon>
             <Icon name="text" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -57,10 +44,10 @@ const colors = computed(() => {
           <template #description>
             <p>A field for inputting text</p>
           </template>
-        </Picker>
+        </PickerElement>
       </li>
       <li>
-        <Picker @dragstart="emit('dragstart', Field.CHECKBOX)">
+        <PickerElement @dragstart="emit('dragstart', Field.CHECKBOX)">
           <template #icon>
             <Icon name="check" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -70,10 +57,10 @@ const colors = computed(() => {
           <template #description>
             <p>A field for adding a checkbox</p>
           </template>
-        </Picker>
+        </PickerElement>
       </li>
       <li>
-        <Picker @dragstart="emit('dragstart', Field.SELECT)">
+        <PickerElement @dragstart="emit('dragstart', Field.SELECT)">
           <template #icon>
             <Icon name="select" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -83,8 +70,11 @@ const colors = computed(() => {
           <template #description>
             <p>A field for adding a dropdown.</p>
           </template>
-        </Picker>
+        </PickerElement>
       </li>
+    </ul>
+    <ul class="w-full overflow-hidden flex flex-col gap-2" v-else>
+
     </ul>
   </div>
 </template>
