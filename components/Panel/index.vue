@@ -21,7 +21,7 @@ defineProps({
     </div>
     <ul class="w-full overflow-hidden flex flex-col gap-2" v-if="displayFields">
       <li>
-        <PickerElement @dragstart="emit('dragstart', Field.EMAIL)">
+        <PanelPickerElement @dragstart="emit('dragstart', Field.EMAIL)">
           <template #icon>
             <Icon name="mail" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -31,10 +31,10 @@ defineProps({
           <template #description>
             <p>A field for inputting an email</p>
           </template>
-        </PickerElement>
+        </PanelPickerElement>
       </li>
       <li>
-        <PickerElement @dragstart="emit('dragstart', Field.TEXT)">
+        <PanelPickerElement @dragstart="emit('dragstart', Field.TEXT)">
           <template #icon>
             <Icon name="text" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -44,10 +44,10 @@ defineProps({
           <template #description>
             <p>A field for inputting text</p>
           </template>
-        </PickerElement>
+        </PanelPickerElement>
       </li>
       <li>
-        <PickerElement @dragstart="emit('dragstart', Field.CHECKBOX)">
+        <PanelPickerElement @dragstart="emit('dragstart', Field.CHECKBOX)">
           <template #icon>
             <Icon name="check" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -57,10 +57,10 @@ defineProps({
           <template #description>
             <p>A field for adding a checkbox</p>
           </template>
-        </PickerElement>
+        </PanelPickerElement>
       </li>
       <li>
-        <PickerElement @dragstart="emit('dragstart', Field.SELECT)">
+        <PanelPickerElement @dragstart="emit('dragstart', Field.SELECT)">
           <template #icon>
             <Icon name="select" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -70,7 +70,7 @@ defineProps({
           <template #description>
             <p>A field for adding a dropdown.</p>
           </template>
-        </PickerElement>
+        </PanelPickerElement>
       </li>
     </ul>
     <ul class="w-full overflow-hidden flex flex-col gap-2" v-else>
