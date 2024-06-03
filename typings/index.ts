@@ -53,6 +53,7 @@ export type _ElementData = {
     accept?: string | undefined,
     onClick?: () => void,
     options?: any,
+    value?: any,
     index?: number,
     placeholder?: string,
     rules?: Array<'required' | `max:${number}` | `min:${number}` | `same:${string}`>,
@@ -84,14 +85,16 @@ export type ImageInputElementData = _ElementData & {
     type: Field.IMAGE,
     inputType: Field.IMAGE,
     label: string,
-    accept: ImageTypeEnum | undefined
+    accept: ImageTypeEnum | undefined,
+    value: string
 }
 
 export type FileInputElementData = _ElementData & {
     type: Field.FILE,
     inputType: Field.FILE,
     label: string,
-    accept: string | undefined
+    accept: string | undefined,
+    value: string
 }
 
 export type CheckboxElementData = _ElementData & {
@@ -120,7 +123,9 @@ export type TextareaElementData = _ElementData & {
 export type RichTextElementData = {
     index?: number,
     type: Field.RICHTEXT,
-    label: string
+    label: string,
+    value: string,
+    inputType: Field.RICHTEXT
 }
 
 export type ButtonElementData = _ElementData & {

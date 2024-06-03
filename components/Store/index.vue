@@ -28,7 +28,7 @@ function addItemModal() {
 
 function emitItem() {
   if (!item.value) return console.warn("item.value has no item")
-  item.value.index = items.value.length + 1 || 0
+  item.value.index = items.value.length
   item.value.store = props.storeIndex
 
   for (const key in item.value) {

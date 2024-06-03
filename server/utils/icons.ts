@@ -1,7 +1,10 @@
-import {readFile} from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 
-export function __readIcon(name: string){
+export function __readIcon(name: string) {
     if (!name) return null
     if (!name.endsWith(".svg")) name += ".svg"
-    return readFile(`${process.cwd()}/public/icons/${name}`, "utf-8")
+    return readFile(`${process.cwd()}/public/icons/${name}`, "utf-8").catch(e => {
+        console.error(e)
+        return null
+    })  
 }

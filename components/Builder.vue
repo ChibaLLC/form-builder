@@ -83,6 +83,15 @@ function deleteStore(id: number) {
   stores.delete(id)
 }
 
+function submit(){
+  const form = {
+    elements: elements.value,
+    stores: Array.from(stores.values())
+  }
+
+  localStorage.setItem("form", JSON.stringify(form))
+}
+
 onMounted(addCanvas)
 </script>
 <template>
@@ -94,13 +103,13 @@ onMounted(addCanvas)
       <div ref="canvasContainer" class="flex flex-col gap-4 w-full"></div>
       <div class="w-full mx-auto flex max-w-[800px]">
         <div
-            class="text-white flex bg-white rounded border-solid border-[#262626] shadow-md border-opacity-10 justify-around z-10 ml-auto mt-1.5"
+            class="text-white flex bg-white rounded-sm border-solid border-[#262626] shadow-md border-opacity-10 justify-around z-10 ml-auto mt-1.5"
             style="border-width: 1px;">
           <Icon name="plus" title="Add Page Break" @click="addCanvas"
-                class="mx-auto cursor-pointer text-[#262626] bg-white p-[4px] hover:bg-[#262626] hover:text-white rounded"
+                class="mx-auto cursor-pointer text-[#262626] bg-white p-[4px] hover:bg-[hsla(0,0%,15%,0.8)] hover:text-white rounded-sm"
                 :styles="{width: '28px', height:'28px'}"/>
           <Icon name="store" title="Add a Store Section" @click="addStore"
-                class="mx-auto cursor-pointer text-[#262626] bg-white p-[4px] hover:bg-[#262626] hover:text-white rounded"
+                class="mx-auto cursor-pointer text-[#262626] bg-white p-[4px] hover:bg-[hsla(0,0%,15%,0.8)] hover:text-white rounded-sm"
                 :styles="{width: '28px', height:'28px'}"/>
         </div>
       </div>
