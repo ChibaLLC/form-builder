@@ -42,10 +42,6 @@ const props = defineProps({
   index: {
     type: Number,
     required: true
-  },
-  formElements: {
-    type: Object as PropType<Ref<Array<FormElementData>>>,
-    required: true
   }
 })
 
@@ -55,7 +51,8 @@ class Elements {
   private target: HTMLElement
   private _onAdd = {
     add: [] as Array<Function>,
-    delete: [] as Array<Function>
+    delete: [] as Array<Function>,
+    update: [] as Array<Function>
   }
 
   constructor(target: HTMLElement) {
@@ -168,7 +165,7 @@ class Elements {
     return this;
   }
 
-  on(event: 'add' | 'delete', callback: (data: FormElementData) => void) {
+  on(event: 'add' | 'delete' | 'update', callback: Function) {
     this._onAdd[event].push(callback)
   }
 
@@ -268,6 +265,12 @@ function repositionElement(elements: Elements, event: DragEvent) {
   elements.move(movingIndex, newIndex)
 }
 
+const emits = defineEmits<{
+  deleteField: [canvasIndex: number, field: FormElementData],
+  addField: [canvasIndex: number, field: FormElementData],
+  updateField: [canvasIndex: number, field: FormElementData],
+  deleteCanvas: [number]
+}>()
 
 onMounted(() => {
   const elements = new Elements(container.value!)
@@ -290,12 +293,18 @@ onMounted(() => {
     dropzone.value?.classList.remove('active')
   })
 
-  elements.on('add', (elData) => {
-    props.formElements.value.push(elData)
+  elements.on('add', (elData: FormElementData) => {
+    emits('addField', props.index, elData)
   })
 
-  elements.on('delete', (elData) => {
-    props.formElements.value = props.formElements.value.filter(e => e.index !== elData.index)
+  elements.on('delete', (elData: FormElementData) => {
+    emits('deleteField', props.index, elData)
+  })
+
+  elements.on('update', (elDatas: Array<FormElementData>) => {
+    for (const elData of elDatas) {
+      emits('updateField', props.index, elData)
+    }
   })
 })
 </script>
@@ -319,7 +328,8 @@ onMounted(() => {
         </div>
       </Transition>
       <div class="icon delete">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" @click="$emit('delete', index)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+          @click="emits('deleteCanvas', index)">
           <path
             d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM18 8H6V20H18V8ZM13.4142 13.9997L15.182 15.7675L13.7678 17.1817L12 15.4139L10.2322 17.1817L8.81802 15.7675L10.5858 13.9997L8.81802 12.232L10.2322 10.8178L12 12.5855L13.7678 10.8178L15.182 12.232L13.4142 13.9997ZM9 4V6H15V4H9Z">
           </path>
@@ -328,10 +338,6 @@ onMounted(() => {
     </div>
     <form class="bg-white h-fit min-h-32 rounded relative py-2" ref="dropzone" @submit.prevent>
       <div ref="container"></div>
-      <button type="submit" v-if="!edit"
-        class="bg-[#00a0e4] text-white rounded-sm px-4 py-2 mt-2 ml-auto mr-2 block hover:bg-[#007f9d] rounded">
-        Submit
-      </button>
     </form>
   </div>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type CSSProperties, render } from 'vue';
-import { Field, type FormElementData, type Item } from '~/typings';
+import { Field, type FormElementData, type Item, type Forms, type Stores } from '~/typings';
 
 defineProps({
   styles: {
@@ -14,7 +14,6 @@ defineProps({
   }
 })
 
-const stores = reactive(new Map<number, Array<Item>>())
 
 const draggedElement = ref<Field | undefined>(undefined)
 
@@ -24,21 +23,43 @@ function setDragged(value: Field) {
 
 const canvasContainer = ref<HTMLElement | null>(null)
 const Canvas = resolveComponent('Canvas')
-const canvases = ref<Array<any>>([])
-const formElements = ref<Array<FormElementData>>([])
+const canvases = ref<Forms>({} as any)
 
 function addCanvas() {
   if (!canvasContainer.value) return console.error('Canvas container not found')
 
   const div = document.createElement("div")
-  div.dataset.id = String(canvases.value.length)
+  div.dataset.id = String(Object.keys(canvases.value).length)
   const node = h(Canvas, {
     draggedElement: draggedElement,
-    index: canvases.value.length,
-    formElements: formElements,
-    onDelete: (index: number) => {
-      canvases.value = canvases.value.filter((_, i) => i !== index)
+    index: Object.keys(canvases.value).length,
+    onDeleteCanvas: (index: number) => {
       canvasContainer.value?.querySelector(`[data-id="${index}"]`)?.remove()
+      delete canvases.value[index]
+    },
+    onAddField: (index: number, field: FormElementData) => {
+      const canvas = canvases.value[index]
+      if (canvas) {
+        canvas.push(field)
+      } else {
+        canvases.value[index] = [field]
+      }
+    },
+    onDeleteField: (index: number, field: FormElementData) => {
+      const canvas = canvases.value[index]
+      if (canvas) {
+        canvases.value[index] = canvas.filter(el => el.index !== field.index)
+      } else {
+        console.warn("Canvas Index not found")
+      }
+    },
+    onUpdateField: (index: number, field: FormElementData) => {
+      const canvas = canvases.value[index]
+      if (canvas) {
+        canvases.value[index] = canvas.map(el => el.index === index ? field : el)
+      } else {
+        console.warn("Canvas Index not found")
+      }
     }
   })
   render(node, div)
@@ -46,11 +67,12 @@ function addCanvas() {
 }
 
 const Store = resolveComponent("Store")
+const stores = ref<Stores>({})
 function addStore() {
   if (!canvasContainer.value) return console.warn("Canvas not found")
 
   const div = document.createElement("div")
-  const storeId = stores.size
+  const storeId = Object.keys(stores.value).length
   div.dataset.id = storeId.toString()
   const node = h(Store, {
     onItem: addStoreItem,
@@ -63,34 +85,36 @@ function addStore() {
 }
 
 function addStoreItem(item: Item) {
-  const store = stores.get(item.store)
+  const store = stores.value[item.store]
   if (store) {
-    store.push(item)
+    stores.value[item.store].push(item)
   } else {
-    stores.set(item.store, [item])
+    stores.value[item.store] = [item]
   }
 }
 
-function deleteStoreItem({ item, store }: { store: number, item: number }) {
-  const _store = stores.get(store)
-  if (!_store) return console.warn("Store not found")
-  stores.delete(store)
-  stores.set(store, _store.filter(i => i.index !== item))
+function deleteStoreItem(item: Item) {
+  const store = stores.value[item.store]
+  if (store) {
+    stores.value[item.store] = store.filter(el => el.index !== item.index)
+  } else {
+    console.warn("Store not found")
+  }
 }
 
 function deleteStore(id: number) {
-  stores.delete(id)
+  delete stores.value[id]
 }
 
 function submit() {
   const form = {
-    elements: formElements.value,
-    stores: stores.entries()
+    canvases: canvases.value,
+    stores: stores.value
   }
 
   console.log(form)
-
   localStorage.setItem("form", JSON.stringify(form))
+  navigateTo("/viewer")
 }
 
 onMounted(addCanvas)
@@ -116,10 +140,10 @@ onMounted(addCanvas)
       </div>
       <ul class="foot-menu">
         <li @click="submit">
-          <Icon name="save" :styles="{ color: 'hsla(0,0%,15%,0.8' }" class="w-7"/>
+          <Icon name="save" :styles="{ color: 'hsla(0,0%,15%,0.8' }" class="w-7" />
         </li>
         <li>
-          <Icon name="dollar" :styles="{ color: 'hsla(0,0%,15%,0.8' }" class="w-7"/>
+          <Icon name="dollar" :styles="{ color: 'hsla(0,0%,15%,0.8' }" class="w-7" />
         </li>
       </ul>
     </div>
@@ -166,7 +190,7 @@ onMounted(addCanvas)
     border-radius: 4px;
 
     &:hover {
-      background-color: hsla(0,0%,15%,0.8);
+      background-color: hsla(0, 0%, 15%, 0.8);
       color: white;
     }
   }

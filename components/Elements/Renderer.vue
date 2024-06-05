@@ -26,6 +26,10 @@ const props = defineProps({
   edit: {
     type: Object as PropType<Ref<boolean>>,
     default: true
+  },
+  onInput: {
+    type: Function as PropType<(fieldIndex: number, value: any) => void>,
+    required: false
   }
 })
 
@@ -164,7 +168,7 @@ function onFileChange(event: any) {
   const files = event.target.files
   if (!files) return console.warn("No files provided")
 
-  for (let i =0; i < files.length; i++) {
+  for (let i = 0; i < files.length; i++) {
     if (typeof files[i] !== 'object') {
       console.warn("Invalid file provided, purging...")
       files.splice(i, 1)

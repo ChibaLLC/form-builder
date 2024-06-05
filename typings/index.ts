@@ -196,3 +196,13 @@ export type Item = {
     price: number,
     images: Array<string>
 }
+
+export type Form = Array<FormElementData>
+export type Store = Array<Item>
+export type Forms = Record<number, Form>
+export type Stores = Record<number, Store>
+
+export type FormStoreData = {
+    forms: Forms,
+    stores: Stores
+}

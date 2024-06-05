@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { type Item } from "~/typings"
-import { Suspense } from "vue";
 
 const emits = defineEmits<{
   item: [item: Item],
   deleteStore: [store: number],
-  deleteItem: [{ item: number, store: number }]
+  deleteItem: [item: Item]
 }>()
 
 const props = defineProps({
@@ -30,12 +29,6 @@ function emitItem() {
   if (!item.value) return console.warn("item.value has no item")
   item.value.index = items.value.length
   item.value.store = props.storeIndex
-
-  for (const key in item.value) {
-    // @ts-ignore
-    if (item.value[key] === undefined) return alert(`Please fill all the fields\n Required: ${key}`);
-  }
-
   items.value.push(item.value)
   emits('item', item.value)
   closeModal()
@@ -43,8 +36,11 @@ function emitItem() {
 }
 
 function emitDeleteItem(id: number) {
+  const item = items.value.find(i => i.index === id)
+  if (!item) return console.warn("Item not found")
+
   items.value = items.value.filter(i => i.index !== id)
-  emits('deleteItem', { store: props.storeIndex, item: id })
+  emits('deleteItem', item)
 }
 
 function closeModal() {
@@ -133,7 +129,7 @@ function deleteStore() {
     color: white;
   }
 
-  &:hover{
+  &:hover {
     background-color: #464545;
   }
 }

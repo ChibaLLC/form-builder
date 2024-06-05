@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { type Item, type FormElementData } from '~/typings';
+import { isStatic, type FormStoreData, type Forms, type Stores, type Form } from '~/typings';
 const props = defineProps({
     data: {
-        type: Object,
+        type: Object as PropType<FormStoreData>,
         required: true
     }
 })
 const formFilled = ref(false)
-const elements = ref<Array<FormElementData>>()
-const stores = ref<Map<number, Array<Item>>>(new Map<number, Array<Item>>())
+const forms = ref<Forms>({})
+const stores = ref<Stores>({})
 
 onMounted(() => {
-    const form = JSON.parse(localStorage.getItem('form') || '{}')
-    elements.value = form.elements
-    stores.value = new Map(form.stores)
+    const form = JSON.parse(localStorage.getItem('form') || '{}') as FormStoreData
+    forms.value = form.forms
+    stores.value = form.stores
 
-    console.log(elements.value, stores.value)
+    console.log(forms.value, stores.value)
 })
 
 function formSubmit(data: any) {
@@ -25,22 +25,39 @@ function formSubmit(data: any) {
 
 const FormElementRenderer = resolveComponent("ElementsRenderer")
 const FormRenderer = defineComponent({
-    setup() {
-        function onInput(index: number, value: any) {
-            // @ts-ignore
-            elements.value[index].value = value
+    setup(props: {
+        formIndex: number,
+        formData: Form
+    }) {
+        const onInput = (formIndex: number, fieldIndex: number, value: any) => {
+            const field = forms.value?.[formIndex][fieldIndex]
+            if (field) {
+                if (isStatic(field)) return console.warn("Static field cannot be edited")
+                field.value = value
+            } else {
+                console.warn("Form not found")
+            }
         }
-        return { onInput }
+        return { onInput, props }
     },
     render() {
-        return h('form', elements.value?.map((element: FormElementData) => h(FormElementRenderer, { data: element, edit: false, onInput: this.onInput })))
+        return h("div", this.props.formData.map(data => {
+            return h(FormElementRenderer, {
+                data: data,
+                onInput: this.onInput.bind(null, this.props.formIndex)
+            })
+        }))
     }
 })
 </script>
 <template>
     <ClientOnly>
-        <FormRenderer @submit="formSubmit" v-if="!formFilled" />
-        <StoreRenderer :stores="stores" v-else />
+        <div v-for="form of Object.entries(forms || {})">
+            <FormRenderer @submit="formSubmit" :formData="form[1]" :formIndex="Number(form[0])" />
+        </div>
+        <div v-for="store of Object.entries(stores || {})">
+            <StoreRenderer :storeData="store[1]" :storeIndex="store[0]" />
+        </div>
     </ClientOnly>
 </template>
 <style scoped lang="scss"></style>

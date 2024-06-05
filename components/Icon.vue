@@ -23,15 +23,21 @@ const props = defineProps({
 
 function clean(svg: string | null | undefined) {
   if (!svg) return ""
-  const rules = Object.entries(props.styles)
-    .map(([key, value]) => {
-      const kebab = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
-      return `${kebab}: ${value};`
-    })
-    .join(' ');
+  let _svg = svg
 
-  let _svg = svg.replace(/<svg/, `<svg style="${rules}"`)
-    .replace(/fill="#[0-9a-fA-F]+"/g, 'fill="currentColor"')
+  if (props.styles) {
+    const rules = Object.entries(props.styles)
+      .map(([key, value]) => {
+        const kebab = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
+        return `${kebab}: ${value};`
+      })
+
+      .join(' ');
+
+    _svg = svg
+      .replace(/<svg/, `<svg style="${rules}"`)
+      .replace(/fill="#[0-9a-fA-F]+"/g, 'fill="currentColor"')
+  }
 
   if (props.class) {
     _svg = _svg.replace(/<svg/, `<svg class="${props.class}"`)
