@@ -6,12 +6,17 @@ const props = defineProps({
         required: true
     }
 })
-
-const form = JSON.parse(localStorage.getItem('form') || '{}')
-const elements = ref<Array<FormElementData>>(form.elements || [])
-const stores = reactive<Record<number, Array<Item>>>(form.stores || new Map<number, Array<Item>>())
-
 const formFilled = ref(false)
+const elements = ref<Array<FormElementData>>()
+const stores = ref<Map<number, Array<Item>>>(new Map<number, Array<Item>>())
+
+onMounted(() => {
+    const form = JSON.parse(localStorage.getItem('form') || '{}')
+    elements.value = form.elements
+    stores.value = new Map(form.stores)
+
+    console.log(elements.value, stores.value)
+})
 
 function formSubmit(data: any) {
     formFilled.value = true
@@ -28,12 +33,14 @@ const FormRenderer = defineComponent({
         return { onInput }
     },
     render() {
-        return h('form', elements.value.map((element: FormElementData) => h(FormElementRenderer, { data: element, edit: false, onInput: this.onInput })))
+        return h('form', elements.value?.map((element: FormElementData) => h(FormElementRenderer, { data: element, edit: false, onInput: this.onInput })))
     }
 })
 </script>
 <template>
-    <FormRenderer :elements="elements" @submit="formSubmit" v-if="!formFilled" />
-    <StoreRenderer :stores="stores" v-else />
+    <ClientOnly>
+        <FormRenderer @submit="formSubmit" v-if="!formFilled" />
+        <StoreRenderer :stores="stores" v-else />
+    </ClientOnly>
 </template>
 <style scoped lang="scss"></style>

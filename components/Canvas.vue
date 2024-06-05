@@ -43,7 +43,7 @@ const props = defineProps({
     type: Number,
     required: true
   },
-  elements: {
+  formElements: {
     type: Object as PropType<Ref<Array<FormElementData>>>,
     required: true
   }
@@ -52,7 +52,11 @@ const props = defineProps({
 class Elements {
   private _elements: Array<FormElementData & { index: number }> = []
   private renderedElements: Array<number> = []
-  private target: HTMLElement;
+  private target: HTMLElement
+  private _onAdd = {
+    add: [] as Array<Function>,
+    delete: [] as Array<Function>
+  }
 
   constructor(target: HTMLElement) {
     this.target = target
@@ -76,6 +80,7 @@ class Elements {
         inputType: Field.IMAGE as any,
         label: '',
         accept: undefined,
+        value: undefined,
       } satisfies ImageInputElementData
     }
 
@@ -84,7 +89,8 @@ class Elements {
         type: Field.FILE as any,
         inputType: Field.FILE as any,
         label: '',
-        accept: undefined
+        accept: undefined,
+        value: undefined,
       } satisfies FileInputElementData
     }
 
@@ -146,7 +152,9 @@ class Elements {
     if (isRichText(field)) {
       component = {
         type: Field.RICHTEXT,
-        label: ""
+        label: "",
+        value: "",
+        inputType: Field.RICHTEXT,
       } satisfies RichTextElementData
     }
 
@@ -156,7 +164,18 @@ class Elements {
 
   add(fieldName: Field) {
     this._elements.push(this.initialiseElementData(fieldName))
+    this.emit('add', this._elements[this._elements.length - 1])
     return this;
+  }
+
+  on(event: 'add' | 'delete', callback: (data: FormElementData) => void) {
+    this._onAdd[event].push(callback)
+  }
+
+  private emit(event: 'add' | 'delete', data: FormElementData) {
+    for (const callback of this._onAdd[event]) {
+      callback(data)
+    }
   }
 
   node(data: FormElementData) {
@@ -216,6 +235,7 @@ class Elements {
     this._elements = this._elements.filter(el => el.index !== index)
     this.renderedElements = this.renderedElements.filter(el => el !== index)
     this.render()
+    this.emit('delete', this._elements[index])
     return this;
   }
 
@@ -269,6 +289,14 @@ onMounted(() => {
     e.preventDefault()
     dropzone.value?.classList.remove('active')
   })
+
+  elements.on('add', (elData) => {
+    props.formElements.value.push(elData)
+  })
+
+  elements.on('delete', (elData) => {
+    props.formElements.value = props.formElements.value.filter(e => e.index !== elData.index)
+  })
 })
 </script>
 <template>
@@ -298,8 +326,12 @@ onMounted(() => {
         </svg>
       </div>
     </div>
-    <form class="bg-white h-fit min-h-32 rounded relative" ref="dropzone" @submit.prevent>
+    <form class="bg-white h-fit min-h-32 rounded relative py-2" ref="dropzone" @submit.prevent>
       <div ref="container"></div>
+      <button type="submit" v-if="!edit"
+        class="bg-[#00a0e4] text-white rounded-sm px-4 py-2 mt-2 ml-auto mr-2 block hover:bg-[#007f9d] rounded">
+        Submit
+      </button>
     </form>
   </div>
 </template>

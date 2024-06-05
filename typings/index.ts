@@ -86,7 +86,7 @@ export type ImageInputElementData = _ElementData & {
     inputType: Field.IMAGE,
     label: string,
     accept: ImageTypeEnum | undefined,
-    value: string
+    value: any
 }
 
 export type FileInputElementData = _ElementData & {
@@ -94,7 +94,7 @@ export type FileInputElementData = _ElementData & {
     inputType: Field.FILE,
     label: string,
     accept: string | undefined,
-    value: string
+    value: any
 }
 
 export type CheckboxElementData = _ElementData & {
