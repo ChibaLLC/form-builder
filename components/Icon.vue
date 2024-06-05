@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {type CSSProperties} from "vue";
+import { type CSSProperties } from "vue";
 
 const props = defineProps({
   name: {
@@ -22,16 +22,16 @@ const props = defineProps({
 })
 
 function clean(svg: string | null | undefined) {
-  if (!svg) return 'ℹ️'
+  if (!svg) return ""
   const rules = Object.entries(props.styles)
-      .map(([key, value]) => {
-        const kebab = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
-        return `${kebab}: ${value};`
-      })
-      .join(' ');
+    .map(([key, value]) => {
+      const kebab = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
+      return `${kebab}: ${value};`
+    })
+    .join(' ');
 
   let _svg = svg.replace(/<svg/, `<svg style="${rules}"`)
-      .replace(/fill="#[0-9a-fA-F]+"/g, 'fill="currentColor"')
+    .replace(/fill="#[0-9a-fA-F]+"/g, 'fill="currentColor"')
 
   if (props.class) {
     _svg = _svg.replace(/<svg/, `<svg class="${props.class}"`)
@@ -39,16 +39,23 @@ function clean(svg: string | null | undefined) {
 
   return _svg
 }
+const data = ref<string | null>(null)
+const icon = computed(() => clean(data.value))
 
-const {data} = await useFetch<string>(`/icons/${props.name}.svg`, {
-  responseType: 'text',
-  watch: [props]
-}).catch(e => {
-  console.error('Failed to fetch icon', e)
-  return Promise.resolve({data: null})
-})
+async function fetchIcon() {
+  const res = await $fetch<string>(`${window.location.origin}/icons/${props.name}.svg`, {
+    responseType: 'text'
+  }).catch(e => {
+    console.error('Failed to fetch icon', e)
+    return Promise.resolve("")
+  })
 
-const icon = computed(() => clean(data?.value))
+  data.value = clean(res)
+}
+
+onMounted(setTimeout.bind(null, fetchIcon, 0))
+
+watch(() => props.name, fetchIcon)
 </script>
 
 <template>
