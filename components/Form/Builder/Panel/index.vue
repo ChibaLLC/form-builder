@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {Field} from '~/typings';
 import type {CSSProperties} from "vue";
 
 const emit = defineEmits(['dragstart'])
@@ -19,9 +18,9 @@ defineProps({
       <Icon name="search" class="search-icon" :styles='{width: "20px", height: "20px"}'/>
       <input placeholder="Search Elements" class="search"/>
     </div>
-    <ul class="w-full overflow-hidden flex flex-col gap-2" v-if="displayFields">
+    <ul class="w-full overflow-hidden flex flex-col gap-2">
       <li>
-        <PanelPickerElement @dragstart="emit('dragstart', Field.EMAIL)">
+        <FormBuilderPanelPicker @dragstart="emit('dragstart', Field.EMAIL)">
           <template #icon>
             <Icon name="mail" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -31,10 +30,10 @@ defineProps({
           <template #description>
             <p>A field for inputting an email</p>
           </template>
-        </PanelPickerElement>
+        </FormBuilderPanelPicker>
       </li>
       <li>
-        <PanelPickerElement @dragstart="emit('dragstart', Field.TEXT)">
+        <FormBuilderPanelPicker @dragstart="emit('dragstart', Field.TEXT)">
           <template #icon>
             <Icon name="text" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -44,10 +43,10 @@ defineProps({
           <template #description>
             <p>A field for inputting text</p>
           </template>
-        </PanelPickerElement>
+        </FormBuilderPanelPicker>
       </li>
       <li>
-        <PanelPickerElement @dragstart="emit('dragstart', Field.CHECKBOX)">
+        <FormBuilderPanelPicker @dragstart="emit('dragstart', Field.CHECKBOX)">
           <template #icon>
             <Icon name="check" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -57,10 +56,10 @@ defineProps({
           <template #description>
             <p>A field for adding a checkbox</p>
           </template>
-        </PanelPickerElement>
+        </FormBuilderPanelPicker>
       </li>
       <li>
-        <PanelPickerElement @dragstart="emit('dragstart', Field.SELECT)">
+        <FormBuilderPanelPicker @dragstart="emit('dragstart', Field.SELECT)">
           <template #icon>
             <Icon name="select" :styles='{width: "15px", height: "15px"}'/>
           </template>
@@ -70,11 +69,8 @@ defineProps({
           <template #description>
             <p>A field for adding a dropdown.</p>
           </template>
-        </PanelPickerElement>
+        </FormBuilderPanelPicker>
       </li>
-    </ul>
-    <ul class="w-full overflow-hidden flex flex-col gap-2" v-else>
-
     </ul>
   </div>
 </template>
@@ -82,7 +78,7 @@ defineProps({
 <style scoped lang="scss">
 .panel {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   overflow-y: auto;
   padding: 1rem;
   display: flex;

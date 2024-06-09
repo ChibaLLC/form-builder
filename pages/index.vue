@@ -1,4 +1,4 @@
 <template>
   <Title>Home</Title>
-  <Builder/>
+  <FormBuilder/>
 </template>

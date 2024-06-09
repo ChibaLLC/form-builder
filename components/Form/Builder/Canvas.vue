@@ -2,21 +2,10 @@
 import {
   type ButtonElementData,
   type CheckboxElementData,
-  Field,
   type FileInputElementData,
   type FormElementData,
   type ImageInputElementData,
   type InputElementData,
-  isButton,
-  isCheckbox,
-  isFileInput,
-  isImageInput,
-  isInput,
-  isRadio,
-  isRichText,
-  isSelect,
-  isStatic,
-  isTextarea,
   type RadioElementData,
   type RichTextElementData,
   type SelectElementData,
@@ -26,7 +15,7 @@ import {
 import { h, render } from "vue";
 
 
-const FieldComponent = resolveComponent("ElementsRenderer")
+const FieldComponent = resolveComponent("FormElementsRenderer")
 
 const container = ref<HTMLElement | null>(null)
 const dropzone = ref<HTMLElement | null>(null)
@@ -36,7 +25,7 @@ const latestEnter = ref<HTMLElement | null>(null)
 
 const props = defineProps({
   draggedElement: {
-    type: Object as PropType<Ref<Field | undefined>>,
+    type: Object as PropType<Ref<keyof typeof Field | undefined>>,
     required: false
   },
   index: {
@@ -59,7 +48,7 @@ class Elements {
     this.target = target
   }
 
-  private initialiseElementData(field: Field) {
+  private initialiseElementData(field: keyof typeof Field) {
     let component = {} as any
     if (isInput(field)) {
       component = {
@@ -159,7 +148,7 @@ class Elements {
     return component as FormElementData & { index: number }
   }
 
-  add(fieldName: Field) {
+  add(fieldName: keyof typeof Field) {
     this._elements.push(this.initialiseElementData(fieldName))
     this.emit('add', this._elements[this._elements.length - 1])
     return this;
@@ -169,7 +158,7 @@ class Elements {
     this._onAdd[event].push(callback)
   }
 
-  private emit(event: 'add' | 'delete', data: FormElementData) {
+  private emit(event: 'add' | 'delete' | 'update', data: FormElementData) {
     for (const callback of this._onAdd[event]) {
       callback(data)
     }
@@ -229,10 +218,10 @@ class Elements {
     if (element) {
       element.remove()
     }
+    this.emit('delete', this._elements[index])
     this._elements = this._elements.filter(el => el.index !== index)
     this.renderedElements = this.renderedElements.filter(el => el !== index)
     this.render()
-    this.emit('delete', this._elements[index])
     return this;
   }
 

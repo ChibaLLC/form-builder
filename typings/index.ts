@@ -1,33 +1,3 @@
-export enum Field {
-    TEXT = 'text',
-    PASSWORD = 'password',
-    EMAIL = 'email',
-    NUMBER = 'number',
-    DATE = 'date',
-    URL = 'url',
-    TEL = 'tel',
-    SEARCH = 'search',
-    FILE = 'file',
-    IMAGE = 'image',
-    CHECKBOX = 'checkbox',
-    RADIO = 'radio',
-    SELECT = 'select',
-    BUTTON = 'button',
-    STATIC = 'static',
-    TEXTAREA = 'textarea',
-    RICHTEXT = 'richtext',
-    STORE = 'store',
-}
-
-export enum ImageTypeEnum {
-    PNG = 'image/png',
-    JPEG = 'image/jpeg',
-    GIF = 'image/gif',
-    SVG = 'image/svg+xml',
-    WEBP = 'image/webp',
-    BMP = 'image/bmp'
-}
-
 export type Input =
     Field.DATE
     | Field.EMAIL
@@ -85,7 +55,7 @@ export type ImageInputElementData = _ElementData & {
     type: Field.IMAGE,
     inputType: Field.IMAGE,
     label: string,
-    accept: ImageTypeEnum | undefined,
+    accept: ImageTypeEnum | undefined | string,
     value: any
 }
 
@@ -93,7 +63,7 @@ export type FileInputElementData = _ElementData & {
     type: Field.FILE,
     inputType: Field.FILE,
     label: string,
-    accept: string | undefined,
+    accept: string | undefined | string,
     value: any
 }
 
@@ -147,46 +117,6 @@ export type FormElementData =
     | FileInputElementData
     | TextareaElementData
     | RichTextElementData
-
-export function isInput(field: any): field is Input {
-    return [Field.DATE, Field.EMAIL, Field.PASSWORD, Field.SEARCH, Field.TEL, Field.TEXT, Field.URL, Field.NUMBER].includes(field)
-}
-
-export function isImageInput(field: any): field is ImageInputElementData {
-    return field === Field.IMAGE
-}
-
-export function isFileInput(field: any): field is FileInputElementData {
-    return field === Field.FILE
-}
-
-export function isButton(field: any): field is ButtonElementData {
-    return field === Field.BUTTON
-}
-
-export function isSelect(field: any): field is SelectElementData {
-    return field === Field.SELECT
-}
-
-export function isCheckbox(field: any): field is CheckboxElementData {
-    return field === Field.CHECKBOX
-}
-
-export function isRadio(field: any): field is RadioElementData {
-    return field === Field.RADIO
-}
-
-export function isStatic(field: any): field is StaticElementData {
-    return field === Field.STATIC
-}
-
-export function isRichText(field: any): field is Field.RICHTEXT {
-    return field === Field.RICHTEXT
-}
-
-export function isTextarea(field: any): field is Field.TEXTAREA {
-    return field === Field.TEXTAREA
-}
 
 export type Item = {
     index: number,
