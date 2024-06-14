@@ -292,6 +292,7 @@ onMounted(() => {
 
   elements.on('update', (elDatas: Array<FormElementData>) => {
     for (const elData of elDatas) {
+      console.log(elData)
       emits('updateField', props.index, elData)
     }
   })

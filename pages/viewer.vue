@@ -9,6 +9,6 @@ onMounted(() => {
 </script>
 <template>
     <ClientOnly>
-        <Viewer :data="data" />
+        <Viewer :data="data" @submit="console.log"/>
     </ClientOnly>
 </template>

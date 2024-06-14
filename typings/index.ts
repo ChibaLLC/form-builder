@@ -1,3 +1,5 @@
+import type { Field, ImageTypeEnum } from "~/utils/DOM"
+
 export type Input =
     Field.DATE
     | Field.EMAIL

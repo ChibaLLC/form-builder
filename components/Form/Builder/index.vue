@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { type CSSProperties, render } from 'vue';
-import {type FormElementData, type Item, type Forms, type Stores, type FormStoreData} from '~/typings';
+import { type FormElementData, type Item, type Forms, type Stores, type FormStoreData } from '~/typings';
+
+const emits = defineEmits<{
+  submit: [FormStoreData]
+}>()
 
 defineProps({
   styles: {
@@ -106,15 +110,13 @@ function deleteStore(id: number) {
   delete stores.value[id]
 }
 
-function submit() {
+async function submit() {
   const form = {
     forms: canvases.value,
     stores: stores.value
   } satisfies FormStoreData
 
-  console.log(form)
-  localStorage.setItem("form", JSON.stringify(form))
-  navigateTo("/viewer")
+  emits('submit', form)
 }
 
 onMounted(addCanvas)
@@ -128,24 +130,24 @@ onMounted(addCanvas)
       <div ref="canvasContainer" class="flex flex-col gap-4 w-full"></div>
       <div class="w-full mx-auto flex max-w-[800px]">
         <div
-            class="text-white flex bg-white rounded-sm border-solid border-[#262626] shadow-md border-opacity-10 justify-around z-10 ml-auto mt-1.5"
-            style="border-width: 1px;">
+          class="text-white flex bg-white rounded-sm border-solid border-[#262626] shadow-md border-opacity-10 justify-around z-10 ml-auto mt-1.5"
+          style="border-width: 1px;">
           <Icon name="plus" title="Add Page Break" @click="addCanvas"
-                class="mx-auto cursor-pointer text-[#262626] bg-white p-[4px] hover:bg-[hsla(0,0%,15%,0.8)] hover:text-white rounded-sm"
-                :styles="{ width: '28px', height: '28px' }" />
+            class="mx-auto cursor-pointer text-[#262626] bg-white p-[4px] hover:bg-[hsla(0,0%,15%,0.8)] hover:text-white rounded-sm"
+            :styles="{ width: '28px', height: '28px' }" />
           <Icon name="store" title="Add a Store Section" @click="addStore"
-                class="mx-auto cursor-pointer text-[#262626] bg-white p-[4px] hover:bg-[hsla(0,0%,15%,0.8)] hover:text-white rounded-sm"
-                :styles="{ width: '28px', height: '28px' }" />
+            class="mx-auto cursor-pointer text-[#262626] bg-white p-[4px] hover:bg-[hsla(0,0%,15%,0.8)] hover:text-white rounded-sm"
+            :styles="{ width: '28px', height: '28px' }" />
         </div>
       </div>
-      <ul class="foot-menu">
-        <li @click="submit">
-          <Icon name="save" :styles="{ color: 'hsla(0,0%,15%,0.8' }" class="w-7" />
-        </li>
-        <li>
-          <Icon name="dollar" :styles="{ color: 'hsla(0,0%,15%,0.8' }" class="w-7" />
-        </li>
-      </ul>
+      <div>
+        <FormBuilderFooter>
+          <FormBuilderFooterItem>
+            <Icon name="save" :styles="{ color: 'hsla(0,0%,15%,0.8' }" class="w-7" />
+          </FormBuilderFooterItem>
+          <slot name="footer" />
+        </FormBuilderFooter>
+      </div>
     </div>
     <div>
       <FormBuilderProperties :styles="styles" />
@@ -168,30 +170,6 @@ onMounted(addCanvas)
 
     &:last-child {
       width: 300px;
-    }
-  }
-}
-
-.foot-menu {
-  position: absolute;
-  z-index: 100;
-  background-color: #FFF;
-  border-radius: 5px;
-  display: flex;
-  bottom: 1rem;
-  right: 50%;
-  transform: translateX(50%);
-  padding: 2px;
-
-  >li {
-    padding: 5px;
-    cursor: pointer;
-    transition: all 0.15s;
-    border-radius: 4px;
-
-    &:hover {
-      background-color: hsla(0, 0%, 15%, 0.8);
-      color: white;
     }
   }
 }

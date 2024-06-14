@@ -4,7 +4,7 @@ export function capitalise(text: string) {
     return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-export function parseElementOptions(options: ElementOptions | undefined): Promise<{ label: string, value: string }[]> {
+export async function parseElementOptions(options: ElementOptions | undefined): Promise<{ label: string, value: string }[]> {
     if (options === undefined) return Promise.resolve([])
 
     function format(item: any) {

@@ -18,19 +18,23 @@ const emit = defineEmits<{
 
 const options = ref<{ label: string, value: string }[]>([])
 parseElementOptions(props.data.options).then(_options => {
-  options.value = _options
+  options.value = _options || []
 })
 
 function addOption(event: any) {
   const value = event.target.value
   if (!value) return console.warn("No value provided")
   options.value.push({ label: value, value: value })
+
+  if (!props.data.options) props.data.options = []
+  props.data.options.push({ label: value, value: value })
   event.target.value = ''
 }
 
 function removeOption(value: string) {
   options.value = options.value!.filter(option => option.value !== value)
 }
+
 </script>
 <template>
   <div class="flex flex-col m-auto w-[80%]">
@@ -42,7 +46,9 @@ function removeOption(value: string) {
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
         v-model="data.description" placeholder="Add a description (optional)" />
     </label>
-    <select v-if="!edit" v-model="data.value">
+    <select v-if="!edit" v-model="data.value" class="border border-gray-300 rounded-md p-2" ref="select"
+      placeholder="wtf">
+      <option value="" disabled selected>Select your option</option>
       <option v-for="option in options" :key="option.value" :value="option.value">{{ option.label }}</option>
     </select>
     <div v-else class="adoptions">
@@ -73,57 +79,57 @@ function removeOption(value: string) {
 </template>
 <style scoped lang="scss">
 label {
-    width: 100%;
+  width: 100%;
 
-    &:first-child {
-        margin-top: 1rem;
+  &:first-child {
+    margin-top: 1rem;
+  }
+
+  &:not(:focus) {
+    input {
+      all: unset;
+      cursor: pointer;
+      transition: padding 0.25s, border-radius 0.25s;
+      width: 100%;
+      text-wrap: normal;
+      text-overflow: ellipsis;
+
+      &::placeholder {
+        color: #4e4e4e;
+      }
+
+      &.label {
+        font-weight: bold;
+        color: black;
+      }
+
+      &.description {
+        margin-bottom: 0.8em;
+        font-size: 0.9rem;
+        color: black;
+      }
     }
+  }
 
-    &:not(:focus) {
-        input {
-            all: unset;
-            cursor: pointer;
-            transition: padding 0.25s, border-radius 0.25s;
-            width: 100%;
-            text-wrap: normal;
-            text-overflow: ellipsis;
+  &:focus-within,
+  &:focus {
+    input {
+      cursor: text;
+      background-color: #f0f0f0;
+      border-radius: 0.25rem;
+      padding: 0.5rem;
+      color: black !important;
+      width: fit-content;
 
-            &::placeholder {
-                color: #4e4e4e;
-            }
-
-            &.label {
-                font-weight: bold;
-                color: black;
-            }
-
-            &.description {
-                margin-bottom: 0.8em;
-                font-size: 0.9rem;
-                color: black;
-            }
-        }
+      transition: padding 0.25s, border-radius 0.25s;
     }
+  }
 
-    &:focus-within,
-    &:focus {
-        input {
-            cursor: text;
-            background-color: #f0f0f0;
-            border-radius: 0.25rem;
-            padding: 0.5rem;
-            color: black !important;
-            width: fit-content;
-
-            transition: padding 0.25s, border-radius 0.25s;
-        }
+  &:hover:not(:focus-within) {
+    input::placeholder {
+      text-decoration: underline;
     }
-
-    &:hover:not(:focus-within) {
-        input::placeholder {
-            text-decoration: underline;
-        }
-    }
+  }
 }
 
 .adoptions {

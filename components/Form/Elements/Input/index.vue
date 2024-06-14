@@ -9,7 +9,7 @@ import {
     type InputElementData
 } from "~/typings";
 
-const props = defineProps({
+defineProps({
     data: {
         type: Object as PropType<InputElementData>,
         required: true
