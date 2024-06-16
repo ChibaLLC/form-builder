@@ -17,8 +17,8 @@ defineProps({
 <style scoped lang="scss">
 .properties {
   width: 100%;
-  min-height: 100svh;
   background-color: #262626;
   padding: 1rem;
+  color: white;
 }
 </style>

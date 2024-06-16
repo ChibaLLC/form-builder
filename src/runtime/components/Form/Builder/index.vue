@@ -9,12 +9,10 @@ const emits = defineEmits<{
 
 defineProps({
   styles: {
-    type: Object as PropType<CSSProperties>,
+    type: Object as PropType<Pick<CSSProperties, 'height'>>,
     required: false,
     default: () => ({
-      backgroundColor: "#262626",
-      color: "#FFF",
-      minHeight: "100svh"
+      height: "100svh"
     })
   }
 })
@@ -124,7 +122,7 @@ async function submit() {
 onMounted(addCanvas)
 </script>
 <template>
-  <div class="three max-w-[100svw] min-h-[100svh]">
+  <div class="three" :style="styles">
     <div>
       <FormBuilderPanel @dragstart="setDragged" :styles="styles"/>
     </div>
