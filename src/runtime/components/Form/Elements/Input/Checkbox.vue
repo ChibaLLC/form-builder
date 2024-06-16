@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, type PropType } from 'vue'
 import type {CheckboxElementData} from "../../../../typings";
-import {parseElementOptions} from "../../../../utils/local";
+import {parseElementOptions} from "../../../../local";
 
 const props = defineProps({
     data: {

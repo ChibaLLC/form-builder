@@ -1,5 +1,5 @@
 <template>
-  <FormBuilder :styles="{height: '80px'}" />
+  <FormBuilder :styles="{height: '80vh'}" />
 </template>
 
 <script setup>
