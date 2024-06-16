@@ -6,8 +6,8 @@ export interface ModuleOptions {
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
-    name: 'form-builder',
-    configKey: 'formBuilder',
+    name: 'nuxt-form-builder',
+    configKey: 'nuxtFormBuilder',
   },
   // Default configuration options of the Nuxt module
   defaults: {},

@@ -1,6 +1,6 @@
 {
-  "name": "nuxt-form-builder",
-  "version": "0.0.5",
+  "name": "@chiballc/nuxt-form-builder",
+  "version": "0.0.1",
   "description": "For Builder Nuxt Module",
   "repository": "kgarchie/form-builder",
   "license": "MIT",
