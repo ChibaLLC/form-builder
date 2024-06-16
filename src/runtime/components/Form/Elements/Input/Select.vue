@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { ref, type PropType } from 'vue'
+import type { SelectElementData } from "../../../../typings";
+import { parseElementOptions } from "../../../../utils/local";
+
 const props = defineProps({
   edit: {
     type: Boolean,
@@ -9,6 +13,10 @@ const props = defineProps({
     required: true
   }
 })
+
+function capitalise(text: string) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
 
 const emit = defineEmits<{
   delete: [idx: number]

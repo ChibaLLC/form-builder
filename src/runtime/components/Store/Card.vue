@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref, getCurrentInstance, type PropType } from 'vue'
+import type { Item } from '../../typings'
+
 let images: Element | null = null
 let scrollPosition = 0
 let imageSize = 0

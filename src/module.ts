@@ -15,10 +15,7 @@ export default defineNuxtModule<ModuleOptions>({
     // @ts-ignore
     const resolver = createResolver(import.meta.url)
 
-    addImportsDir([
-      resolver.resolve('./runtime/typings'),
-      resolver.resolve('./runtime/utils'),
-    ], {
+    addImportsDir(resolver.resolve('./runtime/imports'), {
       prepend: true
     })
 

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { type PropType } from 'vue'
+import type { FormElementData } from '../../typings'
+
 defineProps({
   data: {
     type: Object as PropType<FormElementData[]>,

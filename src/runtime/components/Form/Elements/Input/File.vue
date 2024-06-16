@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { type PropType } from 'vue'
+import type {FileInputElementData} from "../../../../typings";
+
 const props = defineProps({
   edit: {
     type: Boolean,

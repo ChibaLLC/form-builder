@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import type { Item } from '../../typings'
+
 const emits = defineEmits<{
   item: [item: Item],
   deleteStore: [store: number],

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type CSSProperties } from "vue";
+import { type CSSProperties, type PropType } from "vue";
 defineProps({
   styles: {
     type: Object as PropType<CSSProperties>,

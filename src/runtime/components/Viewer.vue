@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref, computed, type PropType } from 'vue'
+import type { FormStoreData, FormElementData, Item, Forms, Stores } from '../typings'
+
 const emits = defineEmits<{
     submit: [FormStoreData],
     complete: [FormElementData[] | Item[]]

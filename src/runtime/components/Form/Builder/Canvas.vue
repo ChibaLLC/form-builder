@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { h, render } from "vue";
+import { h, render, ref, type PropType, type Ref, resolveComponent, onMounted } from "vue";
+import {Field} from '../../../utils/constants'
+import type {
+  ButtonElementData,
+  CheckboxElementData,
+  FileInputElementData,
+  FormElementData,
+  ImageInputElementData,
+  InputElementData, RadioElementData, RichTextElementData, SelectElementData, StaticElementData, TextareaElementData
+} from "~/src/runtime/typings";
 
 
 const FieldComponent = resolveComponent("FormElementsRenderer")

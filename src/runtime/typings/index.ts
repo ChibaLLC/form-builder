@@ -1,4 +1,4 @@
-import type { Field, ImageTypeEnum } from "../utils"
+import { Field, ImageTypeEnum } from "../utils/constants"
 
 export type Input =
     Field.DATE
