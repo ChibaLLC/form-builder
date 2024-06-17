@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type {CheckboxElementData} from "../../../../typings";
+import type {RadioElementData} from "../../../../typings";
 const props = defineProps({
     data: {
-        type: Object as PropType<CheckboxElementData>,
+        type: Object as PropType<RadioElementData>,
         required: true
     },
     edit: {

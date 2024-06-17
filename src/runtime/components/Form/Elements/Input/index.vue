@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {type PropType} from 'vue'
+import {isTextarea, isSelect, isRadio, isCheckbox, isImageInput, isFileInput} from "../../../../utils/functions";
 import type {
   InputElementData,
   TextareaElementData,

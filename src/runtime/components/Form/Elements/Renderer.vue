@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, type Ref } from 'vue'
 import type { FormElementData, StaticElementData, InputElementData, ButtonElementData } from '../../../typings'
+import {isStatic, isInput, isButton} from "../../../utils/functions";
 
 const props = defineProps<{
   data: FormElementData
