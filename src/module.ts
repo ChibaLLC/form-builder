@@ -12,13 +12,14 @@ export default defineNuxtModule<ModuleOptions>({
   // Default configuration options of the Nuxt module
   defaults: {},
   setup(_options, _nuxt) {
-    // @ts-ignore
     const resolver = createResolver(import.meta.url)
 
-    addImportsDir(resolver.resolve('./runtime/utils'))
+    addImportsDir(resolver.resolve('./runtime/utils'), {
+      prepend: true
+    })
 
     addComponentsDir({
       path: resolver.resolve('./runtime/components')
-    })
+    }).then()
   },
 })

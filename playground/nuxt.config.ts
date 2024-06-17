@@ -1,8 +1,8 @@
 export default defineNuxtConfig({
-  modules: ['../src/module', '@nuxtjs/tailwindcss'],
-  formBuilder: {},
-  tailwindcss: {
-    configPath: '../tailwind.config.ts',
-  },
+  modules: ['../src/module'],
+  nuxtFormBuilder: {},
   devtools: { enabled: true },
+  css: [
+    '../src/assets/css/styles.css',
+  ]
 })
