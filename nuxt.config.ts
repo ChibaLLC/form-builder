@@ -1,6 +1,2 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-export default defineNuxtConfig({
-  css: [
-    './src/assets/css/styles.css',
-  ]
-})
+export default defineNuxtConfig({})

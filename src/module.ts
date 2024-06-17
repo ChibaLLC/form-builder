@@ -13,7 +13,7 @@ export default defineNuxtModule<ModuleOptions>({
   defaults: {},
   setup(_options, _nuxt) {
     const resolver = createResolver(import.meta.url)
-    _nuxt.options.css.push(resolver.resolve('./assets/css/styles.css'))
+    _nuxt.options.css.push(resolver.resolve('./runtime/assets/css/styles.css'))
 
     addImportsDir(resolver.resolve('./runtime/utils'), {
       prepend: true
