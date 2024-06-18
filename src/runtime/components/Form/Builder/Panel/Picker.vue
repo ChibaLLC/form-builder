@@ -1,5 +1,5 @@
 <template>
-  <div class="flex cursor-pointer hover:bg-[#2b2a2a] rounded-md p-1.5" draggable="true">
+  <div class="panel-item" draggable="true">
     <div class="icon">
       <slot name="icon"></slot>
     </div>
@@ -14,7 +14,23 @@
   </div>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+ul{
+  list-style: none;
+}
+
+a{
+  text-decoration: none;
+}
+
 .icon {
   width: 32px;
   height: 32px;
@@ -45,5 +61,17 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.panel-item {
+  display: flex;
+  cursor: pointer;
+  background-color: #2b2a2a;
+  border-radius: 0.375rem;
+  padding: 0.375rem;
+}
+
+.panel-item:hover{
+  background-color: #333333;
 }
 </style>

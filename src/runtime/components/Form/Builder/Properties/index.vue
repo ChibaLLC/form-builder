@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type CSSProperties, type PropType } from "vue";
+import {type CSSProperties, type PropType} from "vue";
+
 defineProps({
   styles: {
     type: Object as PropType<CSSProperties>,
@@ -10,15 +11,36 @@ defineProps({
 
 <template>
   <div class="properties" :style="styles">
-    <h1 class="font-bold">Properties</h1>
+    <h3 class="font-bold">Properties</h3>
   </div>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol{
+  list-style: none;
+}
+
+a{
+  text-decoration: none;
+}
+
 .properties {
   width: 100%;
   background-color: #262626;
   padding: 1rem;
   color: white;
+}
+
+.font-bold {
+  font-weight: bold;
 }
 </style>

@@ -4,6 +4,22 @@
     </ul>
 </template>
 <style scoped lang="scss">
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+ul{
+  list-style: none;
+}
+
+a{
+  text-decoration: none;
+}
+
 .foot-menu {
   position: absolute;
   z-index: 100;

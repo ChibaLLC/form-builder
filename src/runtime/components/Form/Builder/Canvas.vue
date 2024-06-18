@@ -273,10 +273,10 @@ onMounted(() => {
   const elements = new Elements(container.value!)
   dropzone.value?.addEventListener('drop', (e) => {
     e.preventDefault()
+    dropzone.value?.classList.remove('active')
     if (!props.draggedElement?.value) return repositionElement(elements, e)
 
     elements.add(props.draggedElement.value).render()
-    dropzone.value?.classList.remove('active')
     props.draggedElement.value = undefined
   })
 
@@ -307,8 +307,8 @@ onMounted(() => {
 })
 </script>
 <template>
-  <div class="w-full m-auto max-w-[800px]">
-    <div class="flex bg-[#323232] w-fit p-0.5 rounded mb-2 gap-1">
+  <div class="canvas-container">
+    <div class="canvas-head">
       <Transition mode="out-in">
         <div class="icon edit" v-if="!edit">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" @click="edit = true">
@@ -334,40 +334,95 @@ onMounted(() => {
         </svg>
       </div>
     </div>
-    <form class="bg-white h-fit min-h-32 rounded relative py-2" ref="dropzone" @submit.prevent>
+    <form class="canvas-form" ref="dropzone" id="dropzone" @submit.prevent>
       <div ref="container"></div>
     </form>
   </div>
 </template>
-<style scoped lang="scss">
+<style scoped>
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol{
+  list-style: none;
+}
+
+a{
+  text-decoration: none;
+}
+
+#dropzone {
+  background-color: white;
+  height: fit-content;
+  min-height: 5rem;
+  border-radius: 0.2rem;
+  position: relative;
+  padding: 0.5rem 1rem;
+  border: 2px solid transparent;
+}
+
 #dropzone.active {
   border: 2px dashed #333;
+}
+
+#dropzone >div{
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.canvas-container {
+  width: 100%;
+  margin: auto;
+  max-width: 800px;
+}
+
+.canvas-head {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #323232;
+  width: fit-content;
+  padding: 2px;
+  border-radius: 0.15rem;
+  margin-bottom: 0.4rem;
+  margin-top: 0.5rem;
+  gap: 8px;
 }
 
 .icon {
   padding: 4px;
   cursor: pointer;
+  border-radius: 0.125rem;
+  display: grid;
+  place-items: center;
+}
 
-  svg {
-    width: 20px;
-    height: 20px;
-    color: white;
-  }
+.icon:hover{
+  background-color: #464545;
+}
 
-  &:hover {
-    background-color: #464545;
-  }
+.icon svg {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
 
-  &.delete:hover {
-    svg {
-      color: red;
-    }
-  }
+.icon svg:hover {
+  background-color: #464545;
+}
 
-  &.edit:hover {
-    svg {
-      color: #00a0e4;
-    }
-  }
+.icon:hover.delete svg {
+  color: red;
+}
+
+.icon:hover.edit svg {
+  color: #00a0e4;
 }
 </style>

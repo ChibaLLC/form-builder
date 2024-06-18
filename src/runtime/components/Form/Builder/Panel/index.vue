@@ -15,15 +15,14 @@ defineProps({
 <template>
   <div class="panel" :style="styles">
     <div class="search-box">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-           style="width: 20px; height: 20px;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="search-icon">
         <path
           d="M11 2C15.968 2 20 6.032 20 11C20 15.968 15.968 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2ZM11 18C14.8675 18 18 14.8675 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18ZM19.4853 18.0711L22.3137 20.8995L20.8995 22.3137L18.0711 19.4853L19.4853 18.0711Z">
         </path>
       </svg>
       <input placeholder="Search Elements" class="search"/>
     </div>
-    <ul class="w-full overflow-hidden flex flex-col gap-2">
+    <ul class="panel-items">
       <li>
         <FormBuilderPanelPicker @dragstart="emit('dragstart', Field.EMAIL)">
           <template #icon>
@@ -106,7 +105,23 @@ defineProps({
   </div>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
 .panel {
   width: 100%;
   overflow-y: auto;
@@ -116,38 +131,52 @@ defineProps({
   gap: 1rem;
   color: white;
   background-color: #262626;
+}
 
-  .search-box {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+.panel .search-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
 
-    .search-icon {
-      position: absolute;
-      color: #737373;
-      margin-left: 0.3rem;
-    }
+.panel .search-box .search-icon {
+  position: absolute;
+  color: #737373;
+  margin-left: 0.45rem;
+  width: 20px;
+  height: 20px;
+}
 
-    .search {
-      width: 100%;
-      padding: 0.5rem 0 0.5rem 1.8rem;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      background-color: #323232;
+.panel .search-box .search {
+  width: 100%;
+  padding: 0.5rem 0 0.5rem 1.8rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background-color: #323232;
+}
 
-      &::placeholder {
-        color: #737373;
-      }
+.panel .search-box .search::placeholder {
+  color: #737373;
+}
 
-      &:focus {
-        outline: none;
-      }
-    }
-  }
+.panel .search-box .search:focus {
+  outline: none;
+}
 
-  svg{
-    color: #efefef;
-  }
+.panel svg {
+  color: #efefef;
+}
+
+.panel-items {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+h3 {
+  font-size: 1rem;
 }
 </style>
