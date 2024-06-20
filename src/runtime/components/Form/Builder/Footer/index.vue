@@ -21,7 +21,7 @@ a{
 }
 
 .foot-menu {
-  position: absolute;
+  position: fixed;
   z-index: 100;
   background-color: #FFF;
   border-radius: 5px;

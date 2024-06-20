@@ -381,6 +381,7 @@ a{
   width: 100%;
   margin: auto;
   max-width: 800px;
+  position: relative;
 }
 
 .canvas-head {
