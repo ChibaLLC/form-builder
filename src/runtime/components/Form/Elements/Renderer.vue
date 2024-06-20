@@ -60,7 +60,6 @@ a{
   position: relative;
   width: 100%;
   display: grid;
-  place-items: center;
   border-radius: 5px;
 }
 
