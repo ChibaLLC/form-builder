@@ -73,7 +73,7 @@ a{
 .close-icon-container{
   cursor: pointer;
   position: absolute;
-  top: 1rem;
+  top: 0.8rem;
   right: 1rem;
   width: 80%;
   display: flex;

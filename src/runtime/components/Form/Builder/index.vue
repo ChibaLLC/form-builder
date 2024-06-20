@@ -216,7 +216,8 @@ a{
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 100%;
+  width: 80%;
+  margin: 0 auto;
 }
 
 .canvas-icons {
