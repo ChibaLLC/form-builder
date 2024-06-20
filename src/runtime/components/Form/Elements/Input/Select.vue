@@ -78,7 +78,7 @@ function removeOption(value: string) {
       <div v-else style="margin-bottom: 2px">
         <p class="options-placeholder">No options added</p>
       </div>
-      <input placeholder="Add Option" @keydown.enter="addOption" style="width: 100%"/>
+      <input placeholder="Add Option" @keydown.enter="addOption" />
     </div>
   </div>
 </template>
@@ -140,7 +140,7 @@ label:not(:focus) input.description {
 label:focus-within input, label:focus input {
   cursor: text;
   border-radius: 0.25rem;
-  outline: 1px solid rgba(78, 78, 78, 0.4);
+  outline: 1px solid rgba(78, 78, 78, 0.2);
   background-color: white;
   padding: 0.5rem;
   width: fit-content;
@@ -156,4 +156,18 @@ label:hover:not(:focus-within) input::placeholder {
   text-decoration: underline;
 }
 
+.adoptions input{
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e5e5e5;
+  margin-top: 0.5rem;
+}
+
+.adoptions input::placeholder {
+  color: #4e4e4e;
+}
+
+input:focus{
+  outline: 1px solid rgba(78, 78, 78, 0.2);
+}
 </style>

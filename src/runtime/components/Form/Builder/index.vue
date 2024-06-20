@@ -217,6 +217,7 @@ a{
   flex-direction: column;
   gap: 1rem;
   width: 80%;
+  max-width: 800px;
   margin: 0 auto;
 }
 
