@@ -28,7 +28,7 @@ parseElementOptions(props.data.options).then(_options => {
 </script>
 
 <template>
-    <div v-for="option in options" class="flex flex-col m-auto w-[80%]">
+    <div v-for="option in options" class="checkbox-container">
         <div v-if="!edit">
             <label>{{ option.label }}</label>
             <input autocomplete="off" type="checkbox" :value="option.value" />
@@ -40,4 +40,11 @@ parseElementOptions(props.data.options).then(_options => {
     </div>
 </template>
 
-<style scoped lang="scss"></style>
+<style>
+.checkbox-container{
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  margin: auto;
+}
+</style>

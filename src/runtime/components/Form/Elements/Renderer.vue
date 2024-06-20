@@ -17,7 +17,7 @@ const _edit = computed(() => {
 })
 </script>
 <template>
-  <div class="container" :draggable="_edit" :class="{ 'hover-active': _edit }">
+  <div class="renderer-container" :draggable="_edit" :class="{ 'hover-active': _edit }">
     <div class="close-icon-container" v-if="_edit">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
            @click="emit('delete', data.index as number)" class="close-icon">
@@ -54,7 +54,7 @@ a{
   text-decoration: none;
 }
 
-.container {
+.renderer-container {
   flex-direction: column;
   padding: 0.5rem 1rem;
   position: relative;

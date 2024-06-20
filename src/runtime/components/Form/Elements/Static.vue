@@ -14,4 +14,4 @@ defineProps({
   <p class="static">{{ data.text }}</p>
 </template>
 
-<style scoped lang="scss"></style>
+<style scoped></style>

@@ -119,7 +119,7 @@ function deleteStore() {
   </div>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .icon {
   padding: 4px;
   cursor: pointer;

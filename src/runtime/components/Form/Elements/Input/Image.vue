@@ -33,7 +33,7 @@ function onChange(event: any) {
 </script>
 
 <template>
-  <div class="flex flex-col m-auto w-[80%]">
+  <div class="images-container">
     <label for="label">
       <input :disabled="edit" autocomplete="off" type="text" id="label" class="label" v-model="data['label']"
         placeholder="Add a label" />
@@ -62,6 +62,13 @@ ol{
 
 a{
   text-decoration: none;
+}
+
+.images-container{
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  margin: auto;
 }
 
 .select-container {

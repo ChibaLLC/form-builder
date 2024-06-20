@@ -15,7 +15,7 @@ defineProps({
 </script>
 
 <template>
-    <div class="flex flex-col m-auto w-[80%]">
+    <div class="textarea-container">
         <label for="textarea">
             <input :disabled="!edit" autocomplete="off" type="text" id="textarea" class="label" v-model="data.label"
                 placeholder="Add a label" />
@@ -44,6 +44,13 @@ ol{
 
 a{
   text-decoration: none;
+}
+
+.textarea-container{
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  margin: auto;
 }
 
 label {

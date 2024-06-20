@@ -14,7 +14,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <div class="flex flex-col m-auto w-[80%]">
+    <div class="radio-container">
         <div v-if="!edit" v-for="option in data.options">
             <label>{{ option.label }}</label>
             <input autocomplete="off" type="radio" :value="option.value" />
@@ -41,6 +41,13 @@ ol{
 
 a{
   text-decoration: none;
+}
+
+.radio-container{
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  margin: auto;
 }
 
 label {

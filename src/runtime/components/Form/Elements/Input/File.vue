@@ -34,7 +34,7 @@ function onChange(event: any) {
 </script>
 
 <template>
-  <div class="flex flex-col m-auto w-[80%]">
+  <div class="file-container">
     <label for="label">
       <input :disabled="!edit" autocomplete="off" type="text" id="label" class="label" v-model="data['label']"
              placeholder="Add a label"/>
@@ -47,6 +47,28 @@ function onChange(event: any) {
   </div>
 </template>
 
-<style scoped lang="scss">
+<style>
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
+ul,
+ol{
+  list-style: none;
+}
+
+a{
+  text-decoration: none;
+}
+
+.file-container{
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  margin: auto;
+}
 </style>
