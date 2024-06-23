@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {type CSSProperties, render, type PropType, resolveComponent, ref, h, onMounted} from 'vue';
-import type {Forms, FormStoreData, FormElementData, Item, Stores} from '~/src/runtime/typings'
+import type {Forms, FormStoreData, FormElementData, Item, Stores} from '~/src/runtime/types'
 import {Field} from '../../../utils/constants'
 
 const emits = defineEmits<{
@@ -192,6 +192,7 @@ a{
 
 .three > div:first-child {
   width: 300px;
+  max-width: 20vw;
 }
 
 .three > div:nth-child(2) {
@@ -200,6 +201,7 @@ a{
 
 .three > div:last-child {
   width: 300px;
+  max-width: 20vw;
 }
 
 .builder {
@@ -208,7 +210,22 @@ a{
   margin-top: 0;
   padding: 8px 10px 0;
   display: flex;
+  overflow-y: auto;
   flex-direction: column;
+}
+
+.builder::-webkit-scrollbar {
+  width: 5px;
+  position: absolute;
+}
+
+.builder::-webkit-scrollbar-thumb {
+  background-color: #323232;
+  border-radius: 10px;
+}
+
+.builder::-webkit-scrollbar-track {
+  background-color: #191919;
 }
 
 .canvas-container,

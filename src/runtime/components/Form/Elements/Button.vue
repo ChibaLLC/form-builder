@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type {ButtonElementData} from "../../../typings";
+import type {ButtonElementData} from "../../../types";
 defineProps({
   data: {
     type: Object as PropType<ButtonElementData>,

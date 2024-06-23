@@ -7,7 +7,7 @@ import {
   type RadioElementData,
   type SelectElementData,
   type StaticElementData
-} from "../typings";
+} from "../types";
 import {Field} from "./constants"
 
 export function isInput(field: any): field is Input {

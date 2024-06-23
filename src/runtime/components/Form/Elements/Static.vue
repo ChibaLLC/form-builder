@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type {StaticElementData} from "../../../typings";
+import type {StaticElementData} from "../../../types";
 
 defineProps({
   data: {

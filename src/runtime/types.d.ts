@@ -65,7 +65,7 @@ export type FileInputElementData = _ElementData & {
   type: Field.FILE,
   inputType: Field.FILE,
   label: string,
-  accept: string | undefined | string,
+  accept: string | undefined,
   value: any
 }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type {TextareaElementData} from "../../../../typings";
+import type {TextareaElementData} from "../../../../types";
 
 defineProps({
     data: {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type { FormElementData } from '../../typings'
+import type { FormElementData } from '../../types'
 
 defineProps({
   data: {
@@ -36,14 +36,13 @@ const emits = defineEmits<{
 .form-renderer{
   background-color: #fff;
   height: fit-content;
-  min-height: 32rem;
   border-radius: 0.5rem;
   position: relative;
   padding: 1rem 0;
 }
 
 .form-footer{
-  width: 80%;
+  padding: 1rem;
   max-width: 800px;
   display: flex;
   justify-content: flex-end;
@@ -56,6 +55,8 @@ const emits = defineEmits<{
   color: #fff;
   border-radius: 0.25rem;
   transition: background-color 0.25s;
+  border: none;
+  cursor: pointer;
 }
 
 .form-submit-button:hover{

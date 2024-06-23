@@ -1,5 +1,5 @@
 <template>
-  <FormBuilder :styles="{height: '80vh'}" />
+  <NuxtPage/>
 </template>
 
 <script setup>

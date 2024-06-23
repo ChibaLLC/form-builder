@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type {FileInputElementData} from "../../../../typings";
+import type {FileInputElementData} from "../../../../types";
 
 const props = defineProps({
   edit: {

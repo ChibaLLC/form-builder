@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, type PropType} from 'vue'
-import type {SelectElementData} from "../../../../typings";
+import type {SelectElementData} from "../../../../types";
 import {parseElementOptions} from "../../../../local";
 
 const props = defineProps({
@@ -169,5 +169,36 @@ label:hover:not(:focus-within) input::placeholder {
 
 input:focus{
   outline: 1px solid rgba(78, 78, 78, 0.2);
+}
+
+.select-element{
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e5e5e5;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  border: 1px solid #e5e5e5;
+  margin-top: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #4e4e4e;
+}
+
+.option:hover{
+  background-color: #fffdfd;
+}
+
+.current-options-heading{
+  color: #4e4e4e;
+  font-size: 1.05rem;
+  margin-bottom: -5px;
 }
 </style>

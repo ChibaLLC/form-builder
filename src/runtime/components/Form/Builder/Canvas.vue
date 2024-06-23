@@ -8,7 +8,7 @@ import type {
   FormElementData,
   ImageInputElementData,
   InputElementData, RadioElementData, RichTextElementData, SelectElementData, StaticElementData, TextareaElementData
-} from "../../../typings";
+} from "../../../types";
 import {
   isInput,
   isFileInput,

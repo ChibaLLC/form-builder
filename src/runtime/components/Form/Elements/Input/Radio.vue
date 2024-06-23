@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type {RadioElementData} from "../../../../typings";
+import type {RadioElementData} from "../../../../types";
 const props = defineProps({
     data: {
         type: Object as PropType<RadioElementData>,

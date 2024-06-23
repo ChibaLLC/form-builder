@@ -9,7 +9,7 @@ import type {
   FileInputElementData,
   CheckboxElementData,
   RadioElementData
-} from "../../../../typings";
+} from "../../../../types";
 
 defineProps({
   data: {
@@ -33,7 +33,7 @@ defineProps({
   <FormElementsInputSelect v-else-if="isSelect(data.type)" :data="data as unknown as SelectElementData" :edit="edit"/>
   <div v-else class="flex flex-col m-auto w-[80%]">
     <label for="label">
-      <input :disabled="!edit" autocomplete="off" :type="data.inputType" id="label" class="label"
+      <input :disabled="!edit" autocomplete="off" :type="data.inputType" id="label" class="label" :style="{marginBottom: (data?.description?.length! > 0 || edit) ? '0rem' : '0.5rem'}"
              v-model="data.label" placeholder="Add a label"/>
     </label>
     <label for="description" v-if="(data.description && data.description.length > 0) || edit">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type {ImageInputElementData} from "../../../../typings";
+import type {ImageInputElementData} from "../../../../types";
 import {ImageTypeEnum} from "../../../../utils/constants";
 
 const props = defineProps({

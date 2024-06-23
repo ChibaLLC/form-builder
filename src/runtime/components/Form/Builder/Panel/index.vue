@@ -10,6 +10,20 @@ defineProps({
     required: true
   }
 })
+
+function search(event: any) {
+  const value = event.target.value.toLowerCase()
+  const items = document.querySelectorAll('.panel-items li')
+  items.forEach((item: any) => {
+    const title = item.querySelector('h3').textContent.toLowerCase()
+    const description = item.querySelector('p').textContent.toLowerCase()
+    if (title.includes(value) || description.includes(value)) {
+      item.style.display = 'block'
+    } else {
+      item.style.display = 'none'
+    }
+  })
+}
 </script>
 
 <template>
@@ -20,7 +34,7 @@ defineProps({
           d="M11 2C15.968 2 20 6.032 20 11C20 15.968 15.968 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2ZM11 18C14.8675 18 18 14.8675 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18ZM19.4853 18.0711L22.3137 20.8995L20.8995 22.3137L18.0711 19.4853L19.4853 18.0711Z">
         </path>
       </svg>
-      <input placeholder="Search Elements" class="search"/>
+      <input placeholder="Search Elements" class="search" @input="search($event)"/>
     </div>
     <ul class="panel-items">
       <li>
@@ -65,24 +79,24 @@ defineProps({
           </template>
         </FormBuilderPanelPicker>
       </li>
-      <li>
-        <FormBuilderPanelPicker @dragstart="emit('dragstart', Field.CHECKBOX)">
-          <template #icon>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                 style="width: 15px; height: 15px;">
-              <path
-                d="M4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM5 5V19H19V5H5ZM11.0026 16L6.75999 11.7574L8.17421 10.3431L11.0026 13.1716L16.6595 7.51472L18.0737 8.92893L11.0026 16Z">
-              </path>
-            </svg>
-          </template>
-          <template #title>
-            <h3>Checkbox</h3>
-          </template>
-          <template #description>
-            <p>A field for adding a checkbox</p>
-          </template>
-        </FormBuilderPanelPicker>
-      </li>
+      <!--      <li>-->
+      <!--        <FormBuilderPanelPicker @dragstart="emit('dragstart', Field.CHECKBOX)">-->
+      <!--          <template #icon>-->
+      <!--            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"-->
+      <!--                 style="width: 15px; height: 15px;">-->
+      <!--              <path-->
+      <!--                d="M4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM5 5V19H19V5H5ZM11.0026 16L6.75999 11.7574L8.17421 10.3431L11.0026 13.1716L16.6595 7.51472L18.0737 8.92893L11.0026 16Z">-->
+      <!--              </path>-->
+      <!--            </svg>-->
+      <!--          </template>-->
+      <!--          <template #title>-->
+      <!--            <h3>Checkbox</h3>-->
+      <!--          </template>-->
+      <!--          <template #description>-->
+      <!--            <p>A field for adding a checkbox</p>-->
+      <!--          </template>-->
+      <!--        </FormBuilderPanelPicker>-->
+      <!--      </li>-->
       <li>
         <FormBuilderPanelPicker @dragstart="emit('dragstart', Field.SELECT)">
           <template #icon>
@@ -125,10 +139,10 @@ a {
 .panel {
   width: 100%;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
   color: white;
   background-color: #262626;
 }
@@ -140,20 +154,27 @@ a {
   margin-bottom: 1rem;
 }
 
+
 .panel .search-box .search-icon {
   position: absolute;
   color: #737373;
-  margin-left: 0.45rem;
+  margin-left: 0.3rem;
   width: 20px;
   height: 20px;
+  margin-top: -1px;
+}
+
+.search:focus {
+  outline: 1px solid rgba(78, 78, 78, 0.1);
 }
 
 .panel .search-box .search {
   width: 100%;
-  padding: 0.5rem 0 0.5rem 1.8rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
+  padding: 0.4rem 0 0.4rem 1.8rem;
+  border-radius: 4px;
   background-color: #323232;
+  color: white;
+  border: none;
 }
 
 .panel .search-box .search::placeholder {
