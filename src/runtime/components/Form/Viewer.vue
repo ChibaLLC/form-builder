@@ -20,8 +20,8 @@ const forms = ref<Forms>(props.data.forms)
 const stores = ref<Stores>(props.data.stores)
 const currentFormIndex = ref(0)
 const currentStoreIndex = ref(0)
-const formLength = computed(() => Object.entries(forms.value)?.length)
-const storeLength = computed(() => Object.entries(stores.value)?.length)
+const formLength = computed(() => Object.entries(forms.value || {}).length)
+const storeLength = computed(() => Object.entries(stores.value || {}).length)
 
 function isDoneForms(currentIndex: number) {
   return currentIndex >= formLength.value - 1
@@ -50,14 +50,12 @@ function done() {
 }
 </script>
 <template>
-  <ClientOnly>
-    <div v-for="form in Object.entries(forms || {})" v-if="currentFormIndex < formLength">
-      <FormRenderer :data="form[1]" @submit="formSubmit(+form[0], form[1])" v-if="currentFormIndex === +form[0]"/>
-    </div>
-    <div v-for="store of Object.entries(stores || {})" v-if="storeLength > 0 && currentFormIndex >= formLength">
-      <StoreRenderer :data="store[1]" @submit="storeSubmit(+store[0], store[1])"
-                     v-if="currentStoreIndex === +store[0]"/>
-    </div>
-  </ClientOnly>
+  <div v-for="form in Object.entries(forms || {})" v-if="currentFormIndex < formLength">
+    <FormRenderer :data="form[1]" @submit="formSubmit(+form[0], form[1])" v-if="currentFormIndex === +form[0]"/>
+  </div>
+  <div v-for="store of Object.entries(stores || {})" v-if="storeLength > 0 && currentFormIndex >= formLength">
+    <StoreRenderer :data="store[1]" @submit="storeSubmit(+store[0], store[1])"
+                   v-if="currentStoreIndex === +store[0]"/>
+  </div>
 </template>
 <style scoped></style>
