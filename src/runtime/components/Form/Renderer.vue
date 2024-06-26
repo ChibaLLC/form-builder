@@ -38,7 +38,6 @@ const emits = defineEmits<{
   height: fit-content;
   border-radius: 0.5rem;
   position: relative;
-  padding: 1rem 0;
 }
 
 .form-footer{
