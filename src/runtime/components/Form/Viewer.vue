@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, computed, type PropType} from 'vue'
+import {ref, computed, type PropType, watch} from 'vue'
 import type {FormStoreData, FormElementData, Item, Forms, Stores} from '../../types'
 
 const emits = defineEmits<{
@@ -14,6 +14,11 @@ const props = defineProps({
       stores: {} as Stores
     },
     required: true
+  },
+  reRender: {
+    type: Boolean,
+    default: false,
+    required: false
   }
 })
 const forms = ref<Forms>(props.data.forms)
@@ -48,6 +53,13 @@ function storeSubmit(storeIndex: number, items: Item[]) {
 function done() {
   emits('submit', {forms: forms.value, stores: stores.value})
 }
+
+function rerender() {
+  currentFormIndex.value = 0
+  currentStoreIndex.value = 0
+}
+
+watch(() => props.reRender, rerender)
 </script>
 <template>
   <div class="content__holder">
@@ -69,7 +81,12 @@ function done() {
   height: fit-content;
   max-height: 100vh;
   display: grid;
+  width: 100%;
   place-items: center;
+}
+
+.content__holder > div {
+  width: 100%;
 }
 
 .loading-spinner {

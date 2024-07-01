@@ -12,7 +12,9 @@ onMounted(() => {
 
 <template>
   <Title>Viewer</Title>
-  <FormViewer :data="formData"/>
+  <ClientOnly>
+    <FormViewer :data="formData"/>
+  </ClientOnly>
 </template>
 
 <style scoped>
