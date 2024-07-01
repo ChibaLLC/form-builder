@@ -15,7 +15,7 @@ export default defineNuxtModule<ModuleOptions>({
     addImports({
       from: resolver.resolve('./runtime/types'),
       type: true,
-      name: 'FBTypes'
+      name: 'FBTypes',
     })
     addImportsDir(resolver.resolve('./runtime/utils'), {
       prepend: true

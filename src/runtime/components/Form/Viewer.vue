@@ -66,7 +66,8 @@ watch(() => props.reRender, rerender)
     <div v-for="form in Object.entries(forms || {})" v-if="currentFormIndex < formLength">
       <FormRenderer :data="form[1]" @submit="formSubmit(+form[0], form[1])" v-if="currentFormIndex === +form[0]"/>
     </div>
-    <div v-for="store of Object.entries(stores || {})" v-if="storeLength > 0 && currentFormIndex >= formLength">
+    <div v-for="store of Object.entries(stores || {})"
+         v-if="storeLength > 0 && currentFormIndex >= formLength && currentStoreIndex < storeLength">
       <StoreRenderer :data="store[1]" @submit="storeSubmit(+store[0], store[1])"
                      v-if="currentStoreIndex === +store[0]"/>
     </div>
@@ -76,7 +77,7 @@ watch(() => props.reRender, rerender)
   </div>
 </template>
 <style scoped>
-.content__holder{
+.content__holder {
   min-height: 10rem;
   height: fit-content;
   max-height: 100vh;
