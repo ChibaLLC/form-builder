@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {type CSSProperties, render, type PropType, resolveComponent, ref, h, onMounted} from 'vue';
-import type {Forms, FormStoreData, FormElementData, Item, Stores} from '~/src/runtime/types'
+import type {Forms, FormStoreData, FormElementData, Item, Stores} from '../../../types'
 import {Field} from '../../../utils/constants'
 
 const emits = defineEmits<{

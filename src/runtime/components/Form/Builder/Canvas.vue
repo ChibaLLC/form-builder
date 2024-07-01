@@ -20,7 +20,7 @@ import {
   isSelect,
   isStatic,
   isTextarea
-} from "../../../utils/functions.js";
+} from "../../../utils/functions";
 
 
 const FieldComponent = resolveComponent("FormElementsRenderer")

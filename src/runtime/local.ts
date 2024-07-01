@@ -1,4 +1,4 @@
-import type {ElementOptions} from "~/src/runtime/types";
+import type {ElementOptions} from "./types";
 
 export async function parseElementOptions(options: ElementOptions | undefined): Promise<{ label: string, value: string }[]> {
   if (options === undefined) return Promise.resolve([])
