@@ -18,7 +18,7 @@ onMounted(() => {
 <template>
   <Title>Viewer</Title>
   <ClientOnly>
-    <FormViewer :data="formData as any" @price="addPrice"/>
+    <FormViewer :data="formData as any" @price="addPrice" style="margin-top: 10rem"/>
   </ClientOnly>
 </template>
 

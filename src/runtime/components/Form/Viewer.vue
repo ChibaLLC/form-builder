@@ -116,6 +116,7 @@ watch(() => props.reRender, rerender)
 .content__holder > div {
   position: relative;
   width: 100%;
+  overflow: hidden;
 }
 
 .loading-spinner {
@@ -157,6 +158,11 @@ watch(() => props.reRender, rerender)
   will-change: transform;
 }
 
+
+.slide-enter-active{
+  width: 0;
+  height: 0;
+}
 
 .slide-enter-from {
   opacity: 0;
