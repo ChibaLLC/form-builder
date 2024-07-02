@@ -38,6 +38,8 @@ const emits = defineEmits<{
   width: 100%;
   margin: auto;
   max-width: 800px;
+
+  transition: all 0.25s;
 }
 
 .form-renderer{

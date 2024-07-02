@@ -33,6 +33,7 @@ const currentFormIndex = ref(0)
 const currentStoreIndex = ref(0)
 const formLength = computed(() => Object.entries(forms.value || {}).length)
 const storeLength = computed(() => Object.entries(stores.value || {}).length)
+const flowDirection = ref('forward')
 
 function isDoneForms(currentIndex: number) {
   return currentIndex >= formLength.value - 1
@@ -46,6 +47,7 @@ function formSubmit(formIndex: number, fields: FormElementData[]) {
   currentFormIndex.value = formIndex + 1
 
   emits('complete', fields)
+  flowDirection.value = 'forward'
   if (isDoneForms(formIndex) && storeLength.value === 0) done()
 }
 
@@ -53,6 +55,7 @@ function storeSubmit(storeIndex: number, items: Item[]) {
   currentStoreIndex.value = storeIndex + 1
 
   emits('complete', items)
+  flowDirection.value = 'forward'
   if (isDoneStores(storeIndex)) done()
 }
 
@@ -66,6 +69,7 @@ function rerender() {
 }
 
 function goBack() {
+  flowDirection.value = 'backward'
   if (currentStoreIndex.value > 0) {
     currentStoreIndex.value -= 1
   } else {
@@ -78,7 +82,7 @@ watch(() => props.reRender, rerender)
 </script>
 <template>
   <div class="content__holder">
-    <TransitionGroup name="slide" tag="div">
+    <TransitionGroup tag="div" :name="flowDirection === 'forward' ? 'slide_out' : 'slide_in'">
       <div v-for="form in Object.entries(forms || {})" v-if="currentFormIndex < formLength">
         <FormRenderer :data="form[1]" @submit="formSubmit(+form[0], form[1])" v-if="currentFormIndex === +form[0]"
                       @back="goBack"/>
@@ -124,6 +128,8 @@ watch(() => props.reRender, rerender)
   opacity: 1;
   position: relative;
   transition: opacity linear 0.1s;
+  width: 50px;
+  height: 50px;
 }
 
 @keyframes spinner {
@@ -148,39 +154,64 @@ watch(() => props.reRender, rerender)
   border-bottom-color: #575757;
   border-radius: 50%;
   content: "";
-  height: 40px;
   left: 50%;
   opacity: inherit;
   position: absolute;
   top: 50%;
   transform: translate3d(-50%, -50%, 0);
-  width: 40px;
+  width: 50px;
+  height: 50px;
   will-change: transform;
 }
 
 
-.slide-enter-active{
+.slide_out-enter-active{
   width: 0;
   height: 0;
 }
 
-.slide-enter-from {
+.slide_out-enter-from {
   opacity: 0;
 }
 
-.slide-enter-to {
+.slide_out-enter-to {
   transition: opacity 0.3s;
   opacity: 0;
 }
 
-.slide-leave-active{
+.slide_out-leave-active{
   transition: opacity 0.3s;
   opacity: 0.5;
 }
 
-.slide-leave-to {
+.slide_out-leave-to {
   transition: transform 0.3s;
   transform: translateY(-100%);
+  opacity: 0.5;
+}
+
+.slide_in-enter-active{
+  width: 0;
+  height: 0;
+}
+
+.slide_in-enter-from {
+  opacity: 0;
+}
+
+.slide_in-enter-to {
+  transition: opacity 0.3s;
+  opacity: 0;
+}
+
+.slide_in-leave-active{
+  transition: opacity 0.3s;
+  opacity: 0.5;
+}
+
+.slide_in-leave-to {
+  transition: transform 0.3s;
+  transform: translateY(100%);
   opacity: 0.5;
 }
 </style>
