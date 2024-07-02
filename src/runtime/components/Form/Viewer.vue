@@ -4,7 +4,8 @@ import type {FormStoreData, FormElementData, Item, Forms, Stores} from '../../ty
 
 const emits = defineEmits<{
   submit: [FormStoreData],
-  complete: [FormElementData[] | Item[]]
+  complete: [FormElementData[] | Item[]],
+  price: [number]
 }>()
 const props = defineProps({
   data: {
@@ -68,7 +69,7 @@ watch(() => props.reRender, rerender)
     </div>
     <div v-for="store of Object.entries(stores || {})"
          v-if="storeLength > 0 && currentFormIndex >= formLength && currentStoreIndex < storeLength">
-      <StoreRenderer :data="store[1]" @submit="storeSubmit(+store[0], store[1])"
+      <StoreRenderer :data="store[1]" @submit="storeSubmit(+store[0], store[1])" @price="emits('price', $event)"
                      v-if="currentStoreIndex === +store[0]"/>
     </div>
     <div class="processing" v-if="currentFormIndex >= formLength && currentStoreIndex >= storeLength">

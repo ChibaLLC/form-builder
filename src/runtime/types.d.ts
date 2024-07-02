@@ -127,6 +127,8 @@ export type Item = {
   store: number,
   name: string,
   price: number,
+  carted: boolean,
+  liked: boolean,
   images: Array<string>
 }
 

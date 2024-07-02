@@ -8,28 +8,39 @@ let images: NodeListOf<HTMLImageElement> | null = null;
 const mainImage = ref<HTMLImageElement | null>(null);
 let currentIndex = 0;
 
-defineProps({
+const props = defineProps({
   item: {
     type: Object as PropType<Item>,
     required: true
   }
 })
 
+const emits = defineEmits<{
+  cart: [],
+  uncart: [],
+}>()
+
 
 function like() {
   liked.value = true
+  props.item.liked = true
 }
 
 function cart() {
   carted.value = true
+  props.item.carted = true
+  emits('cart')
 }
 
 function unlike() {
   liked.value = false
+  props.item.liked = false
 }
 
 function uncart() {
   carted.value = false
+  props.item.carted = false
+  emits('uncart')
 }
 
 function previousImage() {

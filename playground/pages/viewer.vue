@@ -1,5 +1,10 @@
 <script setup lang="ts">
 const formData = ref<FormData | undefined>(undefined)
+
+function addPrice(val: any) {
+  console.log('Price added', val)
+}
+
 onMounted(() => {
   const data = localStorage.getItem('formData')
   if (data) {
@@ -13,7 +18,7 @@ onMounted(() => {
 <template>
   <Title>Viewer</Title>
   <ClientOnly>
-    <FormViewer :data="formData"/>
+    <FormViewer :data="formData" @price="addPrice"/>
   </ClientOnly>
 </template>
 

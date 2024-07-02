@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {type PropType} from 'vue'
+import {type PropType, computed} from 'vue'
 import type {Store} from '../../types'
 
-defineProps({
+const props = defineProps({
   data: {
     type: Object as PropType<Store>,
     default: {} as Store,
@@ -12,13 +12,16 @@ defineProps({
 
 const emits = defineEmits<{
   submit: [],
+  price: [any]
 }>()
 </script>
 
 <template>
   <div class="store-container">
     <div class="store-renderer">
-      <StoreCard v-for="item in data" :key="item.index" :item="item"/>
+      <StoreCard v-for="item in data" :key="item.index" :item="item"
+                 @cart="emits('price', Math.abs(item.price) || 0)"
+                 @uncart="emits('price', -Math.abs(item.price) || 0)"/>
     </div>
     <div class="store-footer">
       <button class="store-submit-button" @click="emits('submit')">
