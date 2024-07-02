@@ -7,16 +7,13 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": [
-        "./dist/types.d.ts",
-        "./dist/runtime/types.d.ts"
-      ],
+      "types": "./dist/runtime/types.d.ts",
       "import": "./dist/module.mjs",
       "require": "./dist/module.cjs"
     }
   },
   "main": "./dist/module.cjs",
-  "types": "./dist/runtime/types.d.ts",
+  "types": "./dist/types.d.ts",
   "files": [
     "dist"
   ],
