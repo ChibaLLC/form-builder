@@ -2,7 +2,7 @@
 import {type PropType, computed} from 'vue'
 import type {Store} from '../../types'
 
-defineProps({
+const props = defineProps({
   data: {
     type: Object as PropType<Store>,
     default: {} as Store,
@@ -20,13 +20,21 @@ const emits = defineEmits<{
   price: [any],
   back: []
 }>()
+
+const _items = computed(() => {
+  if (props.disabled) {
+    return props.data?.filter(item => item.carted)
+  }
+  return props.data
+})
 </script>
 
 <template>
   <div class="store-container">
     <div class="store-renderer">
-      <StoreCard v-for="item in data" :key="item.index" :item="item"
+      <StoreCard v-for="item in _items" :key="item.index" :item="item"
                  @cart="emits('price', Math.abs(item.price) || 0)"
+                 :edit="false"
                  @uncart="emits('price', -Math.abs(item.price) || 0)"/>
     </div>
     <div class="store-footer">
@@ -53,7 +61,7 @@ const emits = defineEmits<{
 }
 
 .store-footer {
-  padding: 0 2rem;
+  padding: 0 1rem;
   max-width: 800px;
   display: flex;
   justify-content: space-between;

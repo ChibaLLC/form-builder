@@ -50,7 +50,7 @@ const emits = defineEmits<{
 }
 
 .form-footer{
-  padding: 0 2rem;
+  padding: 0 1rem;
   max-width: 800px;
   display: flex;
   justify-content: space-between;

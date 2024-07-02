@@ -19,7 +19,7 @@ defineProps({
 
 
 const draggedElement = ref<keyof typeof Field | undefined>(undefined)
-
+const edit = ref(true)
 function setDragged(value: keyof typeof Field) {
   draggedElement.value = value
 }
@@ -63,7 +63,8 @@ function addCanvas() {
       } else {
         console.warn("Canvas Index not found")
       }
-    }
+    },
+    edit: edit
   })
   render(node, div)
   canvasContainer.value.appendChild(div)
@@ -71,18 +72,18 @@ function addCanvas() {
 
 const Store = resolveComponent("Store")
 const stores = ref<Stores>({})
-
 function addStore() {
   if (!canvasContainer.value) return console.warn("Canvas not found")
 
   const div = document.createElement("div")
-  const storeId = Object.keys(stores.value).length
+  const storeId = Object.keys(stores.value || {})?.length
   div.dataset.id = storeId.toString()
   const node = h(Store, {
     onItem: addStoreItem,
     onDeleteItem: deleteStoreItem,
     onDeleteStore: deleteStore,
-    storeIndex: storeId
+    storeIndex: storeId,
+    edit: edit
   })
   render(node, div)
   canvasContainer.value.appendChild(div)

@@ -32,8 +32,8 @@ a{
 }
 
 .icon {
-  width: 32px;
-  height: 32px;
+  width: 35px;
+  height: 35px;
   background-color: #393939;
   display: grid;
   place-items: center;
@@ -59,8 +59,6 @@ a{
 
   width: 100%;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .panel-item {

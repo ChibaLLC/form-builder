@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import {ref, onMounted, type PropType} from 'vue'
+import {ref, onMounted, type PropType, computed, type Ref} from 'vue'
 import type {Item} from '../../types'
 
 const liked = ref(false);
-const carted = ref(false);
 let images: NodeListOf<HTMLImageElement> | null = null;
 const mainImage = ref<HTMLImageElement | null>(null);
 let currentIndex = 0;
@@ -12,14 +11,28 @@ const props = defineProps({
   item: {
     type: Object as PropType<Item>,
     required: true
+  },
+  edit: {
+    type: Boolean as PropType<boolean | Ref<boolean>>,
+    default: false,
+    required: false
   }
 })
+const carted = computed({
+  get: () => props.item.carted || false,
+  set: (value: boolean) => props.item.carted = value
+});
 
 const emits = defineEmits<{
   cart: [],
   uncart: [],
+  delete: [number]
 }>()
 
+const _edit = computed(() => {
+  if (typeof props.edit === 'boolean') return props.edit
+  return props.edit.value
+})
 
 function like() {
   liked.value = true
@@ -75,6 +88,14 @@ onMounted(() => {
 </script>
 <template>
   <div class="shop-card">
+    <div class="close-icon-container" v-if="_edit">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+           @click="emits('delete', item.index)" class="close-icon">
+        <path fill-rule="evenodd" clip-rule="evenodd"
+              d="M12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22ZM8.96965 8.96967C9.26254 8.67678 9.73742 8.67678 10.0303 8.96967L12 10.9394L13.9696 8.96969C14.2625 8.6768 14.7374 8.6768 15.0303 8.96969C15.3232 9.26258 15.3232 9.73746 15.0303 10.0303L13.0606 12L15.0303 13.9697C15.3232 14.2625 15.3232 14.7374 15.0303 15.0303C14.7374 15.3232 14.2625 15.3232 13.9696 15.0303L12 13.0607L10.0303 15.0303C9.73744 15.3232 9.26256 15.3232 8.96967 15.0303C8.67678 14.7374 8.67678 14.2626 8.96967 13.9697L10.9393 12L8.96965 10.0303C8.67676 9.73744 8.67676 9.26256 8.96965 8.96967Z"
+              fill="#d22020"/>
+      </svg>
+    </div>
     <div class="parent-images-container">
       <span class="indicator-left" @click="previousImage">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240.823 240.823">
@@ -90,9 +111,9 @@ onMounted(() => {
         </svg>
       </span>
       <div class="images-container">
-        <img :src="item.images[0]" alt="Main Image" class="image main-image" ref="mainImage"/>
+        <img :src="item?.images[0]" alt="Main Image" class="image main-image" ref="mainImage"/>
         <div>
-          <img v-for="image in item.images?.slice(1)" :key="image" :src="image" alt="Other Image" class="image"/>
+          <img v-for="image in item?.images?.slice(1)" :key="image" :src="image" alt="Other Image" class="image"/>
         </div>
       </div>
     </div>
@@ -128,10 +149,11 @@ onMounted(() => {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  margin: 1rem;
   padding: 1rem;
-  width: 18vw;
+  min-width: 250px;
+  margin: 1rem auto;
   aspect-ratio: 1/1;
+  position: relative;
 }
 
 .parent-images-container {
@@ -183,7 +205,7 @@ onMounted(() => {
   cursor: pointer;
   display: grid;
   place-items: center;
-  z-index: 100;
+
 }
 
 .indicator-left svg,
@@ -271,5 +293,24 @@ svg {
 .transition-enter-to,
 .transition-leave {
   opacity: 1;
+}
+
+.close-icon-container{
+  cursor: pointer;
+  position: absolute;
+  top: 0.8rem;
+  right: 1rem;
+  width: 80%;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.close-icon{
+  margin-top: 1px;
+  pointer-events: auto;
+  width: 20px;
+  height: 20px;
+  z-index: 1;
 }
 </style>

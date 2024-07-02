@@ -57,7 +57,7 @@ a{
 
 .renderer-container {
   flex-direction: column;
-  padding: 0.5rem 2rem;
+  padding: 0.5rem 1rem;
   position: relative;
   width: 100%;
   display: grid;

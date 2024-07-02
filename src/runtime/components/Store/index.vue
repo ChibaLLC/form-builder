@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from 'vue'
+import {ref, type PropType, type Ref, computed} from 'vue'
 import type {Item} from '../../types'
 
 const emits = defineEmits<{
@@ -12,7 +12,16 @@ const props = defineProps({
   storeIndex: {
     type: Number,
     required: true
+  },
+  edit: {
+    type: Boolean as PropType<boolean | Ref<boolean>>,
+    default: false
   }
+})
+
+const _edit = computed(() => {
+  if (typeof props.edit === 'boolean') return props.edit
+  return props.edit.value
 })
 
 const shop = ref<HTMLElement | null>(null)
@@ -28,7 +37,7 @@ function addItemModal() {
 
 function emitItem() {
   if (!item.value) return console.warn("item.value has no item")
-  item.value.index = items.value.length
+  item.value.index = items.value[items.value.length - 1]?.index + 1 || 0
   item.value.store = props.storeIndex
   items.value.push(item.value)
   emits('item', item.value)
@@ -93,7 +102,7 @@ function deleteStore() {
     <div class="shop-container">
       <div class="items">
         <div v-for="item in items" class="item">
-          <StoreCard :item="item"/>
+          <StoreCard :item="item" @delete="emitDeleteItem" :edit="_edit"/>
         </div>
       </div>
     </div>
@@ -134,7 +143,6 @@ function deleteStore() {
   position: relative;
   padding: 0.5rem 1rem;
   border: 2px solid transparent;
-  display: flex;
 }
 
 .shop-icons {
@@ -272,7 +280,9 @@ function deleteStore() {
 }
 
 .items{
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 250px);
+  column-gap: 2rem;
+  justify-content: center;
 }
 </style>

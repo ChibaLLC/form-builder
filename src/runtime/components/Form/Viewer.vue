@@ -100,7 +100,7 @@ watch(() => props.reRender, rerender)
             <FormRenderer :data="form[1]" :disabled="true"/>
           </div>
           <div v-for="store of Object.entries(stores || {})">
-            <StoreRenderer :data="store[1]" :disabled="true"/>
+            <StoreRenderer :data="store[1]" :disabled="true" />
           </div>
         </div>
       </div>
@@ -130,6 +130,7 @@ watch(() => props.reRender, rerender)
   transition: opacity linear 0.1s;
   width: 50px;
   height: 50px;
+  margin: auto;
 }
 
 @keyframes spinner {
