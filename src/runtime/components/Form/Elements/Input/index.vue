@@ -19,18 +19,23 @@ defineProps({
   edit: {
     type: Boolean as PropType<boolean>,
     default: true
+  },
+  disabled: {
+    type: Boolean as PropType<boolean>,
+    default: false,
+    required: false
   }
 })
 
 </script>
 <template>
-  <FormElementsInputTextarea v-if="isTextarea(data.type)" :data="data as unknown as TextareaElementData" :edit="edit"/>
-  <FormElementsInputSelect v-else-if="isSelect(data.type)" :data="data as unknown as  SelectElementData" :edit="edit"/>
-  <FormElementsInputRadio v-else-if="isRadio(data.type)" :data="data as unknown as RadioElementData" :edit="edit"/>
-  <FormElementsInputCheckbox v-else-if="isCheckbox(data.type)" :data="data as unknown  as CheckboxElementData" :edit="edit"/>
-  <FormElementsInputImage v-else-if="isImageInput(data.type)" :data="data as unknown as ImageInputElementData" :edit="edit"/>
-  <FormElementsInputFile v-else-if="isFileInput(data.type)" :data="data  as unknown as FileInputElementData" :edit="edit"/>
-  <FormElementsInputSelect v-else-if="isSelect(data.type)" :data="data as unknown as SelectElementData" :edit="edit"/>
+  <FormElementsInputTextarea v-if="isTextarea(data.type)" :data="data as unknown as TextareaElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputSelect v-else-if="isSelect(data.type)" :data="data as unknown as  SelectElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputRadio v-else-if="isRadio(data.type)" :data="data as unknown as RadioElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputCheckbox v-else-if="isCheckbox(data.type)" :data="data as unknown  as CheckboxElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputImage v-else-if="isImageInput(data.type)" :data="data as unknown as ImageInputElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputFile v-else-if="isFileInput(data.type)" :data="data  as unknown as FileInputElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputSelect v-else-if="isSelect(data.type)" :data="data as unknown as SelectElementData" :edit="edit" :disabled="disabled"/>
   <div v-else class="flex flex-col m-auto w-[80%]">
     <label for="label">
       <input :disabled="!edit" autocomplete="off" :type="data.inputType" id="label" class="label" :style="{marginBottom: (data?.description?.length! > 0 || edit) ? '0rem' : '0.5rem'}"
@@ -40,7 +45,7 @@ defineProps({
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
              v-model="data.description" placeholder="Add a description (optional)"/>
     </label>
-    <input autocomplete="off" :type="data.inputType" :accept="data.accept" v-model="data.value" style="width: 100%"/>
+    <input autocomplete="off" :type="data.inputType" :accept="data.accept" v-model="data.value" style="width: 100%" :disabled="disabled"/>
   </div>
 </template>
 <style scoped>

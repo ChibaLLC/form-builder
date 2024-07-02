@@ -10,6 +10,11 @@ defineProps({
     edit: {
         type: Object as PropType<boolean>,
         default: true
+    },
+    disabled: {
+        type: Object as PropType<boolean>,
+        default: false,
+        required: false
     }
 })
 </script>
@@ -24,7 +29,7 @@ defineProps({
             <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
                 v-model="data.description" placeholder="Add a description (optional)" />
         </label>
-        <textarea class="textarea" v-model="data.value" style="width: 100%"></textarea>
+        <textarea class="textarea" v-model="data.value" style="width: 100%" :disabled="disabled"></textarea>
     </div>
 </template>
 

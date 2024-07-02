@@ -6,6 +6,7 @@ import {isStatic, isInput, isButton} from "../../../utils/functions";
 const props = defineProps<{
   data: FormElementData
   edit: boolean | Ref<boolean>
+  disabled: boolean
 }>()
 const emit = defineEmits<{
   delete: [number]
@@ -28,8 +29,8 @@ const _edit = computed(() => {
     </div>
 
     <FormElementsStatic v-if="isStatic(data.type)" :data="data as StaticElementData"/>
-    <FormElementsInput v-else-if="isInput(data.type)" :data="data as InputElementData" :edit="_edit"/>
-    <FormElementsButton v-else-if="isButton(data.type)" :data="data as ButtonElementData" :edit="_edit"/>
+    <FormElementsInput v-else-if="isInput(data.type)" :data="data as InputElementData" :edit="_edit" :disabled="disabled"/>
+    <FormElementsButton v-else-if="isButton(data.type)" :data="data as ButtonElementData" :edit="_edit" :disabled="disabled"/>
 
     <div v-else>
       <p class="text-red">Unknown element type {{ data.type }}</p>
@@ -56,7 +57,7 @@ a{
 
 .renderer-container {
   flex-direction: column;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 2rem;
   position: relative;
   width: 100%;
   display: grid;

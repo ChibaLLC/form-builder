@@ -9,6 +9,11 @@ const props = defineProps({
     edit: {
         type: Object as PropType<boolean>,
         default: true
+    },
+    disabled: {
+        type: Object as PropType<boolean>,
+        default: false,
+        required: false
     }
 })
 </script>

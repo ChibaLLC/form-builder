@@ -11,6 +11,11 @@ const props = defineProps({
   edit: {
     type: Boolean,
     default: true
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+    required: false
   }
 })
 
@@ -42,7 +47,7 @@ function onChange(event: any) {
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
         v-model="data['description']" placeholder="Add a description (optional)" />
     </label>
-    <input autocomplete="off" v-if="!edit" type="file" @change="onChange" :accept="data.accept" style="width: 100%"/>
+    <input autocomplete="off" v-if="!edit" type="file" @change="onChange" :accept="data.accept" style="width: 100%" :disabled="disabled"/>
   </div>
 </template>
 

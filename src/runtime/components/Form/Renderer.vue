@@ -6,19 +6,26 @@ defineProps({
   data: {
     type: Object as PropType<FormElementData[]>,
     required: true
+  },
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
 
 const emits = defineEmits<{
   submit: []
+  back: []
 }>()
 </script>
 <template>
   <Title>Form</Title>
   <div class="form-container">
     <form class="form-renderer" @submit.prevent="emits('submit')">
-      <FormElementsRenderer v-for="element in data" :key="element.index!" :data="element" :edit="false"/>
-      <div class="form-footer">
+      <FormElementsRenderer v-for="element in data" :key="element.index!" :data="element" :edit="false" :disabled="disabled"/>
+      <div class="form-footer" v-if="!disabled">
+        <button type="button" @click="emits('back')" class="form-back-button">Back</button>
         <button type="submit" class="form-submit-button">
           Submit
         </button>
@@ -41,10 +48,10 @@ const emits = defineEmits<{
 }
 
 .form-footer{
-  padding: 1rem;
+  padding: 0 2rem;
   max-width: 800px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin: auto;
 }
 
@@ -60,5 +67,19 @@ const emits = defineEmits<{
 
 .form-submit-button:hover{
   background-color: #065f4c;
+}
+
+.form-back-button{
+  padding: 0.5rem 1rem;
+  background-color: #dfdfdf;
+  color: #4e4e4e;
+  border-radius: 0.25rem;
+  transition: background-color 0.25s;
+  border: none;
+  cursor: pointer;
+}
+
+.form-back-button:hover{
+  background-color: #e5e5e5;
 }
 </style>

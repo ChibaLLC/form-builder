@@ -20,6 +20,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
     required: false
+  },
+  showSpinner: {
+    type: Boolean,
+    default: false,
+    required: false
   }
 })
 const forms = ref<Forms>(props.data.forms)
@@ -60,21 +65,42 @@ function rerender() {
   currentStoreIndex.value = 0
 }
 
+function goBack() {
+  if (currentStoreIndex.value > 0) {
+    currentStoreIndex.value -= 1
+  } else {
+    if (currentFormIndex.value === 0) return window.history.back()
+    currentFormIndex.value -= 1
+  }
+}
+
 watch(() => props.reRender, rerender)
 </script>
 <template>
   <div class="content__holder">
-    <div v-for="form in Object.entries(forms || {})" v-if="currentFormIndex < formLength">
-      <FormRenderer :data="form[1]" @submit="formSubmit(+form[0], form[1])" v-if="currentFormIndex === +form[0]"/>
-    </div>
-    <div v-for="store of Object.entries(stores || {})"
-         v-if="storeLength > 0 && currentFormIndex >= formLength && currentStoreIndex < storeLength">
-      <StoreRenderer :data="store[1]" @submit="storeSubmit(+store[0], store[1])" @price="emits('price', $event)"
-                     v-if="currentStoreIndex === +store[0]"/>
-    </div>
-    <div class="processing" v-if="currentFormIndex >= formLength && currentStoreIndex >= storeLength">
-      <div class="loading-spinner"></div>
-    </div>
+    <TransitionGroup name="slide" tag="div">
+      <div v-for="form in Object.entries(forms || {})" v-if="currentFormIndex < formLength">
+        <FormRenderer :data="form[1]" @submit="formSubmit(+form[0], form[1])" v-if="currentFormIndex === +form[0]"
+                      @back="goBack"/>
+      </div>
+      <div v-for="store of Object.entries(stores || {})"
+           v-if="storeLength > 0 && currentFormIndex >= formLength && currentStoreIndex < storeLength">
+        <StoreRenderer :data="store[1]" @submit="storeSubmit(+store[0], store[1])" @price="emits('price', $event)"
+                       @back="goBack"
+                       v-if="currentStoreIndex === +store[0]"/>
+      </div>
+      <div class="processing" v-if="currentFormIndex >= formLength && currentStoreIndex >= storeLength">
+        <div class="loading-spinner" v-if="showSpinner"></div>
+        <div v-else>
+          <div v-for="form in Object.entries(forms || {})">
+            <FormRenderer :data="form[1]" :disabled="true"/>
+          </div>
+          <div v-for="store of Object.entries(stores || {})">
+            <StoreRenderer :data="store[1]" :disabled="true"/>
+          </div>
+        </div>
+      </div>
+    </TransitionGroup>
   </div>
 </template>
 <style scoped>
@@ -88,6 +114,7 @@ watch(() => props.reRender, rerender)
 }
 
 .content__holder > div {
+  position: relative;
   width: 100%;
 }
 
@@ -128,5 +155,26 @@ watch(() => props.reRender, rerender)
   transform: translate3d(-50%, -50%, 0);
   width: 40px;
   will-change: transform;
+}
+
+
+.slide-enter-from {
+  opacity: 0;
+}
+
+.slide-enter-to {
+  transition: opacity 0.3s;
+  opacity: 0;
+}
+
+.slide-leave-active{
+  transition: opacity 0.3s;
+  opacity: 0.5;
+}
+
+.slide-leave-to {
+  transition: transform 0.3s;
+  transform: translateY(-100%);
+  opacity: 0.5;
 }
 </style>
