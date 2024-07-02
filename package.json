@@ -16,7 +16,7 @@
     }
   },
   "main": "./dist/module.cjs",
-  "types": "./dist/types.d.ts",
+  "types": "./dist/runtime/types.d.ts",
   "files": [
     "dist"
   ],
