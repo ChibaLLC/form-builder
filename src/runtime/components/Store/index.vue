@@ -281,8 +281,7 @@ function deleteStore() {
 
 .items{
   display: grid;
-  grid-template-columns: repeat(auto-fill, 250px);
-  column-gap: 2rem;
+  grid-template-columns: repeat(auto-fill, 300px);
   justify-content: center;
 }
 </style>

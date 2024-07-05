@@ -150,9 +150,8 @@ onMounted(() => {
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   padding: 1rem;
-  min-width: 250px;
-  margin: 1rem auto;
   aspect-ratio: 1/1;
+  isolation: isolate;
   position: relative;
 }
 
@@ -178,6 +177,7 @@ onMounted(() => {
   width: 100%;
   aspect-ratio: 4/3;
   object-fit: cover;
+  z-index: -1;
   transition: opacity 0.5s;
 }
 
@@ -311,6 +311,5 @@ svg {
   pointer-events: auto;
   width: 20px;
   height: 20px;
-  z-index: 1;
 }
 </style>
