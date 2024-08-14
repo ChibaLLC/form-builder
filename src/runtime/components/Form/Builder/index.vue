@@ -7,12 +7,20 @@ const emits = defineEmits<{
   submit: [FormStoreData]
 }>()
 
-defineProps({
+const props = defineProps({
   styles: {
     type: Object as PropType<Pick<CSSProperties, 'height'>>,
     required: false,
     default: () => ({
       height: "100svh"
+    })
+  },
+  starter: {
+    type: Object as PropType<FormStoreData>,
+    required: false,
+    default: () => ({
+      forms: {},
+      stores: {}
     })
   }
 })
@@ -28,9 +36,8 @@ const canvasContainer = ref<HTMLElement | null>(null)
 const Canvas = resolveComponent('FormBuilderCanvas')
 const canvases = ref<Forms>({} as any)
 
-function addCanvas() {
+function addCanvas(starter?: FormElementData | undefined) {
   if (!canvasContainer.value) return console.error('Canvas container not found')
-
   const div = document.createElement("div")
   div.dataset.id = String(Object.keys(canvases.value).length)
   const node = h(Canvas, {
@@ -64,7 +71,8 @@ function addCanvas() {
         console.warn("Canvas Index not found")
       }
     },
-    edit: edit
+    edit: edit,
+    starter: starter
   })
   render(node, div)
   canvasContainer.value.appendChild(div)
@@ -72,7 +80,7 @@ function addCanvas() {
 
 const Store = resolveComponent("Store")
 const stores = ref<Stores>({})
-function addStore() {
+function addStore(starter?: Item[] | undefined) {
   if (!canvasContainer.value) return console.warn("Canvas not found")
 
   const div = document.createElement("div")
@@ -121,11 +129,22 @@ async function submit() {
 }
 
 onMounted(() => {
-  addCanvas()
-
   if (window.innerWidth < 768) {
     alert("This page is not optimized for mobile devices. Please use a desktop or a tablet to build a form.")
   }
+
+  setTimeout(() => {
+    if (Object.keys(props.starter.forms).length || Object.keys(props.starter.stores).length) {
+      for (const form in props.starter.forms) {
+        addCanvas(props.starter.forms[form])
+      }
+      for (const store in props.starter.stores) {
+        addStore(props.starter.stores[store])
+      }
+    } else {
+      addCanvas()
+    }
+  })
 })
 </script>
 <template>

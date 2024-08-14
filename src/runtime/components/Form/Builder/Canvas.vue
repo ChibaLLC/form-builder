@@ -40,8 +40,12 @@ const props = defineProps({
     required: true
   },
   edit: {
-    type: Boolean as PropType<Ref<boolean> | boolean>,
+    type: Object as PropType<Ref<boolean> | boolean>,
     default: false
+  },
+  starter: {
+    type: Array as PropType<Array<FormElementData>>,
+    default: []
   }
 })
 
@@ -75,13 +79,21 @@ class Elements {
     this.target = target
   }
 
+  static inferLabel(field: Field){
+    switch (field){
+      case Field.EMAIL:
+        return "Email"
+    }
+    return ''
+  }
+
   private initialiseElementData(field: keyof typeof Field) {
     let component = {} as any
     if (isInput(field)) {
       component = {
         inputType: field,
         type: field,
-        label: '',
+        label: Elements.inferLabel(field),
         placeholder: '',
         value: '',
       } satisfies InputElementData
@@ -183,6 +195,12 @@ class Elements {
 
   on(event: 'add' | 'delete' | 'update', callback: Function) {
     this._onAdd[event].push(callback)
+  }
+
+  starter(data: Array<FormElementData>) {
+    if (!data || data.length === 0) return this;
+    this._elements = data.map((el, index) => ({...el, index}))
+    return this;
   }
 
   private emit(event: 'add' | 'delete' | 'update', data: FormElementData) {
@@ -291,6 +309,7 @@ const emits = defineEmits<{
 
 onMounted(() => {
   const elements = new Elements(container.value!)
+  elements.starter(props.starter).render()
   dropzone.value?.addEventListener('drop', (e) => {
     e.preventDefault()
     dropzone.value?.classList.remove('active')

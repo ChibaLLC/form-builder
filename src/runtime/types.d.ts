@@ -22,7 +22,6 @@ export type _ElementData = {
   type: any,
   label: string,
   inputType: string,
-  text?: string,
   accept?: string | undefined,
   onClick?: () => void,
   options?: any,
@@ -34,15 +33,17 @@ export type _ElementData = {
 }
 
 export type StaticElementData = {
-  index?: number,
   type: Field.STATIC,
-  text: string
+  label: string
+  inputType: Field.STATIC
+  value?: string
 }
 
 export type SelectElementData = _ElementData & {
   type: Field.SELECT,
   inputType: Field.SELECT,
   value?: string,
+  label: string
   autocomplete?: boolean,
   options: ElementOptions | undefined
 }
@@ -59,7 +60,7 @@ export type ImageInputElementData = _ElementData & {
   inputType: Field.IMAGE,
   label: string,
   accept: ImageTypeEnum | undefined | string,
-  value: any
+  value: File | string | undefined
 }
 
 export type FileInputElementData = _ElementData & {
@@ -67,7 +68,7 @@ export type FileInputElementData = _ElementData & {
   inputType: Field.FILE,
   label: string,
   accept: string | undefined,
-  value: any
+  value: File | undefined
 }
 
 export type CheckboxElementData = _ElementData & {
@@ -80,7 +81,7 @@ export type CheckboxElementData = _ElementData & {
 
 export type RadioElementData = _ElementData & {
   type: Field.RADIO,
-  value: string,
+  value: boolean,
   inputType: Field.RADIO,
   label: string,
   options: ElementOptions | undefined
