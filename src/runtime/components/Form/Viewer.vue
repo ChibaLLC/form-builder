@@ -111,7 +111,6 @@ watch(() => props.reRender, rerender)
 .content__holder {
   min-height: 10rem;
   height: fit-content;
-  max-height: 100vh;
   display: grid;
   width: 100%;
   place-items: center;
