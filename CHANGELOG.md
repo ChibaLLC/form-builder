@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.0.40
+
+[compare changes](https://github.com/kgarchie/form-builder/compare/v0.0.39...v0.0.40)
+
 ## v0.0.39
 
 [compare changes](https://github.com/kgarchie/form-builder/compare/v0.0.38...v0.0.39)
