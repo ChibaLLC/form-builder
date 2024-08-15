@@ -5,6 +5,7 @@ import type {
   ButtonElementData,
   CheckboxElementData,
   FileInputElementData,
+  Form,
   FormElementData,
   ImageInputElementData,
   InputElementData, RadioElementData, RichTextElementData, SelectElementData, StaticElementData, TextareaElementData
@@ -44,7 +45,7 @@ const props = defineProps({
     default: false
   },
   starter: {
-    type: Array as PropType<Array<FormElementData>>,
+    type: Array as PropType<Form>,
     default: []
   }
 })
@@ -143,7 +144,7 @@ class Elements {
         type: Field.RADIO as any,
         inputType: Field.RADIO as any,
         label: '',
-        value: '',
+        value: false,
         options: undefined
       } satisfies RadioElementData
     }
@@ -151,7 +152,9 @@ class Elements {
     if (isStatic(field)) {
       component = {
         type: Field.STATIC,
-        text: ''
+        label: '',
+        value: '',
+        inputType: Field.STATIC
       } satisfies StaticElementData
     }
 
@@ -199,7 +202,12 @@ class Elements {
 
   starter(data: Array<FormElementData>) {
     if (!data || data.length === 0) return this;
-    this._elements = data.map((el, index) => ({...el, index}))
+    data.map(el => {
+      const index = el.index || this._elements.length
+      this._elements.push({...el, index })
+      this.emit('add', this._elements[index])
+    })
+    this.render()
     return this;
   }
 
@@ -291,7 +299,7 @@ class Elements {
   }
 }
 
-function repositionElement(elements: Elements, event: DragEvent) {
+function repositionElement(elements: Elements) {
   if (!latestEnter.value) return console.log("No element to reposition")
   if (latestEnter.value === movingElement.value) return
 
@@ -309,11 +317,10 @@ const emits = defineEmits<{
 
 onMounted(() => {
   const elements = new Elements(container.value!)
-  elements.starter(props.starter).render()
   dropzone.value?.addEventListener('drop', (e) => {
     e.preventDefault()
     dropzone.value?.classList.remove('active')
-    if (!props.draggedElement?.value) return repositionElement(elements, e)
+    if (!props.draggedElement?.value) return repositionElement(elements)
 
     elements.add(props.draggedElement.value).render()
     props.draggedElement.value = undefined
@@ -343,6 +350,7 @@ onMounted(() => {
       emits('updateField', props.index, elData)
     }
   })
+  elements.starter(props.starter)
 })
 </script>
 <template>

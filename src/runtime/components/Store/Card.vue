@@ -361,6 +361,7 @@ svg {
   display: flex;
   justify-content: flex-end;
   pointer-events: none;
+  z-index: 100;
 }
 
 .close-icon {

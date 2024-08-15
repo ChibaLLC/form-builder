@@ -36,7 +36,8 @@ export type StaticElementData = {
   type: Field.STATIC,
   label: string
   inputType: Field.STATIC
-  value?: string
+  value?: string,
+  index?: number
 }
 
 export type SelectElementData = _ElementData & {

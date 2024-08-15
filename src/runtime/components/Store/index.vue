@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {ref, type PropType, type Ref, computed} from 'vue'
-import type {Item} from '../../types'
+import { ref, type PropType, type Ref, computed } from 'vue'
+import type { Item } from '../../types'
 
 const emits = defineEmits<{
   item: [item: Item],
@@ -14,8 +14,12 @@ const props = defineProps({
     required: true
   },
   edit: {
-    type: Boolean as PropType<boolean | Ref<boolean>>,
+    type: Object as PropType<boolean | Ref<boolean>>,
     default: false
+  },
+  starter: {
+    type: Array as PropType<Array<Item>>,
+    default: []
   }
 })
 
@@ -79,6 +83,14 @@ function deleteStore() {
   emits('deleteStore', props.storeIndex)
   shop.value?.remove()
 }
+
+if (props.starter?.length) {
+
+  items.value = props.starter
+  props.starter.forEach(i => {
+    emits('item', i)
+  })
+}
 </script>
 
 <template>
@@ -99,30 +111,23 @@ function deleteStore() {
         </svg>
       </div>
     </div>
-    <div class="shop-container">
+    <div class="shop-container" :class="{ 'bg-wheat': _edit }">
       <div class="items">
         <div v-for="item in items" class="item">
-          <StoreCard :item="item" @delete="emitDeleteItem" :edit="_edit"/>
+          <StoreCard :item="item" @delete="emitDeleteItem" :edit="_edit" />
         </div>
       </div>
     </div>
   </div>
-  <div class="add-item-container"
-       :class="{ 'hidden': modalHidden }" ref="modal" @keyup.esc="closeModal">
+  <div class="add-item-container" :class="{ 'hidden': modalHidden }" ref="modal" @keyup.esc="closeModal">
     <form class="add-item" @submit.prevent="emitItem">
       <h3>Add An Item to the Store</h3>
       <div style="padding-top: 1rem">
-        <input type="text" placeholder="Name" class="add-item-input" autocomplete="off"
-               required
-               v-model="item.name"/>
-        <input type="number" placeholder="Quantity" class="add-item-input" autocomplete="off"
-               v-model="item.qtty">
-        <input type="number" placeholder="Price" class="add-item-input" autocomplete="off"
-               required
-               v-model="item.price"/>
-        <input type="file" class="add-item-input" multiple
-               required
-               v-on:change="constructImageUrl"/>
+        <input type="text" placeholder="Name" class="add-item-input" autocomplete="off" required v-model="item.name" />
+        <input type="number" placeholder="Quantity" class="add-item-input" autocomplete="off" v-model="item.qtty">
+        <input type="number" placeholder="Price" class="add-item-input" autocomplete="off" required
+          v-model="item.price" />
+        <input type="file" class="add-item-input" multiple required v-on:change="constructImageUrl" />
       </div>
       <div class="add-item-buttons">
         <button class="add-item-button" type="submit">Add</button>
@@ -137,12 +142,15 @@ function deleteStore() {
   max-width: 800px;
   margin: auto;
   min-height: 5rem;
-  background-color: white;
   height: fit-content;
   border-radius: 0.2rem;
   position: relative;
   padding: 0.5rem 1rem;
   border: 2px solid transparent;
+}
+
+.bg-wheat {
+  background-color: wheat;
 }
 
 .shop-icons {
@@ -212,7 +220,7 @@ function deleteStore() {
   text-transform: capitalize;
 }
 
-.add-item > div {
+.add-item>div {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -226,7 +234,7 @@ function deleteStore() {
   font-size: 1rem;
 }
 
-.add-item-input[type="file"]{
+.add-item-input[type="file"] {
   padding: 0.25rem;
 }
 
@@ -279,7 +287,7 @@ function deleteStore() {
   display: none;
 }
 
-.items{
+.items {
   display: grid;
   grid-template-columns: repeat(auto-fill, 300px);
   justify-content: center;
