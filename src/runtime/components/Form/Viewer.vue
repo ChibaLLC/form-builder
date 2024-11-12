@@ -5,7 +5,8 @@ import type {FormStoreData, FormElementData, Item, Forms, Stores} from '../../ty
 const emits = defineEmits<{
   submit: [FormStoreData],
   complete: [FormElementData[] | Item[]],
-  price: [number]
+  price: [number],
+  back: []
 }>()
 const props = defineProps({
   data: {
@@ -73,8 +74,7 @@ function goBack() {
   if (currentStoreIndex.value > 0) {
     currentStoreIndex.value -= 1
   } else {
-    if (currentFormIndex.value === 0) return window.history.back()
-    currentFormIndex.value -= 1
+    if (currentFormIndex.value === 0) return emits("back")
   }
 }
 
