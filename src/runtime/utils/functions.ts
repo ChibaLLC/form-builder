@@ -11,7 +11,7 @@ import {
 import {Field} from "./constants"
 
 export function isInput(field: any): field is Input {
-  return [Field.DATE, Field.EMAIL, Field.PASSWORD, Field.SEARCH, Field.TEL, Field.TEXT, Field.URL, Field.NUMBER, Field.TEXTAREA, Field.IMAGE, Field.SELECT].includes(field)
+  return [Field.DATE, Field.EMAIL, Field.PASSWORD, Field.CHECKBOX, Field.SEARCH, Field.TEL, Field.TEXT, Field.URL, Field.NUMBER, Field.TEXTAREA, Field.IMAGE, Field.SELECT].includes(field)
 }
 
 export function isButton(field: any): field is ButtonElementData {

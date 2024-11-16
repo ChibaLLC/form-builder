@@ -18,7 +18,7 @@ export type ElementOptions = Array<{ value: string, label: string }> | URL | Pro
   label: string
 }>> | (() => Promise<Array<{ value: string, label: string }>>) | `http${string}`
 
-export type _ElementData = {
+export interface _ElementData {
   type: any,
   label: string,
   inputType: string,
@@ -40,7 +40,7 @@ export type StaticElementData = {
   index?: number
 }
 
-export type SelectElementData = _ElementData & {
+export interface SelectElementData  extends _ElementData {
   type: Field.SELECT,
   inputType: Field.SELECT,
   value?: string,
@@ -49,14 +49,14 @@ export type SelectElementData = _ElementData & {
   options: ElementOptions | undefined
 }
 
-export type InputElementData = _ElementData & {
+export interface InputElementData  extends _ElementData {
   type: Input,
   label: string,
   inputType: Input
   value?: Date | string | number,
 }
 
-export type ImageInputElementData = _ElementData & {
+export interface ImageInputElementData  extends _ElementData {
   type: Field.IMAGE,
   inputType: Field.IMAGE,
   label: string,
@@ -64,7 +64,7 @@ export type ImageInputElementData = _ElementData & {
   value: File | string | undefined
 }
 
-export type FileInputElementData = _ElementData & {
+export interface FileInputElementData extends _ElementData {
   type: Field.FILE,
   inputType: Field.FILE,
   label: string,
@@ -72,15 +72,16 @@ export type FileInputElementData = _ElementData & {
   value: File | undefined
 }
 
-export type CheckboxElementData = _ElementData & {
+export interface CheckboxElementData extends _ElementData { 
   type: Field.CHECKBOX,
-  value: boolean,
+  value: Record<string, string>,
   inputType: Field.CHECKBOX,
   label: string,
-  options: ElementOptions | undefined
+  options: ElementOptions | undefined,
+  multiple: boolean
 }
 
-export type RadioElementData = _ElementData & {
+export interface RadioElementData  extends _ElementData {
   type: Field.RADIO,
   value: boolean,
   inputType: Field.RADIO,
@@ -88,7 +89,7 @@ export type RadioElementData = _ElementData & {
   options: ElementOptions | undefined
 }
 
-export type TextareaElementData = _ElementData & {
+export interface TextareaElementData  extends _ElementData {
   type: Field.TEXTAREA,
   inputType: Field.TEXTAREA,
   label: string,
@@ -103,7 +104,7 @@ export type RichTextElementData = {
   inputType: Field.RICHTEXT
 }
 
-export type ButtonElementData = _ElementData & {
+export interface ButtonElementData  extends _ElementData {
   type: Field.BUTTON,
   inputType: 'submit' | 'reset' | 'button',
   label: string,

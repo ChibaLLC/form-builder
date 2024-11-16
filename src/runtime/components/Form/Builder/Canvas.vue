@@ -125,7 +125,8 @@ class Elements {
         type: Field.CHECKBOX as any,
         inputType: Field.CHECKBOX as any,
         label: '',
-        value: false,
+        value: {},
+        multiple: true,
         options: undefined
       } satisfies CheckboxElementData
     }

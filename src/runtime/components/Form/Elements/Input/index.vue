@@ -36,7 +36,7 @@ defineProps({
   <FormElementsInputImage v-else-if="isImageInput(data.type)" :data="data as unknown as ImageInputElementData" :edit="edit" :disabled="disabled"/>
   <FormElementsInputFile v-else-if="isFileInput(data.type)" :data="data  as unknown as FileInputElementData" :edit="edit" :disabled="disabled"/>
   <FormElementsInputSelect v-else-if="isSelect(data.type)" :data="data as unknown as SelectElementData" :edit="edit" :disabled="disabled"/>
-  <div v-else class="flex flex-col m-auto">
+  <div v-else>
     <label for="label">
       <input :disabled="!edit" autocomplete="off" :type="data.inputType" id="label" class="label" :style="{marginBottom: (data?.description?.length! > 0 || edit) ? '0rem' : '0.5rem'}"
              v-model="data.label" placeholder="Add a label"/>

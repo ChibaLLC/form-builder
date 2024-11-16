@@ -37,8 +37,8 @@ function addOption(event: any) {
   if (!value) return console.warn("No value provided")
   options.value.push({label: value, value: value})
 
-  if (!props.data.options) props.data.options = []
-  props.data.options.push({label: value, value: value})
+  if (!props.data.options) props.data.options = [] as any
+  (props.data.options as unknown as Array<any>).push({ label: value, value: value })
   event.target.value = ''
 }
 
