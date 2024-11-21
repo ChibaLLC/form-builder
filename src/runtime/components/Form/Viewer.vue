@@ -75,6 +75,7 @@ function goBack() {
     currentStoreIndex.value -= 1
   } else {
     if (currentFormIndex.value === 0) return emits("back")
+    currentFormIndex.value -= 1
   }
 }
 
