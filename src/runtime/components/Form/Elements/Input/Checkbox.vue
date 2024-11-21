@@ -40,7 +40,8 @@ function addOption(event: any) {
 }
 
 function removeOption(value: string) {
-  options.value = options.value!.filter(option => option.value !== value)
+  options.value = options.value!.filter(option => option.value !== value);
+  props.data.options = options.value
 }
 
 const Option = defineComponent({
