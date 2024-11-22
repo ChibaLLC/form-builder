@@ -1,5 +1,5 @@
 <script setup lang="ts">
-async function saveForm(data: FormData) {
+async function saveForm(data: any) {
   localStorage.setItem('formData', JSON.stringify(data))
   await navigateTo("/viewer")
 }

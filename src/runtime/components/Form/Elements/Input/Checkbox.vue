@@ -24,24 +24,24 @@ parseElementOptions(props.data.options).then(_options => {
   options.value = _options
 })
 
-const multiple = ref(true)
+const multiple = ref(props.data.multiple ?? true)
 watch(multiple, () => {
   props.data.multiple = multiple.value
 }, { immediate: true })
 
-function addOption(event: any) {
-  const value = event.target.value
+function addOption(event: Event) {
+  const value = (event.target as HTMLInputElement)?.value
   if (!value) return console.warn("No value provided")
   options.value.push({ label: value, value: value })
 
-  if (!props.data.options) props.data.options = [] as any
-  (props.data.options as unknown as Array<any>).push({ label: value, value: value })
-  event.target.value = ''
+  if (!props.data.options) props.data.options = [] as any[];
+  (props.data.options as Array<any>).push({ label: value, value: value });
+  (event.target as HTMLInputElement).value = ''
 }
 
 function removeOption(value: string) {
   options.value = options.value!.filter(option => option.value !== value);
-  props.data.options = options.value
+  props.data.options = (props.data.options as Array<any>).filter(option => option.value !== value)
 }
 
 const Option = defineComponent({
