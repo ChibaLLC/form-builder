@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import {h, render, ref, type PropType, type Ref, resolveComponent, onMounted, computed} from "vue";
-import {Field} from '../../../utils/constants'
+import { h, render, ref, type PropType, type Ref, resolveComponent, onMounted, computed } from "vue";
+import { Field } from '../../../utils/constants'
 import type {
   ButtonElementData,
   CheckboxElementData,
   FileInputElementData,
-  Form,
+  Page,
   FormElementData,
   ImageInputElementData,
+  Input,
   InputElementData, RadioElementData, RichTextElementData, SelectElementData, StaticElementData, TextareaElementData
 } from "../../../types";
 import {
@@ -33,7 +34,7 @@ const latestEnter = ref<HTMLElement | null>(null)
 
 const props = defineProps({
   draggedElement: {
-    type: Object as PropType<Ref<keyof typeof Field | undefined>>,
+    type: Object as PropType<Ref<Input | undefined>>,
     required: false
   },
   index: {
@@ -45,7 +46,7 @@ const props = defineProps({
     default: false
   },
   starter: {
-    type: Array as PropType<Form>,
+    type: Array as PropType<Page>,
     default: []
   }
 })
@@ -67,7 +68,7 @@ const _edit = computed({
 })
 
 class Elements {
-  private _elements: Array<FormElementData & { index: number }> = []
+  private _elements: Array<FormElementData> = []
   private renderedElements: Array<number> = []
   private target: HTMLElement
   private _onAdd = {
@@ -80,118 +81,114 @@ class Elements {
     this.target = target
   }
 
-  static inferLabel(field: Field){
-    switch (field){
-      case Field.EMAIL:
-        return "Email"
+  private initialiseElementData(type: Input) {
+    const index = this._elements.length;
+    switch (true) {
+      case isInput({ type }):
+        return {
+          inputType: type,
+          type: type,
+          label: (function (field: Field) {
+            switch (field) {
+              case Field.EMAIL:
+                return "Email"
+            }
+            return ''
+          }(type)),
+          placeholder: '',
+          value: '',
+          index
+        } satisfies InputElementData;
+
+      case isImageInput({ type }):
+        return {
+          type: Field.IMAGE,
+          inputType: Field.IMAGE,
+          label: '',
+          accept: undefined,
+          value: undefined,
+          index
+        } satisfies ImageInputElementData;
+      case isFileInput({ type }):
+        return {
+          type: Field.FILE,
+          inputType: Field.FILE,
+          label: '',
+          index
+        } satisfies FileInputElementData;
+
+      case isCheckbox({ type }):
+        return {
+          type: Field.CHECKBOX,
+          inputType: Field.CHECKBOX,
+          label: '',
+          multiple: true,
+          index
+        } satisfies CheckboxElementData;
+
+      case isButton({ type }):
+        return {
+          type: Field.BUTTON as any,
+          inputType: 'submit',
+          label: '',
+          index
+        } satisfies ButtonElementData;
+
+      case isRadio({ type }):
+        return {
+          type: Field.RADIO,
+          inputType: Field.RADIO,
+          label: '',
+          value: false,
+          options: undefined,
+          index
+        } satisfies RadioElementData;
+        break;
+
+      case isStatic({ type }):
+        return {
+          type: Field.STATIC,
+          label: '',
+          value: '',
+          inputType: Field.STATIC,
+          index
+        } satisfies StaticElementData;
+
+      case isTextarea({ type }):
+        return {
+          type: Field.TEXTAREA,
+          inputType: Field.TEXTAREA,
+          label: '',
+          placeholder: '',
+          value: '',
+          index
+        } satisfies TextareaElementData;
+
+      case isSelect({ type }):
+        return {
+          label: '',
+          type: Field.SELECT as any,
+          inputType: Field.SELECT as any,
+          index
+        } satisfies SelectElementData;
+
+      case isRichText({ type }):
+        return {
+          type: Field.RICHTEXT,
+          label: '',
+          value: '',
+          inputType: Field.RICHTEXT,
+          index
+        } satisfies RichTextElementData;
+
+      default:
+        alert("Unsupported Field Type")
+        throw new Error("Unsupported Field Type")
     }
-    return ''
   }
 
-  private initialiseElementData(field: keyof typeof Field) {
-    let component = {} as any
-    if (isInput(field)) {
-      component = {
-        inputType: field,
-        type: field,
-        label: Elements.inferLabel(field),
-        placeholder: '',
-        value: '',
-      } satisfies InputElementData
-    }
 
-    if (isImageInput(field)) {
-      component = {
-        type: Field.IMAGE as any,
-        inputType: Field.IMAGE as any,
-        label: '',
-        accept: undefined,
-        value: undefined,
-      } satisfies ImageInputElementData
-    }
-
-    if (isFileInput(field)) {
-      component = {
-        type: Field.FILE as any,
-        inputType: Field.FILE as any,
-        label: '',
-        accept: undefined,
-        value: undefined,
-      } satisfies FileInputElementData
-    }
-
-    if (isCheckbox(field)) {
-      component = {
-        type: Field.CHECKBOX as any,
-        inputType: Field.CHECKBOX as any,
-        label: '',
-        value: {},
-        multiple: true,
-        options: undefined
-      } satisfies CheckboxElementData
-    }
-
-    if (isButton(field)) {
-      component = {
-        type: Field.BUTTON as any,
-        inputType: 'submit' as any,
-        label: '',
-        onClick: undefined
-      } satisfies ButtonElementData
-    }
-
-    if (isRadio(field)) {
-      component = {
-        type: Field.RADIO as any,
-        inputType: Field.RADIO as any,
-        label: '',
-        value: false,
-        options: undefined
-      } satisfies RadioElementData
-    }
-
-    if (isStatic(field)) {
-      component = {
-        type: Field.STATIC,
-        label: '',
-        value: '',
-        inputType: Field.STATIC
-      } satisfies StaticElementData
-    }
-
-    if (isTextarea(field)) {
-      component = {
-        type: Field.TEXTAREA as any,
-        inputType: Field.TEXTAREA as any,
-        label: '',
-        placeholder: '',
-        value: ''
-      } satisfies TextareaElementData
-    }
-
-    if (isSelect(field)) {
-      component = {
-        label: '',
-        type: Field.SELECT as any,
-        inputType: Field.SELECT as any,
-        options: undefined
-      } satisfies SelectElementData
-    }
-
-    if (isRichText(field)) {
-      component = {
-        type: Field.RICHTEXT,
-        label: "",
-        value: "",
-        inputType: Field.RICHTEXT,
-      } satisfies RichTextElementData
-    }
-
-    component.index = this._elements.length
-    return component as FormElementData & { index: number }
-  }
-
-  add(fieldName: keyof typeof Field) {
+  add(fieldName: Input) {
     this._elements.push(this.initialiseElementData(fieldName))
     this.emit('add', this._elements[this._elements.length - 1])
     return this;
@@ -205,7 +202,7 @@ class Elements {
     if (!data || data.length === 0) return this;
     data.map(el => {
       const index = el.index || this._elements.length
-      this._elements.push({...el, index })
+      this._elements.push({ ...el, index })
       this.emit('add', this._elements[index])
     })
     this.render()
@@ -284,7 +281,7 @@ class Elements {
     const element = this._elements[id]
     this._elements.splice(id, 1)
     this._elements.splice(newIndex, 0, element)
-    this._elements = this._elements.map((el, index) => ({...el, index}))
+    this._elements = this._elements.map((el, index) => ({ ...el, index }))
     this.renderedElements = []
     this.target.innerHTML = ''
     this.render()
@@ -301,7 +298,7 @@ class Elements {
 }
 
 function repositionElement(elements: Elements) {
-  if (!latestEnter.value) return console.log("No element to reposition")
+  if (!latestEnter.value) return console.warn("No element to reposition")
   if (latestEnter.value === movingElement.value) return
 
   const movingIndex = Number(movingElement.value?.dataset.identity)
@@ -375,7 +372,7 @@ onMounted(() => {
       </Transition>
       <div class="icon delete">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-             @click="emits('deleteCanvas', index)">
+          @click="emits('deleteCanvas', index)">
           <path
             d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM18 8H6V20H18V8ZM13.4142 13.9997L15.182 15.7675L13.7678 17.1817L12 15.4139L10.2322 17.1817L8.81802 15.7675L10.5858 13.9997L8.81802 12.232L10.2322 10.8178L12 12.5855L13.7678 10.8178L15.182 12.232L13.4142 13.9997ZM9 4V6H15V4H9Z">
           </path>
@@ -419,7 +416,7 @@ a {
   border: 2px dashed #333;
 }
 
-#dropzone > div {
+#dropzone>div {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;

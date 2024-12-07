@@ -13,11 +13,8 @@ export type Input =
   | Field.FILE
   | Field.IMAGE
 
-export type ElementOptions = Array<{ value: string, label: string }> | URL | Promise<Array<{
-  value: string,
-  label: string
-}>> | (() => Promise<Array<{ value: string, label: string }>>) | `http${string}`
 
+export type ElementOptions = Array<{ value: string, label: string }>
 export interface _ElementData {
   type: any,
   label: string,
@@ -26,18 +23,17 @@ export interface _ElementData {
   onClick?: () => void,
   options?: any,
   value?: any,
-  index?: number,
+  index: number,
   placeholder?: string,
   rules?: Array<'required' | `max:${number}` | `min:${number}` | `same:${string}`>,
   description?: string,
 }
 
-export type StaticElementData = {
+export interface StaticElementData extends _ElementData {
   type: Field.STATIC,
   label: string
   inputType: Field.STATIC
-  value?: string,
-  index?: number
+  value?: string
 }
 
 export interface SelectElementData  extends _ElementData {
@@ -46,7 +42,7 @@ export interface SelectElementData  extends _ElementData {
   value?: string,
   label: string
   autocomplete?: boolean,
-  options: ElementOptions | undefined
+  options?: ElementOptions
 }
 
 export interface InputElementData  extends _ElementData {
@@ -60,24 +56,24 @@ export interface ImageInputElementData  extends _ElementData {
   type: Field.IMAGE,
   inputType: Field.IMAGE,
   label: string,
-  accept: ImageTypeEnum | undefined | string,
-  value: File | string | undefined
+  accept?: ImageTypeEnum | string,
+  value?: File | undefined
 }
 
 export interface FileInputElementData extends _ElementData {
   type: Field.FILE,
   inputType: Field.FILE,
   label: string,
-  accept: string | undefined,
-  value: File | undefined
+  accept?: string,
+  value?: File
 }
 
 export interface CheckboxElementData extends _ElementData { 
   type: Field.CHECKBOX,
-  value: Record<string, string>,
+  value?: Record<string, string>,
   inputType: Field.CHECKBOX,
   label: string,
-  options: ElementOptions | undefined,
+  options?: ElementOptions,
   multiple: boolean
 }
 
@@ -86,7 +82,7 @@ export interface RadioElementData  extends _ElementData {
   value: boolean,
   inputType: Field.RADIO,
   label: string,
-  options: ElementOptions | undefined
+  options?: ElementOptions
 }
 
 export interface TextareaElementData  extends _ElementData {
@@ -96,8 +92,7 @@ export interface TextareaElementData  extends _ElementData {
   value: string
 }
 
-export type RichTextElementData = {
-  index?: number,
+export interface RichTextElementData  extends  _ElementData {
   type: Field.RICHTEXT,
   label: string,
   value: string,
@@ -108,7 +103,7 @@ export interface ButtonElementData  extends _ElementData {
   type: Field.BUTTON,
   inputType: 'submit' | 'reset' | 'button',
   label: string,
-  onClick: (() => void) | undefined
+  onClick?: (() => void)
 }
 
 export type FormElementData =
@@ -135,13 +130,13 @@ export type Item = {
   images: Array<string>
 }
 
-export type Form = Array<FormElementData>
+export type Page = Array<FormElementData>
 export type Store = Array<Item>
-export type Forms = Record<number, Form>
+export type Pages = Record<number, Page>
 export type Stores = Record<number, Store>
 
-export type FormStoreData = {
-  forms: Forms,
+export type Form = {
+  pages: Pages,
   stores: Stores
 }
 

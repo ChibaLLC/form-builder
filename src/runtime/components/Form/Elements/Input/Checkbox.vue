@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { watch, defineComponent, ref, type PropType, h, type Ref, toRef, computed } from 'vue'
+import { watch, defineComponent, ref, type PropType, h, type Ref, toRef, computed, proxyRefs } from 'vue'
 import type { CheckboxElementData } from "../../../../types";
-import { parseElementOptions } from "../../../../local";
 
 const props = defineProps({
   data: {
@@ -19,29 +18,31 @@ const props = defineProps({
   }
 })
 
-const options = ref<{ label: string, value: string }[]>([])
-parseElementOptions(props.data.options).then(_options => {
-  options.value = _options
-})
+// const multiple = ref(props.data.multiple ?? true)
+// watch(multiple, () => {
+//   props.data.multiple = multiple.value
+// }, { immediate: true })
 
-const multiple = ref(props.data.multiple ?? true)
-watch(multiple, () => {
-  props.data.multiple = multiple.value
-}, { immediate: true })
+const multiple = computed({
+  get() {
+    return props.data.multiple ?? true
+  },
+  set(val) {
+    props.data.multiple = val
+  }
+})
 
 function addOption(event: Event) {
   const value = (event.target as HTMLInputElement)?.value
   if (!value) return console.warn("No value provided")
-  options.value.push({ label: value, value: value })
 
-  if (!props.data.options) props.data.options = [] as any[];
-  (props.data.options as Array<any>).push({ label: value, value: value });
+  if (!props.data.options) props.data.options = [];
+  props.data.options.push({ label: value, value: value });
   (event.target as HTMLInputElement).value = ''
 }
 
 function removeOption(value: string) {
-  options.value = options.value!.filter(option => option.value !== value);
-  props.data.options = (props.data.options as Array<any>).filter(option => option.value !== value)
+  props.data.options = props.data.options?.filter(option => option.value !== value)
 }
 
 const Option = defineComponent({
@@ -61,18 +62,19 @@ const Option = defineComponent({
   },
   setup(props) {
     const data = props.data.ref
-    const checked = computed(() => !!(data.value[props.option.label] && data.value[props.option.label] === props.option.value))
+    const checked = computed(() => !!(data.value?.[props.option.label] && data.value[props.option.label] === props.option.value))
     watch(() => props.multiple, () => {
       if (props.multiple || !checked.value) return
-      delete data.value[props.option.label]
+      if (data.value?.[props.option.label]) delete data.value?.[props.option.label]
     })
 
     function setValue() {
-      const existing = data.value[props.option.label]
+      const existing = data.value?.[props.option.label]
       if (existing) {
-        delete data.value[props.option.label];
+        delete data.value?.[props.option.label];
       } else {
         if (props.multiple) {
+          if (!data.value) data.value = {}
           data.value[props.option.label] = props.option.value;
         } else {
           data.value = { [props.option.label]: props.option.value };
@@ -82,6 +84,7 @@ const Option = defineComponent({
 
     function onInput(e: Event) {
       const target = e.target as HTMLInputElement
+      if (!data.value) data.value = {}
       if (target.checked) {
         if (props.multiple) {
           data.value[props.option.label] = props.option.value
@@ -94,10 +97,10 @@ const Option = defineComponent({
       }
     }
 
-    return { checked, setValue, onInput, props }
+    return { checked, setValue, onInput }
   },
   render() {
-    const label = h('label', { onClick: this.setValue, style: { cursor: "pointer", outline: "none" } }, this.props.option.label)
+    const label = h('label', { onClick: this.setValue, style: { cursor: "pointer", outline: "none" } }, this.$props.option.label)
     const input = h('input', { onChange: this.onInput, checked: this.checked, type: 'checkbox', style: { cursor: "pointer" } })
     return h('div', { class: 'option' }, [input, label])
   }
@@ -116,8 +119,8 @@ const dataRef = { ref: toRef(props.data.value) }
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
         v-model="data.description" placeholder="Add a description (optional)" />
     </label>
-    <div v-if="options.length" class="options">
-      <div v-for="option in options" class="option">
+    <div v-if="props.data.options?.length" class="options">
+      <div v-for="option in props.data.options" class="option">
         <Option :data="dataRef" :option="option" :multiple="multiple" />
         <span style="cursor: pointer; margin-left: auto; margin-right: 0.35rem;" v-if="edit">
           <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"

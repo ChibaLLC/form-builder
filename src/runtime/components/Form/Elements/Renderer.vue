@@ -28,9 +28,9 @@ const _edit = computed(() => {
       </svg>
     </div>
 
-    <FormElementsStatic v-if="isStatic(data.type)" :data="data as StaticElementData"/>
-    <FormElementsInput v-else-if="isInput(data.type)" :data="data as InputElementData" :edit="_edit" :disabled="disabled"/>
-    <FormElementsButton v-else-if="isButton(data.type)" :data="data as ButtonElementData" :edit="_edit" :disabled="disabled"/>
+    <FormElementsStatic v-if="isStatic(data)" :data="data as StaticElementData"/>
+    <FormElementsInput v-else-if="isInput(data)" :data="data as InputElementData" :edit="_edit" :disabled="disabled"/>
+    <FormElementsButton v-else-if="isButton(data)" :data="data as ButtonElementData" :edit="_edit" :disabled="disabled"/>
 
     <div v-else>
       <p class="text-red">Unknown element type {{ data.type }}</p>

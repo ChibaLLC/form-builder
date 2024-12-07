@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { type CSSProperties, render, type PropType, resolveComponent, ref, h, onMounted } from 'vue';
-import type { Forms, Form, FormStoreData, FormElementData, Item, Stores } from '../../../types'
+import type { Pages, Page, Form, FormElementData, Item, Stores } from '../../../types'
 import { Field } from '../../../utils/constants'
 
 const emits = defineEmits<{
-  submit: [FormStoreData]
+  submit: [Form]
 }>()
 
 const props = defineProps({
@@ -16,7 +16,7 @@ const props = defineProps({
     })
   },
   starter: {
-    type: Object as PropType<FormStoreData>,
+    type: Object as PropType<Form>,
     required: false,
     default: () => ({
       forms: {},
@@ -34,9 +34,9 @@ function setDragged(value: keyof typeof Field) {
 
 const canvasContainer = ref<HTMLElement | null>(null)
 const Canvas = resolveComponent('FormBuilderCanvas')
-const canvases = ref<Forms>({} as any)
+const canvases = ref<Pages>({} as any)
 
-function addCanvas(starter?: Form | undefined) {
+function addCanvas(starter?: Page | undefined) {
   if (!canvasContainer.value) return console.error('Canvas container not found')
   const div = document.createElement("div")
   div.dataset.id = String(Object.keys(canvases.value).length)
@@ -122,9 +122,9 @@ function deleteStore(id: number) {
 
 async function submit() {
   const form = {
-    forms: canvases.value,
+    pages: canvases.value,
     stores: stores.value
-  } satisfies FormStoreData
+  } satisfies Form
 
   emits('submit', form)
 }
@@ -135,9 +135,9 @@ onMounted(() => {
   }
 
   setTimeout(() => {
-    if (Object.values(props.starter.forms).some(form => form.length) || Object.values(props.starter.stores).some(store => store.length)) {
-      for (const form in props.starter.forms) {
-        addCanvas(props.starter.forms[form])
+    if (Object.values(props.starter.pages || {}).some(form => form.length) || Object.values(props.starter.stores).some(store => store.length)) {
+      for (const form in props.starter.pages) {
+        addCanvas(props.starter.pages[form])
       }
       for (const store in props.starter.stores) {
         addStore(props.starter.stores[store])

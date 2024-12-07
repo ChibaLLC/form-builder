@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type PropType } from 'vue'
-import type {ButtonElementData} from "../../../types";
+import type { ButtonElementData } from "../../../types";
 defineProps({
   data: {
     type: Object as PropType<ButtonElementData>,
@@ -15,9 +15,8 @@ defineProps({
 </script>
 
 <template>
-  <button @click="data.onClick || (() => console.log.bind(null, 'Button onClick not set'))" :type="data.inputType as any" v-if="!disabled">{{ data.text }}</button>
-</template>
+  <button @click="data.onClick || console.log('Button onClick not set')" :type="data.inputType"
+    v-if="!disabled">{{ data.label }}</button>
+</template> 
 
-<style>
-
-</style>
+<style></style>

@@ -29,13 +29,13 @@ defineProps({
 
 </script>
 <template>
-  <FormElementsInputTextarea v-if="isTextarea(data.type)" :data="data as unknown as TextareaElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputSelect v-else-if="isSelect(data.type)" :data="data as unknown as  SelectElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputRadio v-else-if="isRadio(data.type)" :data="data as unknown as RadioElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputCheckbox v-else-if="isCheckbox(data.type)" :data="data as unknown  as CheckboxElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputImage v-else-if="isImageInput(data.type)" :data="data as unknown as ImageInputElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputFile v-else-if="isFileInput(data.type)" :data="data  as unknown as FileInputElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputSelect v-else-if="isSelect(data.type)" :data="data as unknown as SelectElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputTextarea v-if="isTextarea(data)" :data="data as unknown as TextareaElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputSelect v-else-if="isSelect(data)" :data="data as unknown as  SelectElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputRadio v-else-if="isRadio(data)" :data="data as unknown as RadioElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputCheckbox v-else-if="isCheckbox(data)" :data="data as unknown  as CheckboxElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputImage v-else-if="isImageInput(data)" :data="data as unknown as ImageInputElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputFile v-else-if="isFileInput(data)" :data="data  as unknown as FileInputElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputSelect v-else-if="isSelect(data)" :data="data as unknown as SelectElementData" :edit="edit" :disabled="disabled"/>
   <div v-else>
     <label for="label">
       <input :disabled="!edit" autocomplete="off" :type="data.inputType" id="label" class="label" :style="{marginBottom: (data?.description?.length! > 0 || edit) ? '0rem' : '0.5rem'}"

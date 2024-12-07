@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import {ref, computed, type PropType, watch} from 'vue'
-import type {FormStoreData, FormElementData, Item, Forms, Stores} from '../../types'
+import type { Form, FormElementData, Item, Pages, Stores } from '../../types'
 
 const emits = defineEmits<{
-  submit: [FormStoreData],
+  submit: [Form],
   complete: [FormElementData[] | Item[]],
   price: [number],
   back: []
 }>()
 const props = defineProps({
   data: {
-    type: Object as PropType<FormStoreData>,
+    type: Object as PropType<Form>,
     default: {
-      forms: {} as Forms,
+      forms: {} as Pages,
       stores: {} as Stores
     },
     required: true
@@ -28,7 +28,7 @@ const props = defineProps({
     required: false
   }
 })
-const forms = ref<Forms>(props.data.forms)
+const forms = ref<Pages>(props.data.pages)
 const stores = ref<Stores>(props.data.stores)
 const currentFormIndex = ref(0)
 const currentStoreIndex = ref(0)
@@ -61,7 +61,7 @@ function storeSubmit(storeIndex: number, items: Item[]) {
 }
 
 function done() {
-  emits('submit', {forms: forms.value, stores: stores.value})
+  emits('submit', { pages: forms.value, stores: stores.value })
 }
 
 function rerender() {
