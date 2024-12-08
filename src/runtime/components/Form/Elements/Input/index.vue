@@ -1,41 +1,29 @@
 <script setup lang="ts">
-import {type PropType} from 'vue'
+import {type PropType, type Ref, inject} from 'vue'
 import {isTextarea, isSelect, isRadio, isCheckbox, isImageInput, isFileInput} from "../../../../utils/functions";
+import { disabledKey, editKey } from '../../_utils';
 import type {
   InputElementData,
-  TextareaElementData,
-  SelectElementData,
-  ImageInputElementData,
-  FileInputElementData,
-  CheckboxElementData,
-  RadioElementData
 } from "../../../../types";
 
 defineProps({
   data: {
     type: Object as PropType<InputElementData>,
     required: true
-  },
-  edit: {
-    type: Boolean as PropType<boolean>,
-    default: true
-  },
-  disabled: {
-    type: Boolean as PropType<boolean>,
-    default: false,
-    required: false
   }
 })
 
+const disabled = inject<Ref<boolean>>(disabledKey)
+const edit = inject<Ref<boolean>>(editKey)
 </script>
 <template>
-  <FormElementsInputTextarea v-if="isTextarea(data)" :data="data as unknown as TextareaElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputSelect v-else-if="isSelect(data)" :data="data as unknown as  SelectElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputRadio v-else-if="isRadio(data)" :data="data as unknown as RadioElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputCheckbox v-else-if="isCheckbox(data)" :data="data as unknown  as CheckboxElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputImage v-else-if="isImageInput(data)" :data="data as unknown as ImageInputElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputFile v-else-if="isFileInput(data)" :data="data  as unknown as FileInputElementData" :edit="edit" :disabled="disabled"/>
-  <FormElementsInputSelect v-else-if="isSelect(data)" :data="data as unknown as SelectElementData" :edit="edit" :disabled="disabled"/>
+  <FormElementsInputTextarea v-if="isTextarea(data)" :data="data" />
+  <FormElementsInputSelect v-else-if="isSelect(data)" :data="data" />
+  <FormElementsInputRadio v-else-if="isRadio(data)" :data="data" />
+  <FormElementsInputCheckbox v-else-if="isCheckbox(data)" :data="data" />
+  <FormElementsInputImage v-else-if="isImageInput(data)" :data="data" />
+  <FormElementsInputFile v-else-if="isFileInput(data)" :data="data" />
+  <FormElementsInputSelect v-else-if="isSelect(data)" :data="data" />
   <div v-else>
     <label for="label">
       <input :disabled="!edit" autocomplete="off" :type="data.inputType" id="label" class="label" :style="{marginBottom: (data?.description?.length! > 0 || edit) ? '0rem' : '0.5rem'}"

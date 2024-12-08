@@ -1,20 +1,12 @@
 <script setup lang="ts">
-import { type PropType } from 'vue'
+import { type PropType, type Ref, inject } from 'vue'
 import type { SelectElementData } from "../../../../types";
+import { disabledKey, editKey } from '../../_utils';
 
 const props = defineProps({
-  edit: {
-    type: Boolean,
-    required: true
-  },
   data: {
     type: Object as PropType<SelectElementData>,
     required: true
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-    required: false
   }
 })
 
@@ -41,6 +33,8 @@ function removeOption(value: string) {
   props.data.options = props.data.options?.filter(option => option.value !== value)
 }
 
+const edit = inject<Ref<boolean>>(editKey)
+const disabled = inject<Ref<boolean>>(disabledKey)
 </script>
 <template>
   <div class="select-container">

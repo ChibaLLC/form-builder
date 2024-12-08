@@ -1,8 +1,7 @@
-import {defineNuxtModule, createResolver, addComponentsDir, addImportsDir} from '@nuxt/kit'
+import { defineNuxtModule, createResolver, addComponentsDir, addImportsDir } from '@nuxt/kit'
 
 // Module options TypeScript interface definition
-export interface ModuleOptions {
-}
+export interface ModuleOptions { }
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
@@ -17,6 +16,6 @@ export default defineNuxtModule<ModuleOptions>({
     })
     addComponentsDir({
       path: resolver.resolve('./runtime/components')
-    }).then()
+    })
   },
 })

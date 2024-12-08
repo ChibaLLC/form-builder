@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { type PropType } from 'vue'
+import { provide, ref, type Ref, type PropType } from 'vue'
 import type { FormElementData } from '../../types'
+import { editKey, formDataKey } from './_utils';
 
-defineProps({
+const props = defineProps({
   data: {
     type: Object as PropType<FormElementData[]>,
     required: true
@@ -18,12 +19,15 @@ const emits = defineEmits<{
   submit: []
   back: []
 }>()
+
+const edit = ref(false);
+provide<Ref<boolean>>(editKey, edit)
 </script>
 <template>
   <Title>Form</Title>
   <div class="form-container">
     <form class="form-renderer" @submit.prevent="emits('submit')">
-      <FormElementsRenderer v-for="element in data" :key="element.index!" :data="element" :edit="false" :disabled="disabled"/>
+      <FormElementsRenderer v-for="element in data" :key="element.index" :data="element" :disabled="disabled" />
       <div class="form-footer" v-if="!disabled">
         <button type="button" @click="emits('back')" class="form-back-button">Back</button>
         <button type="submit" class="form-submit-button">
@@ -34,7 +38,7 @@ const emits = defineEmits<{
   </div>
 </template>
 <style scoped>
-.form-container{
+.form-container {
   width: 100%;
   margin: auto;
   max-width: 800px;
@@ -42,14 +46,14 @@ const emits = defineEmits<{
   transition: all 0.25s;
 }
 
-.form-renderer{
+.form-renderer {
   background-color: #fff;
   height: fit-content;
   border-radius: 0.5rem;
   position: relative;
 }
 
-.form-footer{
+.form-footer {
   padding: 0 1rem;
   max-width: 800px;
   display: flex;
@@ -57,7 +61,7 @@ const emits = defineEmits<{
   margin: auto;
 }
 
-.form-submit-button{
+.form-submit-button {
   padding: 0.5rem 1rem;
   background-color: #047857;
   color: #fff;
@@ -67,11 +71,11 @@ const emits = defineEmits<{
   cursor: pointer;
 }
 
-.form-submit-button:hover{
+.form-submit-button:hover {
   background-color: #065f4c;
 }
 
-.form-back-button{
+.form-back-button {
   padding: 0.5rem 1rem;
   background-color: #dfdfdf;
   color: #4e4e4e;
@@ -81,7 +85,7 @@ const emits = defineEmits<{
   cursor: pointer;
 }
 
-.form-back-button:hover{
+.form-back-button:hover {
   background-color: #e5e5e5;
 }
 </style>

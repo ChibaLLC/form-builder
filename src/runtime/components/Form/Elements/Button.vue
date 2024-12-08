@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import { type PropType } from 'vue'
+import { type PropType, inject, type Ref } from 'vue'
 import type { ButtonElementData } from "../../../types";
+import { disabledKey } from '../_utils';
 defineProps({
   data: {
     type: Object as PropType<ButtonElementData>,
     required: true
-  },
-  disabled: {
-    type: Boolean,
-    required: false,
-    default: false
   }
 })
+
+const disabled = inject<Ref<boolean>>(disabledKey)
 </script>
 
 <template>

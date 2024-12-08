@@ -1,22 +1,17 @@
 <script setup lang="ts">
-import { type PropType } from 'vue'
+import { type PropType, type Ref, inject } from 'vue'
 import type {TextareaElementData} from "../../../../types";
+import { editKey, disabledKey } from '../../_utils';
 
 defineProps({
     data: {
         type: Object as PropType<TextareaElementData>,
         required: true
-    },
-    edit: {
-        type: Object as PropType<boolean>,
-        default: true
-    },
-    disabled: {
-        type: Object as PropType<boolean>,
-        default: false,
-        required: false
     }
 })
+
+const edit = inject<Ref<boolean>>(editKey)
+const disabled = inject<Ref<boolean>>(disabledKey)
 </script>
 
 <template>

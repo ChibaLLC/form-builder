@@ -1,21 +1,13 @@
 <script setup lang="ts">
-import { type PropType } from 'vue'
+import { type PropType, inject, type Ref } from 'vue'
 import type {ImageInputElementData} from "../../../../types";
 import {ImageTypeEnum} from "../../../../utils/constants";
+import { editKey, disabledKey } from '../../_utils';
 
 const props = defineProps({
   data: {
     type: Object as PropType<ImageInputElementData>,
     required: true
-  },
-  edit: {
-    type: Boolean,
-    default: true
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-    required: false
   }
 })
 
@@ -35,6 +27,9 @@ function onChange(event: any) {
   if (files.length === 0) return console.warn("No valid files provided")
   props.data.value = files
 }
+
+const edit = inject<Ref<boolean>>(editKey)
+const disabled = inject<Ref<boolean>>(disabledKey)
 </script>
 
 <template>

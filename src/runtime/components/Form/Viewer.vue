@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, computed, type PropType, watch} from 'vue'
+import { ref, type PropType, watch } from 'vue'
 import type { Form, FormElementData, Item, Pages, Stores } from '../../types'
 
 const emits = defineEmits<{
@@ -28,20 +28,18 @@ const props = defineProps({
     required: false
   }
 })
-const forms = ref<Pages>(props.data.pages)
-const stores = ref<Stores>(props.data.stores)
+const pages = Object.entries(props.data.pages || {})
+const stores = Object.entries(props.data.stores || {})
+const flowDirection = ref('forward')
 const currentFormIndex = ref(0)
 const currentStoreIndex = ref(0)
-const formLength = computed(() => Object.entries(forms.value || {}).length)
-const storeLength = computed(() => Object.entries(stores.value || {}).length)
-const flowDirection = ref('forward')
 
 function isDoneForms(currentIndex: number) {
-  return currentIndex >= formLength.value - 1
+  return currentIndex >= pages.length - 1
 }
 
 function isDoneStores(currentIndex: number) {
-  return currentIndex >= storeLength.value - 1
+  return currentIndex >= stores.length - 1
 }
 
 function formSubmit(formIndex: number, fields: FormElementData[]) {
@@ -49,7 +47,7 @@ function formSubmit(formIndex: number, fields: FormElementData[]) {
 
   emits('complete', fields)
   flowDirection.value = 'forward'
-  if (isDoneForms(formIndex) && storeLength.value === 0) done()
+  if (isDoneForms(formIndex) && stores.length === 0) done()
 }
 
 function storeSubmit(storeIndex: number, items: Item[]) {
@@ -61,7 +59,7 @@ function storeSubmit(storeIndex: number, items: Item[]) {
 }
 
 function done() {
-  emits('submit', { pages: forms.value, stores: stores.value })
+  emits('submit', { pages: Object.fromEntries(pages), stores: Object.fromEntries(stores) })
 }
 
 function rerender() {
@@ -84,24 +82,23 @@ watch(() => props.reRender, rerender)
 <template>
   <div class="content__holder">
     <TransitionGroup tag="div" :name="flowDirection === 'forward' ? 'slide_out' : 'slide_in'">
-      <div v-for="form in Object.entries(forms || {})" v-if="currentFormIndex < formLength">
-        <FormRenderer :data="form[1]" @submit="formSubmit(+form[0], form[1])" v-if="currentFormIndex === +form[0]"
-                      @back="goBack"/>
+      <div v-for="[index, page] of pages" v-if="currentFormIndex < pages.length">
+        <FormRenderer v-if="currentFormIndex === +index" :data="page" @submit="formSubmit(+index, page)"
+          @back="goBack" />
       </div>
-      <div v-for="store of Object.entries(stores || {})"
-           v-if="storeLength > 0 && currentFormIndex >= formLength && currentStoreIndex < storeLength">
-        <StoreRenderer :data="store[1]" @submit="storeSubmit(+store[0], store[1])" @price="emits('price', $event)"
-                       @back="goBack"
-                       v-if="currentStoreIndex === +store[0]"/>
+      <div v-for="[index, store] of stores"
+        v-if="stores.length && currentFormIndex >= pages.length && currentStoreIndex < stores.length">
+        <StoreRenderer v-if="currentStoreIndex === +index" :data="store" @submit="storeSubmit(+index, store)"
+          @price="emits('price', $event)" @back="goBack" />
       </div>
-      <div class="processing" v-if="currentFormIndex >= formLength && currentStoreIndex >= storeLength">
+      <div class="processing" v-if="currentFormIndex >= pages.length && currentStoreIndex >= stores.length">
         <div class="loading-spinner" v-if="showSpinner"></div>
         <div v-else>
-          <div v-for="form in Object.entries(forms || {})">
-            <FormRenderer :data="form[1]" :disabled="true"/>
+          <div v-for="[_, page] in pages">
+            <FormRenderer :data="page" :disabled="true" />
           </div>
-          <div v-for="store of Object.entries(stores || {})">
-            <StoreRenderer :data="store[1]" :disabled="true" />
+          <div v-for="[_, store] of stores">
+            <StoreRenderer :data="store" :disabled="true" />
           </div>
         </div>
       </div>
@@ -117,7 +114,7 @@ watch(() => props.reRender, rerender)
   place-items: center;
 }
 
-.content__holder > div {
+.content__holder>div {
   position: relative;
   width: 100%;
   overflow: hidden;
@@ -137,6 +134,7 @@ watch(() => props.reRender, rerender)
   0% {
     transform: translate3d(-50%, -50%, 0) rotate(0deg);
   }
+
   100% {
     transform: translate3d(-50%, -50%, 0) rotate(360deg);
   }
@@ -166,7 +164,7 @@ watch(() => props.reRender, rerender)
 }
 
 
-.slide_out-enter-active{
+.slide_out-enter-active {
   width: 0;
   height: 0;
 }
@@ -180,7 +178,7 @@ watch(() => props.reRender, rerender)
   opacity: 0;
 }
 
-.slide_out-leave-active{
+.slide_out-leave-active {
   transition: opacity 0.3s;
   opacity: 0.5;
 }
@@ -191,7 +189,7 @@ watch(() => props.reRender, rerender)
   opacity: 0.5;
 }
 
-.slide_in-enter-active{
+.slide_in-enter-active {
   width: 0;
   height: 0;
 }
@@ -205,7 +203,7 @@ watch(() => props.reRender, rerender)
   opacity: 0;
 }
 
-.slide_in-leave-active{
+.slide_in-leave-active {
   transition: opacity 0.3s;
   opacity: 0.5;
 }

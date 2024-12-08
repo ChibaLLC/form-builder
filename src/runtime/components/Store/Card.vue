@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, type PropType, computed, type Ref } from 'vue'
+import { ref, onMounted, type PropType, computed, type Ref, inject } from 'vue'
 import type { Item } from '../../types'
+import { editKey } from '../Form/_utils';
 
 const liked = ref(false);
 let images: NodeListOf<HTMLImageElement> | null = null;
@@ -11,11 +12,6 @@ const props = defineProps({
   item: {
     type: Object as PropType<Item>,
     required: true
-  },
-  edit: {
-    type: Boolean as PropType<boolean | Ref<boolean>>,
-    default: false,
-    required: false
   }
 })
 const carted = computed({
@@ -29,32 +25,29 @@ const emits = defineEmits<{
   delete: [number]
 }>()
 
-const _edit = computed(() => {
-  if (typeof props.edit === 'boolean') return props.edit
-  return props.edit.value
-})
+const edit = inject<Ref<boolean>>(editKey)
 
 function like() {
-  if (_edit.value) return;
+  if (edit?.value) return;
   liked.value = true
   props.item.liked = true
 }
 
 function cart() {
-  if (_edit.value) return;
+  if (edit?.value) return;
   carted.value = true
   props.item.carted = true
   emits('cart')
 }
 
 function unlike() {
-  if (_edit.value) return;
+  if (edit?.value) return;
   liked.value = false
   props.item.liked = false
 }
 
 function uncart() {
-  if (_edit.value) return;
+  if (edit?.value) return;
   carted.value = false
   props.item.carted = false
   emits('uncart')
@@ -92,7 +85,7 @@ onMounted(() => {
 </script>
 <template>
   <div class="shop-card">
-    <div class="close-icon-container" v-if="_edit">
+    <div class="close-icon-container" v-if="edit">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" @click="emits('delete', item.index)"
         class="close-icon">
         <path fill-rule="evenodd" clip-rule="evenodd"

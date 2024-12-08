@@ -16,7 +16,7 @@ Lets you or your users build forms using a drag-and-drop interface.
 Install the module to your Nuxt application with one command:
 
 ```bash
-npx nuxi module add nuxt-form-builder
+npx nuxi module add @chiballc/nuxt-form-builder
 ```
 
 That's it! You can now use the Nuxt Form Builder in your Nuxt app ✨

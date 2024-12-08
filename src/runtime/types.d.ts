@@ -31,9 +31,10 @@ export interface _ElementData {
 
 export interface StaticElementData extends _ElementData {
   type: Field.STATIC,
-  label: string
+  label?: never
   inputType: Field.STATIC
-  value?: string
+  value?: never
+  text: string
 }
 
 export interface SelectElementData  extends _ElementData {

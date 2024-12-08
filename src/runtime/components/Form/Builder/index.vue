@@ -1,7 +1,27 @@
 <script setup lang="ts">
-import { type CSSProperties, render, type PropType, resolveComponent, ref, h, onMounted } from 'vue';
-import type { Pages, Page, Form, FormElementData, Item, Stores } from '../../../types'
-import { Field } from '../../../utils/constants'
+import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, reactive } from 'vue';
+import type { Pages, Form, Stores, Store, Page, Input } from '../../../types'
+import { disabledKey, draggedElementKey, editKey } from '../_utils';
+import { createFormPage } from './Page/_utils';
+import { createStorePage } from '../../Store/_utils';
+
+const Page = resolveComponent('FormBuilderPage')
+const form = shallowReactive<{ pages: Pages; stores: Stores }>({
+  pages: {},
+  stores: {}
+})
+
+
+const pages = shallowReactive<ReturnType<typeof createFormPage>[]>([])
+function addPage(starter?: Page) {
+  pages.push(createFormPage(Page, form.pages, starter))
+}
+
+const store = resolveComponent("Store")
+const stores = shallowReactive<ReturnType<typeof createStorePage>[]>([])
+function addStore(starter?: Store) {
+  stores.push(createStorePage(store, form.stores, starter))
+}
 
 const emits = defineEmits<{
   submit: [Form]
@@ -19,133 +39,45 @@ const props = defineProps({
     type: Object as PropType<Form>,
     required: false,
     default: () => ({
-      forms: {},
+      pages: {},
       stores: {}
     })
   }
 })
 
 
-const draggedElement = ref<keyof typeof Field | undefined>(undefined)
-const edit = ref(true)
-function setDragged(value: keyof typeof Field) {
+const draggedElement = ref<Input | undefined>(undefined)
+provide<Ref<boolean>>(editKey, ref(true))
+provide<Ref<boolean>>(disabledKey, ref(false))
+provide<Ref<Input | undefined>>(draggedElementKey, draggedElement)
+
+function setDragged(value: Input) {
   draggedElement.value = value
 }
 
-const canvasContainer = ref<HTMLElement | null>(null)
-const Canvas = resolveComponent('FormBuilderCanvas')
-const canvases = ref<Pages>({} as any)
-
-function addCanvas(starter?: Page | undefined) {
-  if (!canvasContainer.value) return console.error('Canvas container not found')
-  const div = document.createElement("div")
-  div.dataset.id = String(Object.keys(canvases.value).length)
-  const node = h(Canvas, {
-    draggedElement: draggedElement,
-    index: Object.keys(canvases.value).length,
-    onDeleteCanvas: (index: number) => {
-      canvasContainer.value?.querySelector(`[data-id="${index}"]`)?.remove()
-      delete canvases.value[index]
-    },
-    onAddField: (index: number, field: FormElementData) => {
-      const canvas = canvases.value[index]
-      if (canvas) {
-        canvas.push(field)
-      } else {
-        canvases.value[index] = [field]
-      }
-    },
-    onDeleteField: (index: number, field: FormElementData) => {
-      const canvas = canvases.value[index]
-      if (canvas) {
-        canvases.value[index] = canvas.filter(el => el.index !== field.index)
-      } else {
-        console.warn("Canvas Index not found")
-      }
-    },
-    onUpdateField: (index: number, field: FormElementData) => {
-      const canvas = canvases.value[index]
-      if (canvas) {
-        canvases.value[index] = canvas.map(el => el.index === index ? field : el)
-      } else {
-        console.warn("Canvas Index not found")
-      }
-    },
-    edit: edit,
-    starter: starter
-  })
-  render(node, div)
-  canvasContainer.value.appendChild(div)
-}
-
-const Store = resolveComponent("Store")
-const stores = ref<Stores>({})
-function addStore(_starter?: Item[] | undefined) {
-  if (!canvasContainer.value) return console.warn("Canvas not found")
-
-  const div = document.createElement("div")
-  const storeId = Object.keys(stores.value || {})?.length
-  div.dataset.id = storeId.toString()
-  const node = h(Store, {
-    onItem: addStoreItem,
-    onDeleteItem: deleteStoreItem,
-    onDeleteStore: deleteStore,
-    storeIndex: storeId,
-    edit: edit,
-    starter: _starter
-  })
-  render(node, div)
-  canvasContainer.value.appendChild(div)
-}
-
-function addStoreItem(item: Item) {
-  const store = stores.value[item.store]
-  if (store) {
-    stores.value[item.store].push(item)
-  } else {
-    stores.value[item.store] = [item]
-  }
-}
-
-function deleteStoreItem(item: Item) {
-  const store = stores.value[item.store]
-  if (store) {
-    stores.value[item.store] = store.filter(el => el.index !== item.index)
-  } else {
-    console.warn("Store not found")
-  }
-}
-
-function deleteStore(id: number) {
-  delete stores.value[id]
-}
-
 async function submit() {
-  const form = {
-    pages: canvases.value,
-    stores: stores.value
-  } satisfies Form
-
   emits('submit', form)
 }
+
+const hasPages = Object.values(props.starter.pages || {}).some(form => form.length)
+const hasStores = Object.values(props.starter.stores).some(store => store.length)
+setTimeout(() => {
+  if (hasPages || hasStores) {
+    for (const form in props.starter.pages) {
+      addPage(props.starter.pages[form])
+    }
+    for (const store in props.starter.stores) {
+      addStore(props.starter.stores[store])
+    }
+  } else {
+    addPage()
+  }
+})
 
 onMounted(() => {
   if (window.innerWidth < 768) {
     alert("This page is not optimized for mobile devices. Please use a desktop or a tablet to build a form.")
   }
-
-  setTimeout(() => {
-    if (Object.values(props.starter.pages || {}).some(form => form.length) || Object.values(props.starter.stores).some(store => store.length)) {
-      for (const form in props.starter.pages) {
-        addCanvas(props.starter.pages[form])
-      }
-      for (const store in props.starter.stores) {
-        addStore(props.starter.stores[store])
-      }
-    } else {
-      addCanvas()
-    }
-  })
 })
 </script>
 <template>
@@ -154,11 +86,18 @@ onMounted(() => {
       <FormBuilderPanel @dragstart="setDragged" :styles="styles" />
     </div>
     <div class="builder">
-      <div ref="canvasContainer" class="canvas-container"></div>
+      <div class="canvas-container">
+        <div v-for="page of pages">
+          <component :is="page" />
+        </div>
+        <div v-for="store of stores">
+          <component :is="store" />
+        </div>
+      </div>
       <div class="canvas-icons-container">
         <div class="canvas-icons">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" title="Add Page Break"
-            @click="addCanvas()" class="canvas-icon">
+            @click="addPage()" class="canvas-icon">
             <path
               d="M11 11V7H13V11H17V13H13V17H11V13H7V11H11ZM12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20Z">
             </path>

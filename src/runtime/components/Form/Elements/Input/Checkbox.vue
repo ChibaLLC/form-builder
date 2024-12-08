@@ -1,20 +1,12 @@
 <script setup lang="ts">
-import { watch, defineComponent, ref, type PropType, h, type Ref, toRef, computed, proxyRefs } from 'vue'
+import { watch, defineComponent, inject, type PropType, h, type Ref, toRef, computed } from 'vue'
 import type { CheckboxElementData } from "../../../../types";
+import { disabledKey, editKey } from '../../_utils';
 
 const props = defineProps({
   data: {
     type: Object as PropType<CheckboxElementData>,
     required: true,
-  },
-  edit: {
-    type: Boolean,
-    default: true
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-    required: false
   }
 })
 
@@ -107,6 +99,8 @@ const Option = defineComponent({
 })
 
 const dataRef = { ref: toRef(props.data.value) }
+const edit = inject<Ref<boolean>>(editKey)
+const disabled = inject<Ref<boolean>>(disabledKey)
 </script>
 
 <template>

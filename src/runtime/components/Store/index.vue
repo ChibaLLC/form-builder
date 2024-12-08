@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, type PropType, type Ref, computed } from 'vue'
+import { ref, type PropType, type Ref, computed, inject } from 'vue'
 import type { Item } from '../../types'
+import { editKey } from '../Form/_utils';
 
 const emits = defineEmits<{
   item: [item: Item],
@@ -13,19 +14,10 @@ const props = defineProps({
     type: Number,
     required: true
   },
-  edit: {
-    type: Object as PropType<boolean | Ref<boolean>>,
-    default: false
-  },
   starter: {
     type: Array as PropType<Array<Item>>,
     default: []
   }
-})
-
-const _edit = computed(() => {
-  if (typeof props.edit === 'boolean') return props.edit
-  return props.edit.value
 })
 
 const shop = ref<HTMLElement | null>(null)
@@ -33,7 +25,7 @@ const item = ref<Item>({} as Item)
 const items = ref<Array<Item>>([])
 const modal = ref(null)
 const modalHidden = ref(true)
-
+const edit = inject<Ref<boolean>>(editKey)
 
 function addItemModal() {
   modalHidden.value = !modalHidden.value
@@ -111,10 +103,10 @@ if (props.starter?.length) {
         </svg>
       </div>
     </div>
-    <div class="shop-container" :class="{ 'bg-wheat': _edit }">
+    <div class="shop-container" :class="{ 'bg-wheat': edit }">
       <div class="items">
         <div v-for="item in items" class="item">
-          <StoreCard :item="item" @delete="emitDeleteItem" :edit="_edit" />
+          <StoreCard :item="item" @delete="emitDeleteItem" />
         </div>
       </div>
     </div>
