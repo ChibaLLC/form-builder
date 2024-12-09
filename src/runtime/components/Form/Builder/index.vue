@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, reactive } from 'vue';
+import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, watch } from 'vue';
 import type { Pages, Form, Stores, Store, Page, Input, FormElementData } from '../../../types'
-import { disabledKey, draggedElementKey, editKey, formElementDataListKey } from '../../../utils/symbols';
+import { disabledKey, draggedElementKey, editKey } from '../../../utils/symbols';
 import { createFormPage } from './Page/_utils';
 import { createStorePage } from '../../Store/_utils';
 
@@ -78,6 +78,8 @@ onMounted(() => {
     alert("This page is not optimized for mobile devices. Please use a desktop or a tablet to build a form.")
   }
 })
+
+const active = ref<FormElementData | undefined>(undefined)
 </script>
 <template>
   <div class="three" :style="styles">
@@ -87,7 +89,7 @@ onMounted(() => {
     <div class="builder">
       <div class="canvas-container">
         <div v-for="page of pages">
-          <component :is="page" />
+          <component :is="page" @active="active = $event" />
         </div>
         <div v-for="store of stores">
           <component :is="store" />
@@ -125,7 +127,7 @@ onMounted(() => {
       </div>
     </div>
     <div>
-      <FormBuilderProperties :styles="styles" />
+      <FormBuilderProperties :styles="styles" :data="active" />
     </div>
   </div>
 </template>

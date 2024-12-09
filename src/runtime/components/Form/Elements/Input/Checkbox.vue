@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defineComponent, inject, type PropType, h, type Ref, reactive, computed, watch } from 'vue'
 import type { CheckboxElementData } from "../../../../types";
-import { editKey, formElementDataKey } from '../../../../utils/symbols';
+import { disabledKey, editKey, formElementDataKey } from '../../../../utils/symbols';
 
 const data = inject<Ref<CheckboxElementData>>(formElementDataKey);
 if (data) {
@@ -25,6 +25,19 @@ function removeOption(value: string) {
   }
 }
 
+function deleteValues<T extends Object>(obj: T, key?: keyof T) {
+  if (!obj) return
+  if (!key) {
+    for (const key in obj) {
+      delete obj[key]
+    }
+  } else {
+    if (obj[key]) {
+      delete obj[key]
+    }
+  }
+}
+
 const Option = defineComponent({
   props: {
     option: {
@@ -35,6 +48,8 @@ const Option = defineComponent({
   setup(props) {
     const data = inject<Ref<CheckboxElementData>>(formElementDataKey);
     if (!data) return console.warn("No Element Data Found For Option")
+    const disabled = inject<Ref<boolean>>(disabledKey)
+
     const checked = computed({
       get() {
         const value = data.value.value?.[props.option.label]
@@ -43,16 +58,16 @@ const Option = defineComponent({
       set(val) {
         if (!data.value.value) data.value.value = {}
         if (val) {
-          if (data.value.multiple) {
-            data.value.value[props.option.label] = props.option.value
-          } else {
-            data.value.value = { [props.option.label]: props.option.value }
+          if (!data.value.multiple) {
+            deleteValues(data.value.value)
           }
+          data.value.value[props.option.label] = props.option.value
         } else {
-          const existing = data.value.value?.[props.option.label]
-          if (existing)
-            delete data.value.value![props.option.label];
-          if (!data.value.multiple) data.value.value = {}
+          if (data.value.multiple) {
+            deleteValues(data.value.value, props.option.label)
+          } else {
+            deleteValues(data.value.value)
+          }
         }
       }
     })
@@ -66,11 +81,11 @@ const Option = defineComponent({
       }
     }
 
-    return { checked, onInput }
+    return { checked, onInput, disabled }
   },
   render() {
-    const input = h('input', { onChange: this.onInput, checked: this.checked, type: 'checkbox', style: { cursor: "pointer" } })
-    const label = h('label', { onClick: () => {input.el!.click()}, style: { cursor: "pointer", outline: "none" } }, this.$props.option.label)
+    const input = h('input', { onChange: this.onInput, checked: this.checked, type: 'checkbox', style: { cursor: "pointer" }, disabled: this.disabled })
+    const label = h('label', { onClick: () => { input.el!.click() }, style: { cursor: "pointer", outline: "none" } }, this.$props.option.label)
     return h('div', { class: 'option' }, [input, label])
   }
 })
@@ -90,7 +105,7 @@ const edit = inject<Ref<boolean>>(editKey)
     </label>
     <div v-if="data.options?.length" class="options">
       <div v-for="option in data?.options" class="option">
-        <Option :option="option" :multiple="!!data.multiple" />
+        <Option :option="option" />
         <span style="cursor: pointer; margin-left: auto; margin-right: 0.35rem;" v-if="edit">
           <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
             @click="removeOption(option.value)">
@@ -111,7 +126,8 @@ const edit = inject<Ref<boolean>>(editKey)
       style="margin-top: 1rem; margin-left: 0.1rem; display: flex; gap: 0.25rem; align-items: center; width: fit-content;">
       <input type="checkbox" id="allow_multiple" v-model="data.multiple" style="cursor: pointer;" />
       <label for="allow_multiple" style="margin: 0;">
-        <small style="font-size: 14px; cursor: pointer;">Allow multiple selection</small>
+        <small style="font-size: 14px; cursor: pointer;" @click="data.multiple && deleteValues(data.value || {})">Allow
+          multiple selection</small>
       </label>
     </div>
   </div>

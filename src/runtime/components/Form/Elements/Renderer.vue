@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormElementData } from '../../../types'
 import { isStatic, isInput, isButton } from "../../../utils/functions";
-import { inject, type Ref, type PropType, provide, toRef } from 'vue';
+import { inject, type Ref, type PropType, provide, toRef, ref, onMounted } from 'vue';
 import { editKey, formElementDataKey } from '../../../utils/symbols';
 
 const props = defineProps({
@@ -11,14 +11,45 @@ const props = defineProps({
   }
 })
 const emit = defineEmits<{
-  delete: [number | string]
+  delete: [number | string],
+  focus: [boolean, FormElementData]
 }>()
 
 const edit = inject<Ref<boolean>>(editKey)
 provide<Ref<FormElementData>>(formElementDataKey, toRef(() => props.data))
+
+const onClick = (e: Event) => {
+  const dropzone = document.getElementById("dropzone");
+  if (!container.value?.contains(e.target as Node)) {
+    container.value?.classList.remove("element-active")
+    emit("focus", false, props.data)
+    dropzone?.removeEventListener("click", onClick)
+  }
+}
+
+const container = ref<HTMLElement | undefined>()
+function focusWithin() {
+  if (!container.value) return console.error("What the fuck?")
+  container.value.classList.add("element-active")
+  emit("focus", true, props.data)
+  const dropzone = document.getElementById("dropzone")
+  dropzone?.addEventListener("click", onClick);
+}
+
+onMounted(() => {
+  document?.addEventListener("keydown", (e) => {
+    const dropzone = document.getElementById("dropzone")
+    if (e.key === "Escape") {
+      container.value?.classList.remove("element-active")
+      emit("focus", false, props.data)
+      dropzone?.removeEventListener("click", onClick)
+    }
+  })
+})
 </script>
 <template>
-  <div class="renderer-container" :draggable="edit" :class="{ 'hover-active': edit }">
+  <div class="renderer-container" :draggable="edit" :class="{ 'hover-active': edit }" @click="focusWithin"
+    ref="container">
     <div class="close-icon-container" v-if="edit">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" @click="emit('delete', data.index)"
         class="close-icon">
@@ -68,6 +99,10 @@ a {
   background-color: #f2f2f2;
   cursor: grab;
   box-shadow: 0 0 0 1px #f0f0f0;
+}
+
+.element-active {
+  outline: 2px solid rgba(102, 51, 153, 0.25);
 }
 
 .close-icon-container {

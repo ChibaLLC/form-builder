@@ -4,15 +4,21 @@ import type { Item, Stores } from "../../types"
 
 export function createStorePage(Store: ReturnType<typeof resolveComponent>, stores: Stores, starter?: Item[] | undefined) {
     return defineComponent({
-        setup(){
+        setup() {
             const storeIndex = Object.keys(stores || {})?.length
-            return {storeIndex}
+            return { storeIndex }
         },
         render() {
             return h('div', h(Store, {
-                onItem: addStoreItem,
-                onDeleteItem: deleteStoreItem,
-                onDeleteStore: deleteStore,
+                onItem: (item: Item) => {
+                    addStoreItem(stores, item)
+                },
+                onDeleteItem: (item: Item) => {
+                    deleteStoreItem(stores, item)
+                },
+                onDeleteStore: (index: number) => {
+                    deleteStore(stores, index)
+                },
                 storeIndex: this.storeIndex,
                 starter: starter
             }))
@@ -20,24 +26,24 @@ export function createStorePage(Store: ReturnType<typeof resolveComponent>, stor
     })
 }
 
-function addStoreItem(stores: Ref<Stores>, item: Item) {
-    const store = stores.value[item.store]
+function addStoreItem(stores: Stores, item: Item) {
+    const store = stores[item.store]
     if (store) {
-        stores.value[item.store].push(item)
+        stores[item.store].push(item)
     } else {
-        stores.value[item.store] = [item]
+        stores[item.store] = [item]
     }
 }
 
-function deleteStoreItem(stores: Ref<Stores>, item: Item) {
-    const store = stores.value[item.store]
+function deleteStoreItem(stores: Stores, item: Item) {
+    const store = stores[item.store]
     if (store) {
-        stores.value[item.store] = store.filter(el => el.index !== item.index)
+        stores[item.store] = store.filter(el => el.index !== item.index)
     } else {
         console.warn("Store not found")
     }
 }
 
-function deleteStore(stores: Ref<Stores>, id: number) {
-    delete stores.value[id]
+function deleteStore(stores: Stores, id: number) {
+    delete stores[id]
 }

@@ -43,7 +43,7 @@ const disabled = inject<Ref<boolean>>(disabledKey)
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
         v-model="data.description" placeholder="Add a description (optional)" />
     </label>
-    <select v-if="!edit" v-model="data.options" class="select-element" ref="select" :disabled="disabled">
+    <select v-if="!edit" v-model="data.value" class="select-element" ref="select" :disabled="disabled">
       <option value="" disabled selected>Select your option</option>
       <option v-for="option in data?.options" :key="option.value" :value="option.value">{{ option.label }}</option>
     </select>

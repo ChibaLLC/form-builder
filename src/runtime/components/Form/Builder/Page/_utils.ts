@@ -1,4 +1,4 @@
-import { type Ref, h, inject, defineComponent, resolveComponent, createVNode, shallowReactive, type Component } from "vue"
+import { type Ref, h, inject, defineComponent, resolveComponent, createVNode, shallowReactive, type Component, shallowRef } from "vue"
 import type {
     Page,
     Pages,
@@ -65,6 +65,9 @@ export function createFormPage(Page: ResolvedComponent, canvases: Pages, starter
                         console.warn("Canvas Index not found")
                     }
                 },
+                onActive: (val: FormElementData) => {
+                    this.$emit("active", val)
+                },
                 starter: starter
             }))
         }
@@ -74,6 +77,7 @@ export function createFormPage(Page: ResolvedComponent, canvases: Pages, starter
 export class Elements {
     private elements: Array<FormElementData> = []
     public components = shallowReactive(new Map<number, Component>())
+    public active = shallowRef<FormElementData | undefined>(undefined);
     private _onAdd = {
         add: [] as Array<Function>,
         delete: [] as Array<Function>,
@@ -194,8 +198,9 @@ export class Elements {
 
 
     add(fieldName: Input) {
-        this.elements.push(this.initialiseElementData(fieldName))
-        this.emit('add', this.elements[this.elements.length - 1])
+        const data = this.initialiseElementData(fieldName)
+        this.elements.push(data)
+        this.emit('add', data)
         return this;
     }
 
@@ -229,13 +234,16 @@ export class Elements {
                 const onDragEnter = (_: Event) => {
                     this.latestEnter = data.index
                 }
-                return { FieldComponent: this.FieldComponent, delete: this.delete.bind(this), onDragStart, onDragEnter }
+                return { FieldComponent: this.FieldComponent, delete: this.delete.bind(this), onDragStart, onDragEnter, setActive: this.setActive.bind(this) }
             },
             render() {
                 return h('div', { onDragstart: this.onDragStart, onDragenter: this.onDragEnter }, h(this.FieldComponent, {
                     data: data,
                     onDelete: (idx: number) => {
                         this.delete(idx)
+                    },
+                    onFocus: (state: boolean, data: FormElementData) => {
+                        this.setActive(state, data)
                     }
                 }))
             }
@@ -263,11 +271,35 @@ export class Elements {
     }
 
     delete(index: number) {
-        this.emit('delete', this.elements[index])
+        const element = this.elements.find(el => el.index === index)
+        if(!element) return console.warn("Buda")
+        this.emit('delete', element)
         this.elements = this.elements.filter(el => el.index !== index)
         this.components.delete(index)
         this.render()
+        if(!this.elements.length) {
+            this.active.value = undefined
+        }
         return this;
+    }
+
+    setActive(state: boolean, data: FormElementData) {
+        if (!state && !this.active.value) return
+
+        if (this.active.value?.index === data.index) {
+            if (state === true) {
+                this.active.value = data
+            } else {
+                this.active.value = undefined
+            }
+
+            return
+        }
+
+        if (state) {
+            this.active.value = data
+            return
+        }
     }
 
 
