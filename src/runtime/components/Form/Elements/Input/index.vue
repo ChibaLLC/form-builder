@@ -28,7 +28,7 @@ const data = inject<Ref<InputElementData>>(formElementDataKey)
         <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
           v-model="data.description" placeholder="Add a description (optional)" />
       </label>
-      <input autocomplete="off" :type="data?.inputType" :accept="data?.accept" v-model="data.value" style="width: 100%"
+      <input autocomplete="off" :type="data?.inputType" :accept="data?.accept" v-model="data.value" style="width: 100%" :required="!!data.rules?.find(r => r === 'required')"
         :disabled="disabled" />
     </div>
   </template>

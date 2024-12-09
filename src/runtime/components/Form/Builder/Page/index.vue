@@ -31,42 +31,34 @@ const emits = defineEmits<{
 const FieldComponent = resolveComponent("FormElementsRenderer")
 const elements = new Elements(FieldComponent)
 elements.starter(props.starter)
-onMounted(() => {
-  dropzone.value?.addEventListener('drop', (e) => {
-    e.preventDefault()
-    dropzone.value?.classList.remove('active')
-    if (!draggedElement!.value) return elements.repositionElement()
-
-    elements.add(draggedElement!.value).render()
-    draggedElement!.value = undefined
-  })
-
-  dropzone.value?.addEventListener('dragover', (e) => {
-    e.preventDefault()
-    dropzone.value?.classList.add('active')
-  })
-
-  dropzone.value?.addEventListener('dragleave', (e) => {
-    e.preventDefault()
-    dropzone.value?.classList.remove('active')
-  })
-
-  elements.on('add', (elData: FormElementData) => {
-    emits('addField', props.index, elData)
-  })
-
-  elements.on('delete', (elData: FormElementData) => {
-    emits('deleteField', props.index, elData)
-  })
-
-  elements.on('update', (elDatas: Array<FormElementData>) => {
-    for (const elData of elDatas) {
-      emits('updateField', props.index, elData)
-    }
-  })
-
-  watch(elements.active, (val) => emits("active", val))
+elements.on('add', (elData: FormElementData) => {
+  emits('addField', props.index, elData)
 })
+elements.on('delete', (elData: FormElementData) => {
+  emits('deleteField', props.index, elData)
+})
+elements.on('update', (elData: FormElementData) => {
+  emits('updateField', props.index, elData)
+})
+
+watch(elements.active, (val) => emits("active", val))
+
+const onDrop = (e: Event) => {
+  e.preventDefault()
+  dropzone.value?.classList.remove('active')
+  if (!draggedElement!.value) return elements.repositionElement()
+
+  elements.add(draggedElement!.value).render()
+  draggedElement!.value = undefined
+}
+const onDragover = (e: Event) => {
+  e.preventDefault()
+  dropzone.value?.classList.add('active')
+}
+const onDragleave = (e: Event) => {
+  e.preventDefault()
+  dropzone.value?.classList.remove('active')
+}
 </script>
 <template>
   <div class="canvas-container">
@@ -96,7 +88,8 @@ onMounted(() => {
         </svg>
       </div>
     </div>
-    <form class="canvas-form" ref="dropzone" id="dropzone" @submit.prevent>
+    <form class="canvas-form" id="dropzone" @submit.prevent @drop="onDrop" @dragover="onDragover"
+      @dragleave="onDragleave">
       <div v-if="elements.components.size">
         <component v-for="[index, comp] in elements.components" :is="comp" />
       </div>

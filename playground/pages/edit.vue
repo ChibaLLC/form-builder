@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import type { Form } from '../../src/runtime/types';
+
 const formData = ref<any | undefined>(undefined)
-async function saveForm(data: FormData) {
+async function saveForm(data: Form) {
     localStorage.setItem('formData', JSON.stringify(data))
     await navigateTo("/viewer")
 }

@@ -17,8 +17,9 @@ const emit = defineEmits<{
 
 const edit = inject<Ref<boolean>>(editKey)
 provide<Ref<FormElementData>>(formElementDataKey, toRef(() => props.data))
-
+  
 const onClick = (e: Event) => {
+  if (!edit?.value) return
   const dropzone = document.getElementById("dropzone");
   if (!container.value?.contains(e.target as Node)) {
     container.value?.classList.remove("element-active")
@@ -29,6 +30,7 @@ const onClick = (e: Event) => {
 
 const container = ref<HTMLElement | undefined>()
 function focusWithin() {
+  if(!edit?.value) return
   if (!container.value) return console.error("What the fuck?")
   container.value.classList.add("element-active")
   emit("focus", true, props.data)
@@ -38,6 +40,7 @@ function focusWithin() {
 
 onMounted(() => {
   document?.addEventListener("keydown", (e) => {
+    if (!edit?.value) return
     const dropzone = document.getElementById("dropzone")
     if (e.key === "Escape") {
       container.value?.classList.remove("element-active")

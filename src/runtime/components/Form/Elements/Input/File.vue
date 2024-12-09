@@ -38,7 +38,8 @@ const disabled = inject<Ref<boolean>>(disabledKey)
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
         v-model="data.description" placeholder="Add a description (optional)" />
     </label>
-    <input autocomplete="off" type="file" :accept="data?.accept" @change="onChange" :disabled="disabled" />
+    <input autocomplete="off" type="file" :accept="data?.accept" @change="onChange" :disabled="disabled"
+      :required="!!data.rules?.find(r => r === 'required')" />
   </div>
   <div v-else>
     <p>No Form Element Data In Context</p>

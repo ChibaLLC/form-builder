@@ -78,14 +78,11 @@ export class Elements {
     private elements: Array<FormElementData> = []
     public components = shallowReactive(new Map<number, Component>())
     public active = shallowRef<FormElementData | undefined>(undefined);
-    private _onAdd = {
-        add: [] as Array<Function>,
-        delete: [] as Array<Function>,
-        update: [] as Array<Function>
-    }
+    private events: { [key: string]: Array<(data: FormElementData) => void> } = {}
     private FieldComponent: ResolvedComponent;
     private movingElement: number | undefined;
     private latestEnter: number | undefined;
+    private backpressure: { [key: string]: Array<FormElementData> } = {}
 
     constructor(FormElementsRenderer: ResolvedComponent) {
         this.FieldComponent = FormElementsRenderer
@@ -204,8 +201,14 @@ export class Elements {
         return this;
     }
 
-    on(event: 'add' | 'delete' | 'update', callback: Function) {
-        this._onAdd[event].push(callback)
+    on(event: 'add' | 'delete' | 'update', callback: (data: FormElementData) => void) {
+        if (!this.events[event]) this.events[event] = []
+        this.events[event].push(callback)
+        const backpressure = this.backpressure[event]
+        if (backpressure && backpressure.length) {
+            backpressure.forEach(callback)
+            delete this.backpressure[event]
+        }
     }
 
     starter(data: Array<FormElementData>) {
@@ -220,7 +223,15 @@ export class Elements {
     }
 
     private emit(event: 'add' | 'delete' | 'update', data: FormElementData) {
-        for (const callback of this._onAdd[event]) {
+        const functions = this.events[event]
+        if (!functions || event.length === 0) {
+            if (!this.backpressure[event]) {
+                this.backpressure[event] = []
+            }
+            this.backpressure[event].push(data)
+            return
+        }
+        for (const callback of functions) {
             callback(data)
         }
     }
@@ -272,12 +283,12 @@ export class Elements {
 
     delete(index: number) {
         const element = this.elements.find(el => el.index === index)
-        if(!element) return console.warn("Buda")
+        if (!element) return console.warn("Buda")
         this.emit('delete', element)
         this.elements = this.elements.filter(el => el.index !== index)
         this.components.delete(index)
         this.render()
-        if(!this.elements.length) {
+        if (!this.elements.length) {
             this.active.value = undefined
         }
         return this;

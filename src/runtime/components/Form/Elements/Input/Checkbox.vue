@@ -81,10 +81,10 @@ const Option = defineComponent({
       }
     }
 
-    return { checked, onInput, disabled }
+    return { checked, onInput, disabled, data }
   },
   render() {
-    const input = h('input', { onChange: this.onInput, checked: this.checked, type: 'checkbox', style: { cursor: "pointer" }, disabled: this.disabled })
+    const input = h('input', { onChange: this.onInput, checked: this.checked, type: 'checkbox', style: { cursor: "pointer" }, disabled: this.disabled, required: !!this.data.rules?.find(r => r === 'required') })
     const label = h('label', { onClick: () => { input.el!.click() }, style: { cursor: "pointer", outline: "none" } }, this.$props.option.label)
     return h('div', { class: 'option' }, [input, label])
   }

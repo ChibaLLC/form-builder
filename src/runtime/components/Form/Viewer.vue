@@ -76,9 +76,11 @@ function goBack() {
   flowDirection.value = 'backward'
   if (currentStoreIndex.value > 0) {
     currentStoreIndex.value -= 1
-  } else {
-    if (currentFormIndex.value === 0) return emits("back")
+  } else if(currentFormIndex.value > 0) {
     currentFormIndex.value -= 1
+  } else {
+    emits("back")
+    rerender()
   }
 }
 

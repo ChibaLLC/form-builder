@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import {type PropType, computed} from 'vue'
-import type {Store} from '../../types'
+import { type PropType, computed, inject, type Ref } from 'vue'
+import type { Store } from '../../types'
+import { disabledKey } from '../../utils/symbols';
 
 const props = defineProps({
   data: {
     type: Object as PropType<Store>,
     default: {} as Store,
     required: true
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-    required: false
   }
 })
 
@@ -21,8 +17,9 @@ const emits = defineEmits<{
   back: []
 }>()
 
-const _items = computed(() => {
-  if (props.disabled) {
+const disabled = inject<Ref<boolean>>(disabledKey)
+const items = computed(() => {
+  if (disabled?.value) {
     return props.data?.filter(item => item.carted)
   }
   return props.data
@@ -32,14 +29,12 @@ const _items = computed(() => {
 <template>
   <div class="store-container">
     <div class="store-renderer">
-      <StoreCard v-for="item in _items" :key="item.index" :item="item"
-                 @cart="emits('price', Math.abs(item.price) || 0)"
-                 :edit="false"
-                 @uncart="emits('price', -Math.abs(item.price) || 0)"/>
+      <StoreCard v-for="item in items" :key="item.index" :item="item" @cart="emits('price', Math.abs(item.price) || 0)"
+        :edit="false" @uncart="emits('price', -Math.abs(item.price) || 0)" />
     </div>
-    <div class="store-footer">
-      <button type="button" @click="emits('back')" class="store-back-button" v-if="!disabled">Back</button>
-      <button class="store-submit-button" @click="emits('submit')" v-if="!disabled">
+    <div class="store-footer" v-if="!disabled">
+      <button type="button" @click="emits('back')" class="store-back-button">Back</button>
+      <button class="store-submit-button" @click="emits('submit')">
         Done
       </button>
     </div>

@@ -20,9 +20,9 @@ defineProps({
   <Title>Form</Title>
   <div class="form-container">
     <form class="form-renderer" @submit.prevent="emits('submit')">
-      <FormElementsRenderer v-for="element in data" :key="element.index" :data="element" @focus=""/>
+      <FormElementsRenderer v-for="element in data" :key="element.index" :data="element" />
       <div class="form-footer" v-if="!disabled">
-        <button type="button" @click="emits('back')" class="form-back-button">Back</button>
+        <button type="button" @click="emits('back');" class="form-back-button">Back</button>
         <button type="submit" class="form-submit-button">
           Submit
         </button>

@@ -1,26 +1,27 @@
 <script setup lang="ts">
-import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, watch } from 'vue';
+import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, watch, computed } from 'vue';
 import type { Pages, Form, Stores, Store, Page, Input, FormElementData } from '../../../types'
 import { disabledKey, draggedElementKey, editKey } from '../../../utils/symbols';
 import { createFormPage } from './Page/_utils';
 import { createStorePage } from '../../Store/_utils';
+import { useState } from '#app';
 
 const Page = resolveComponent('FormBuilderPage')
-const form = shallowReactive<{ pages: Pages; stores: Stores }>({
+const form = useState<{ pages: Pages; stores: Stores }>(() => ({
   pages: {},
   stores: {}
-})
+}))
 
 
 const pages = shallowReactive<ReturnType<typeof createFormPage>[]>([])
 function addPage(starter?: Page) {
-  pages.push(createFormPage(Page, form.pages, starter))
+  pages.push(createFormPage(Page, form.value.pages, starter))
 }
 
 const Store = resolveComponent("Store")
 const stores = shallowReactive<ReturnType<typeof createStorePage>[]>([])
 function addStore(starter?: Store) {
-  stores.push(createStorePage(Store, form.stores, starter))
+  stores.push(createStorePage(Store, form.value.stores, starter))
 }
 
 const emits = defineEmits<{
@@ -56,27 +57,36 @@ function setDragged(value: Input) {
 }
 
 async function submit() {
-  emits('submit', form)
+  emits('submit', form.value)
 }
 
-const hasPages = Object.values(props.starter.pages || {}).some(form => form.length)
-const hasStores = Object.values(props.starter.stores).some(store => store.length)
+const starterPages = computed(() => Object.values(props.starter.pages || {}))
+const starterStore = computed(() => Object.values(props.starter.stores))
 
-if (hasPages || hasStores) {
-  for (const form in props.starter.pages) {
-    addPage(props.starter.pages[form])
+
+watch([starterPages, starterStore], ([pages, stores]) => {
+  if (pages.length || stores.length) {
+    for (const page of pages) {
+      addPage(page)
+    }
+    for (const store of stores) {
+      addStore(store)
+    }
+  } else {
+    addPage()
   }
-  for (const store in props.starter.stores) {
-    addStore(props.starter.stores[store])
-  }
-} else {
-  addPage()
-}
+}, { immediate: true })
 
 onMounted(() => {
   if (window.innerWidth < 768) {
-    alert("This page is not optimized for mobile devices. Please use a desktop or a tablet to build a form.")
+    alert("This page is not optimized for mobile devices. Please use a desktop or a tablet to build a form.value.")
   }
+
+  setTimeout(() => {
+    if (!pages.length && !stores.length) {
+      addPage()
+    }
+  })
 })
 
 const active = ref<FormElementData | undefined>(undefined)

@@ -18,7 +18,8 @@ const data = inject<Ref<TextareaElementData>>(formElementDataKey)
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
         v-model="data.description" placeholder="Add a description (optional)" />
     </label>
-    <textarea class="textarea" v-model="data.value" style="width: 100%" :disabled="disabled"></textarea>
+    <textarea class="textarea" v-model="data.value" style="width: 100%" :disabled="disabled"
+      :required="!!data.rules?.find(r => r === 'required')"></textarea>
   </div>
   <div v-else>
     <p>No Form Element Data In Context</p>

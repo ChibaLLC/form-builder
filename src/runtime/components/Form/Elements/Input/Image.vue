@@ -37,7 +37,7 @@ const disabled = inject<Ref<boolean>>(disabledKey)
         v-model="data.description" placeholder="Add a description (optional)" />
     </label>
     <input autocomplete="off" v-if="!edit" type="file" @change="onChange" :accept="data?.accept" style="width: 100%"
-      :disabled="disabled" />
+      :required="!!data.rules?.find(r => r === 'required')" :disabled="disabled" />
   </div>
   <div v-else>
     <p>No Form Element Data In Context</p>
