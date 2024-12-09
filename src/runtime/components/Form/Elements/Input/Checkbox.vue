@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { watch, defineComponent, inject, type PropType, h, type Ref, reactive, computed, toRef } from 'vue'
+import { defineComponent, inject, type PropType, h, type Ref, reactive, computed, watch } from 'vue'
 import type { CheckboxElementData } from "../../../../types";
-import { disabledKey, editKey, formElementDataKey } from '../../../../utils/symbols';
+import { editKey, formElementDataKey } from '../../../../utils/symbols';
 
 const data = inject<Ref<CheckboxElementData>>(formElementDataKey);
 if (data) {
   data.value.options = reactive(data.value.options || [])
   data.value.value = reactive(data.value.value || {})
+  data.value.multiple = false
 }
 function addOption(event: Event) {
   const value = (event.target as HTMLInputElement)?.value
@@ -34,51 +35,42 @@ const Option = defineComponent({
   setup(props) {
     const data = inject<Ref<CheckboxElementData>>(formElementDataKey);
     if (!data) return console.warn("No Element Data Found For Option")
-    const checked = computed(() => {
-      const value = data.value.value?.[props.option.label]
-      return value === props.option.value
-    })
-    watch(data, () => {
-      if (data.value.multiple || !checked.value) return
-      const index = data.value.options?.findIndex(d => d.label === props.option.label)
-      if (index !== undefined && index >= 0) {
-        data.value.options?.splice(index, 1)
-      }
-    })
-
-    function setValue() {
-      const existing = data?.value.value?.[props.option.label]
-      if (existing) {
-        delete data.value.value![props.option.label];
-      } else {
-        if (data!.value.multiple) {
-          if (!data!.value.value) data!.value.value = {}
-          data!.value.value[props.option.label] = props.option.value;
+    const checked = computed({
+      get() {
+        const value = data.value.value?.[props.option.label]
+        return value === props.option.value
+      },
+      set(val) {
+        if (!data.value.value) data.value.value = {}
+        if (val) {
+          if (data.value.multiple) {
+            data.value.value[props.option.label] = props.option.value
+          } else {
+            data.value.value = { [props.option.label]: props.option.value }
+          }
         } else {
-          data!.value.value = { [props.option.label]: props.option.value };
+          const existing = data.value.value?.[props.option.label]
+          if (existing)
+            delete data.value.value![props.option.label];
+          if (!data.value.multiple) data.value.value = {}
         }
       }
-    }
+    })
 
     function onInput(e: Event) {
       const target = e.target as HTMLInputElement
-      if (!data!.value.value) data!.value.value = {}
       if (target.checked) {
-        if (data!.value.multiple) {
-          data!.value.value[props.option.label] = props.option.value
-        } else {
-          data!.value.value = { [props.option.label]: props.option.value };
-        }
+        checked.value = true
       } else {
-        data!.value.value[props.option.label] && delete data!.value.value[props.option.label]
+        checked.value = false
       }
     }
 
-    return { checked, setValue, onInput }
+    return { checked, onInput }
   },
   render() {
-    const label = h('label', { onClick: this.setValue, style: { cursor: "pointer", outline: "none" } }, this.$props.option.label)
     const input = h('input', { onChange: this.onInput, checked: this.checked, type: 'checkbox', style: { cursor: "pointer" } })
+    const label = h('label', { onClick: () => {input.el!.click()}, style: { cursor: "pointer", outline: "none" } }, this.$props.option.label)
     return h('div', { class: 'option' }, [input, label])
   }
 })
@@ -98,7 +90,7 @@ const edit = inject<Ref<boolean>>(editKey)
     </label>
     <div v-if="data.options?.length" class="options">
       <div v-for="option in data?.options" class="option">
-        <Option :option="option" :multiple="data.multiple" />
+        <Option :option="option" :multiple="!!data.multiple" />
         <span style="cursor: pointer; margin-left: auto; margin-right: 0.35rem;" v-if="edit">
           <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
             @click="removeOption(option.value)">
@@ -117,9 +109,9 @@ const edit = inject<Ref<boolean>>(editKey)
     </div>
     <div v-if="edit"
       style="margin-top: 1rem; margin-left: 0.1rem; display: flex; gap: 0.25rem; align-items: center; width: fit-content;">
-      <input type="checkbox" id="allow_multiple" v-model="data.multiple" />
+      <input type="checkbox" id="allow_multiple" v-model="data.multiple" style="cursor: pointer;" />
       <label for="allow_multiple" style="margin: 0;">
-        <small style="font-size: 14px;">Allow multiple selection</small>
+        <small style="font-size: 14px; cursor: pointer;">Allow multiple selection</small>
       </label>
     </div>
   </div>
