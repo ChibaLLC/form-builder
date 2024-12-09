@@ -1,39 +1,12 @@
 <script setup lang="ts">
-import { h, render, ref, type PropType, type Ref, resolveComponent, onMounted, inject } from "vue";
-import { Field } from '../../../../utils/constants'
-import { disabledKey, draggedElementKey, editKey } from "../../_utils";
-import type {
-  ButtonElementData,
-  CheckboxElementData,
-  FileInputElementData,
-  Page,
-  FormElementData,
-  ImageInputElementData,
-  Input,
-  InputElementData, RadioElementData, RichTextElementData, SelectElementData, StaticElementData, TextareaElementData
-} from "../../../../types";
-import {
-  isInput,
-  isFileInput,
-  isImageInput,
-  isButton,
-  isCheckbox,
-  isRadio,
-  isRichText,
-  isSelect,
-  isStatic,
-  isTextarea
-} from "../../../../utils/functions";
-
-
-const FieldComponent = resolveComponent("FormElementsRenderer")
+import { resolveComponent, inject, type Ref, ref, type PropType, onMounted } from 'vue';
+import type { Input, Page, FormElementData } from '~/src/runtime/types';
+import { editKey, draggedElementKey } from '../../../../utils/symbols';
+import { Elements } from './_utils';
 
 const edit = inject<Ref<boolean>>(editKey)
 const draggedElement = inject<Ref<Input | undefined>>(draggedElementKey)
-const container = ref<HTMLElement | null>(null)
 const dropzone = ref<HTMLElement | null>(null)
-const movingElement = ref<HTMLElement | null>(null)
-const latestEnter = ref<HTMLElement | null>(null)
 
 const props = defineProps({
   index: {
@@ -46,256 +19,21 @@ const props = defineProps({
   }
 })
 
-
-class Elements {
-  private _elements: Array<FormElementData> = []
-  private renderedElements: Array<number> = []
-  private target: HTMLElement
-  private _onAdd = {
-    add: [] as Array<Function>,
-    delete: [] as Array<Function>,
-    update: [] as Array<Function>
-  }
-
-  constructor(target: HTMLElement) {
-    this.target = target
-  }
-
-  private initialiseElementData(type: Input) {
-    const index = this._elements.length;
-    switch (true) {
-      case isInput({ type }):
-        return {
-          inputType: type,
-          type: type,
-          label: (function (field: Field) {
-            switch (field) {
-              case Field.EMAIL:
-                return "Email"
-            }
-            return ''
-          }(type)),
-          placeholder: '',
-          value: '',
-          index
-        } satisfies InputElementData;
-
-      case isImageInput({ type }):
-        return {
-          type: Field.IMAGE,
-          inputType: Field.IMAGE,
-          label: '',
-          accept: undefined,
-          value: undefined,
-          index
-        } satisfies ImageInputElementData;
-      case isFileInput({ type }):
-        return {
-          type: Field.FILE,
-          inputType: Field.FILE,
-          label: '',
-          index
-        } satisfies FileInputElementData;
-
-      case isCheckbox({ type }):
-        return {
-          type: Field.CHECKBOX,
-          inputType: Field.CHECKBOX,
-          label: '',
-          multiple: true,
-          index
-        } satisfies CheckboxElementData;
-
-      case isButton({ type }):
-        return {
-          type: Field.BUTTON as any,
-          inputType: 'submit',
-          label: '',
-          index
-        } satisfies ButtonElementData;
-
-      case isRadio({ type }):
-        return {
-          type: Field.RADIO,
-          inputType: Field.RADIO,
-          label: '',
-          value: false,
-          options: undefined,
-          index
-        } satisfies RadioElementData;
-        break;
-
-      case isStatic({ type }):
-        return {
-          type: Field.STATIC,
-          inputType: Field.STATIC,
-          index,
-          text: ''
-        } satisfies StaticElementData;
-
-      case isTextarea({ type }):
-        return {
-          type: Field.TEXTAREA,
-          inputType: Field.TEXTAREA,
-          label: '',
-          placeholder: '',
-          value: '',
-          index
-        } satisfies TextareaElementData;
-
-      case isSelect({ type }):
-        return {
-          label: '',
-          type: Field.SELECT as any,
-          inputType: Field.SELECT as any,
-          index
-        } satisfies SelectElementData;
-
-      case isRichText({ type }):
-        return {
-          type: Field.RICHTEXT,
-          label: '',
-          value: '',
-          inputType: Field.RICHTEXT,
-          index
-        } satisfies RichTextElementData;
-
-      default:
-        alert("Unsupported Field Type")
-        throw new Error("Unsupported Field Type")
-    }
-  }
-
-
-  add(fieldName: Input) {
-    this._elements.push(this.initialiseElementData(fieldName))
-    this.emit('add', this._elements[this._elements.length - 1])
-    return this;
-  }
-
-  on(event: 'add' | 'delete' | 'update', callback: Function) {
-    this._onAdd[event].push(callback)
-  }
-
-  starter(data: Array<FormElementData>) {
-    if (!data || data.length === 0) return this;
-    data.map(el => {
-      const index = el.index || this._elements.length
-      this._elements.push({ ...el, index })
-      this.emit('add', this._elements[index])
-    })
-    this.render()
-    return this;
-  }
-
-  private emit(event: 'add' | 'delete' | 'update', data: FormElementData) {
-    for (const callback of this._onAdd[event]) {
-      callback(data)
-    }
-  }
-
-  node(data: FormElementData) {
-    return h(FieldComponent, {
-      data: data,
-      onDelete: (idx: number) => {
-        this.delete(idx)
-      }
-    })
-  }
-
-  render() {
-    this._elements.map(el => {
-      if (this.isRendered(el)) return
-      const anchor = document.createElement('div')
-      anchor.dataset.identity = el.index.toString()
-      anchor.addEventListener("dragenter", e => {
-        latestEnter.value = anchor
-      })
-      anchor.addEventListener("dragstart", e => {
-        movingElement.value = anchor
-      })
-      const node = this.node(el)
-      render(node, anchor)
-      this.renderedElements.push(el.index)
-      this.target.appendChild(anchor)
-    })
-    return this;
-  }
-
-  isRendered(el: FormElementData) {
-    return this.renderedElements.some(no => no === el.index)
-  }
-
-  update(index: number, data: FormElementData) {
-    const element = this.node(data)
-    const anchor = document.createElement('div')
-
-    anchor.dataset.identity = index.toString()
-    render(element, anchor)
-
-    const replacement = this.target.querySelector(`[data-identity="${index}"]`)
-    if (replacement) {
-      replacement.replaceWith(anchor)
-    } else {
-      this.target.appendChild(anchor)
-    }
-    return this;
-  }
-
-  delete(index: number) {
-    const element = this.target.querySelector(`[data-identity="${index}"]`)
-    if (element) {
-      element.remove()
-    }
-    this.emit('delete', this._elements[index])
-    this._elements = this._elements.filter(el => el.index !== index)
-    this.renderedElements = this.renderedElements.filter(el => el !== index)
-    this.render()
-    return this;
-  }
-
-  move(id: number, newIndex: number) {
-    const element = this._elements[id]
-    this._elements.splice(id, 1)
-    this._elements.splice(newIndex, 0, element)
-    this._elements = this._elements.map((el, index) => ({ ...el, index }))
-    this.renderedElements = []
-    this.target.innerHTML = ''
-    this.render()
-    return this;
-  }
-
-  get elements() {
-    return this._elements
-  }
-
-  get(index: number) {
-    return this._elements[index]
-  }
-}
-
-function repositionElement(elements: Elements) {
-  if (!latestEnter.value) return console.warn("No element to reposition")
-  if (latestEnter.value === movingElement.value) return
-
-  const movingIndex = Number(movingElement.value?.dataset.identity)
-  const newIndex = Number(latestEnter.value?.dataset.identity)
-  elements.move(movingIndex, newIndex)
-}
-
 const emits = defineEmits<{
-  deleteField: [canvasIndex: number, field: FormElementData],
-  addField: [canvasIndex: number, field: FormElementData],
-  updateField: [canvasIndex: number, field: FormElementData],
+  deleteField: [pageIndex: number, field: FormElementData],
+  addField: [pageIndex: number, field: FormElementData],
+  updateField: [pageIndex: number, field: FormElementData],
   deleteCanvas: [number]
 }>()
 
+const FieldComponent = resolveComponent("FormElementsRenderer")
+const elements = new Elements(FieldComponent)
+elements.starter(props.starter)
 onMounted(() => {
-  const elements = new Elements(container.value!)
   dropzone.value?.addEventListener('drop', (e) => {
     e.preventDefault()
     dropzone.value?.classList.remove('active')
-    if (!draggedElement!.value) return repositionElement(elements)
+    if (!draggedElement!.value) return elements.repositionElement()
 
     elements.add(draggedElement!.value).render()
     draggedElement!.value = undefined
@@ -321,11 +59,9 @@ onMounted(() => {
 
   elements.on('update', (elDatas: Array<FormElementData>) => {
     for (const elData of elDatas) {
-      console.log(elData)
       emits('updateField', props.index, elData)
     }
   })
-  elements.starter(props.starter)
 })
 </script>
 <template>
@@ -357,7 +93,9 @@ onMounted(() => {
       </div>
     </div>
     <form class="canvas-form" ref="dropzone" id="dropzone" @submit.prevent>
-      <div ref="container"></div>
+      <div>
+        <component v-for="[index, comp] in elements.components" :is="comp" />
+      </div>
     </form>
   </div>
 </template>

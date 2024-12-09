@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { type PropType } from 'vue'
-import type {StaticElementData} from "../../../types";
+import { inject, type Ref } from 'vue';
+import { formElementDataKey } from '../../../utils/symbols';
+import type { StaticElementData } from '~/src/runtime/types';
 
-defineProps({
-  data: {
-    type: Object as PropType<StaticElementData>,
-    required: true
-  }
-})
+const data = inject<Ref<StaticElementData>>(formElementDataKey)
 </script>
 
 <template>
-  <p class="static">{{ data.text }}</p>
+  <p class="static">{{ data?.text }}</p>
 </template>
 
 <style scoped></style>

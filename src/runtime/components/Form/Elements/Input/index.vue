@@ -1,39 +1,39 @@
 <script setup lang="ts">
-import {type PropType, type Ref, inject} from 'vue'
-import {isTextarea, isSelect, isRadio, isCheckbox, isImageInput, isFileInput} from "../../../../utils/functions";
-import { disabledKey, editKey } from '../../_utils';
+import { type Ref, inject } from 'vue'
+import { isTextarea, isSelect, isRadio, isCheckbox, isImageInput, isFileInput } from "../../../../utils/functions";
+import { disabledKey, editKey, formElementDataKey } from '../../../../utils/symbols';
 import type {
   InputElementData,
 } from "../../../../types";
-
-defineProps({
-  data: {
-    type: Object as PropType<InputElementData>,
-    required: true
-  }
-})
-
 const disabled = inject<Ref<boolean>>(disabledKey)
 const edit = inject<Ref<boolean>>(editKey)
+const data = inject<Ref<InputElementData>>(formElementDataKey)
 </script>
 <template>
-  <FormElementsInputTextarea v-if="isTextarea(data)" :data="data" />
-  <FormElementsInputSelect v-else-if="isSelect(data)" :data="data" />
-  <FormElementsInputRadio v-else-if="isRadio(data)" :data="data" />
-  <FormElementsInputCheckbox v-else-if="isCheckbox(data)" :data="data" />
-  <FormElementsInputImage v-else-if="isImageInput(data)" :data="data" />
-  <FormElementsInputFile v-else-if="isFileInput(data)" :data="data" />
-  <FormElementsInputSelect v-else-if="isSelect(data)" :data="data" />
+  <template v-if="data">
+    <FormElementsInputTextarea v-if="isTextarea(data)" />
+    <FormElementsInputSelect v-else-if="isSelect(data)" />
+    <FormElementsInputRadio v-else-if="isRadio(data)" />
+    <FormElementsInputCheckbox v-else-if="isCheckbox(data)" />
+    <FormElementsInputImage v-else-if="isImageInput(data)" />
+    <FormElementsInputFile v-else-if="isFileInput(data)" />
+    <FormElementsInputSelect v-else-if="isSelect(data)" />
+    <div v-else>
+      <label for="label">
+        <input :disabled="!edit" autocomplete="off" :type="data.inputType" id="label" class="label"
+          :style="{ marginBottom: (data?.description?.length || edit) ? '0rem' : '0.5rem' }" v-model="data.label"
+          placeholder="Add a label" />
+      </label>
+      <label for="description" v-if="(data?.description && data.description.length) || edit">
+        <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
+          v-model="data.description" placeholder="Add a description (optional)" />
+      </label>
+      <input autocomplete="off" :type="data?.inputType" :accept="data?.accept" v-model="data.value" style="width: 100%"
+        :disabled="disabled" />
+    </div>
+  </template>
   <div v-else>
-    <label for="label">
-      <input :disabled="!edit" autocomplete="off" :type="data.inputType" id="label" class="label" :style="{marginBottom: (data?.description?.length! > 0 || edit) ? '0rem' : '0.5rem'}"
-             v-model="data.label" placeholder="Add a label"/>
-    </label>
-    <label for="description" v-if="(data.description && data.description.length > 0) || edit">
-      <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
-             v-model="data.description" placeholder="Add a description (optional)"/>
-    </label>
-    <input autocomplete="off" :type="data.inputType" :accept="data.accept" v-model="data.value" style="width: 100%" :disabled="disabled"/>
+    <p>No Form Element Data In Context</p>
   </div>
 </template>
 <style scoped>
@@ -54,11 +54,11 @@ textarea {
 }
 
 ul,
-ol{
+ol {
   list-style: none;
 }
 
-a{
+a {
   text-decoration: none;
 }
 
@@ -99,7 +99,8 @@ label:not(:focus) input.description {
   outline: 1px solid rgba(78, 78, 78, 0.1);
 }
 
-label:focus-within input, label:focus input {
+label:focus-within input,
+label:focus input {
   cursor: text;
   border-radius: 0.25rem;
   outline: 1px solid rgba(78, 78, 78, 0.4);
@@ -110,7 +111,8 @@ label:focus-within input, label:focus input {
 }
 
 
-label:focus-within input::placeholder, label:focus input::placeholder {
+label:focus-within input::placeholder,
+label:focus input::placeholder {
   text-decoration: none;
 }
 

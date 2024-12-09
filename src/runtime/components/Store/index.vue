@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, type PropType, type Ref, computed, inject } from 'vue'
 import type { Item } from '../../types'
-import { editKey } from '../Form/_utils';
+import { editKey } from '../../utils/symbols';
 
 const emits = defineEmits<{
   item: [item: Item],

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { FormElementData } from '../../../types'
 import { isStatic, isInput, isButton } from "../../../utils/functions";
-import { inject, type Ref, type PropType, provide } from 'vue';
-import { editKey } from '../_utils';
+import { inject, type Ref, type PropType, provide, toRef } from 'vue';
+import { editKey, formElementDataKey } from '../../../utils/symbols';
 
 const props = defineProps({
   data: {
@@ -15,6 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const edit = inject<Ref<boolean>>(editKey)
+provide<Ref<FormElementData>>(formElementDataKey, toRef(() => props.data))
 </script>
 <template>
   <div class="renderer-container" :draggable="edit" :class="{ 'hover-active': edit }">
@@ -27,9 +28,9 @@ const edit = inject<Ref<boolean>>(editKey)
       </svg>
     </div>
 
-    <FormElementsStatic v-if="isStatic(data)" :data="data" />
-    <FormElementsInput v-else-if="isInput(data)" :data="data" />
-    <FormElementsButton v-else-if="isButton(data)" :data="data" />
+    <FormElementsStatic v-if="isStatic(data)" />
+    <FormElementsInput v-else-if="isInput(data)" />
+    <FormElementsButton v-else-if="isButton(data)" />
 
     <div v-else>
       <p class="text-red">Unknown element type {{ data.type }}</p>

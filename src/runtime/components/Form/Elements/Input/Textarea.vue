@@ -1,31 +1,28 @@
 <script setup lang="ts">
 import { type PropType, type Ref, inject } from 'vue'
 import type {TextareaElementData} from "../../../../types";
-import { editKey, disabledKey } from '../../_utils';
-
-defineProps({
-    data: {
-        type: Object as PropType<TextareaElementData>,
-        required: true
-    }
-})
+import { editKey, disabledKey, formElementDataKey } from '../../../../utils/symbols';
 
 const edit = inject<Ref<boolean>>(editKey)
 const disabled = inject<Ref<boolean>>(disabledKey)
+const data = inject<Ref<TextareaElementData>>(formElementDataKey)
 </script>
 
 <template>
-    <div class="textarea-container">
-        <label for="textarea">
-            <input :disabled="!edit" autocomplete="off" type="text" id="textarea" class="label" v-model="data.label"
-                placeholder="Add a label" />
-        </label>
-        <label for="description" v-if="data.description || edit">
-            <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
-                v-model="data.description" placeholder="Add a description (optional)" />
-        </label>
-        <textarea class="textarea" v-model="data.value" style="width: 100%" :disabled="disabled"></textarea>
-    </div>
+  <div class="textarea-container" v-if="data">
+    <label for="textarea">
+      <input :disabled="!edit" autocomplete="off" type="text" id="textarea" class="label" v-model="data.label"
+        placeholder="Add a label" />
+    </label>
+    <label for="description" v-if="data.description || edit">
+      <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
+        v-model="data.description" placeholder="Add a description (optional)" />
+    </label>
+    <textarea class="textarea" v-model="data.value" style="width: 100%" :disabled="disabled"></textarea>
+  </div>
+  <div v-else>
+    <p>No Form Element Data In Context</p>
+  </div>
 </template>
 
 <style scoped>

@@ -3,14 +3,17 @@ import type { Item, Stores } from "../../types"
 
 
 export function createStorePage(Store: ReturnType<typeof resolveComponent>, stores: Stores, starter?: Item[] | undefined) {
-    const storeIndex = Object.keys(stores || {})?.length
     return defineComponent({
+        setup(){
+            const storeIndex = Object.keys(stores || {})?.length
+            return {storeIndex}
+        },
         render() {
             return h('div', h(Store, {
                 onItem: addStoreItem,
                 onDeleteItem: deleteStoreItem,
                 onDeleteStore: deleteStore,
-                storeIndex: storeIndex,
+                storeIndex: this.storeIndex,
                 starter: starter
             }))
         }

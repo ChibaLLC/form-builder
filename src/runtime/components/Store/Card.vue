@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, type PropType, computed, type Ref, inject } from 'vue'
 import type { Item } from '../../types'
-import { editKey } from '../Form/_utils';
+import { editKey } from '../../utils/symbols';
 
 const liked = ref(false);
 let images: NodeListOf<HTMLImageElement> | null = null;

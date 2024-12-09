@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import { type PropType, inject, type Ref } from 'vue'
-import type {ImageInputElementData} from "../../../../types";
-import {ImageTypeEnum} from "../../../../utils/constants";
-import { editKey, disabledKey } from '../../_utils';
+import { inject, type Ref } from 'vue'
+import type { ImageInputElementData } from "../../../../types";
+import { ImageTypeEnum } from "../../../../utils/constants";
+import { editKey, disabledKey, formElementDataKey } from '../../../../utils/symbols';
 
-const props = defineProps({
-  data: {
-    type: Object as PropType<ImageInputElementData>,
-    required: true
-  }
-})
-
-props.data.accept = Object.values(ImageTypeEnum).join(',')
+const data = inject<Ref<ImageInputElementData>>(formElementDataKey)
+if (data) data.value.accept = Object.values(ImageTypeEnum).join(',')
 
 function onChange(event: any) {
   const files = event.target.files
@@ -25,7 +19,7 @@ function onChange(event: any) {
   }
 
   if (files.length === 0) return console.warn("No valid files provided")
-  props.data.value = files
+  if (data?.value) data.value.value = files
 }
 
 const edit = inject<Ref<boolean>>(editKey)
@@ -33,16 +27,20 @@ const disabled = inject<Ref<boolean>>(disabledKey)
 </script>
 
 <template>
-  <div class="images-container">
+  <div class="images-container" v-if="data">
     <label for="label">
-      <input :disabled="edit" autocomplete="off" type="text" id="label" class="label" v-model="data['label']"
+      <input :disabled="edit" autocomplete="off" type="text" id="label" class="label" v-model="data.label"
         placeholder="Add a label" />
     </label>
     <label for="description" v-if="data['description'] || edit">
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
-        v-model="data['description']" placeholder="Add a description (optional)" />
+        v-model="data.description" placeholder="Add a description (optional)" />
     </label>
-    <input autocomplete="off" v-if="!edit" type="file" @change="onChange" :accept="data.accept" style="width: 100%" :disabled="disabled"/>
+    <input autocomplete="off" v-if="!edit" type="file" @change="onChange" :accept="data?.accept" style="width: 100%"
+      :disabled="disabled" />
+  </div>
+  <div v-else>
+    <p>No Form Element Data In Context</p>
   </div>
 </template>
 
@@ -56,15 +54,15 @@ const disabled = inject<Ref<boolean>>(disabledKey)
 }
 
 ul,
-ol{
+ol {
   list-style: none;
 }
 
-a{
+a {
   text-decoration: none;
 }
 
-.images-container{
+.images-container {
   display: flex;
   flex-direction: column;
   width: 80%;
@@ -157,7 +155,8 @@ label:not(:focus) input.description {
   outline: 1px solid rgba(78, 78, 78, 0.1);
 }
 
-label:focus-within input, label:focus input {
+label:focus-within input,
+label:focus input {
   cursor: text;
   border-radius: 0.25rem;
   outline: 1px solid rgba(78, 78, 78, 0.4);
@@ -168,7 +167,8 @@ label:focus-within input, label:focus input {
 }
 
 
-label:focus-within input::placeholder, label:focus input::placeholder {
+label:focus-within input::placeholder,
+label:focus input::placeholder {
   text-decoration: none;
 }
 

@@ -1,33 +1,26 @@
 <script setup lang="ts">
-import { provide, ref, type Ref, type PropType } from 'vue'
-import type { FormElementData } from '../../types'
-import { editKey, formDataKey } from './_utils';
-
-const props = defineProps({
-  data: {
-    type: Object as PropType<FormElementData[]>,
-    required: true
-  },
-  disabled: {
-    type: Boolean,
-    required: false,
-    default: false
-  }
-})
+import { type Ref, inject, type PropType } from 'vue'
+import { disabledKey } from '../../utils/symbols';
+import type { FormElementData } from '../../types';
 
 const emits = defineEmits<{
   submit: []
   back: []
 }>()
 
-const edit = ref(false);
-provide<Ref<boolean>>(editKey, edit)
+const disabled = inject<Ref<boolean>>(disabledKey)
+defineProps({
+  data: {
+    type: Object as PropType<FormElementData[]>,
+    requuired: true
+  }
+})
 </script>
 <template>
   <Title>Form</Title>
   <div class="form-container">
     <form class="form-renderer" @submit.prevent="emits('submit')">
-      <FormElementsRenderer v-for="element in data" :key="element.index" :data="element" :disabled="disabled" />
+      <FormElementsRenderer v-for="element in data" :key="element.index" :data="element" />
       <div class="form-footer" v-if="!disabled">
         <button type="button" @click="emits('back')" class="form-back-button">Back</button>
         <button type="submit" class="form-submit-button">

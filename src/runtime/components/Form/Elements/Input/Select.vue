@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { type PropType, type Ref, inject } from 'vue'
+import { type PropType, type Ref, inject, reactive } from 'vue'
 import type { SelectElementData } from "../../../../types";
-import { disabledKey, editKey } from '../../_utils';
+import { disabledKey, editKey, formElementDataKey } from '../../../../utils/symbols';
 
-const props = defineProps({
-  data: {
-    type: Object as PropType<SelectElementData>,
-    required: true
-  }
-})
-
+const data = inject<Ref<SelectElementData>>(formElementDataKey)
+if (data) {
+  data.value.options = reactive(data.value.options || [])
+}
 function capitalise(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
@@ -21,40 +18,40 @@ const emit = defineEmits<{
 
 function addOption(event: any) {
   const value = event.target.value
-  if (!value) return console.warn("No value provided")
-  if (!props.data.options) props.data.options = []
-  props.data.options.push({ label: value, value: value })
-  if (!props.data.options) props.data.options = [] as any
-  (props.data.options as unknown as Array<any>).push({ label: value, value: value })
+  data?.value.options?.push({ label: value, value: value })
   event.target.value = ''
 }
 
 function removeOption(value: string) {
-  props.data.options = props.data.options?.filter(option => option.value !== value)
+  if (!data) return console.warn("No Form Element Data Provided")
+  const index = data.value.options?.findIndex(d => d.value === value)
+  if (index !== undefined && index >= 0) {
+    data.value.options?.splice(index, 1)
+  }
 }
 
 const edit = inject<Ref<boolean>>(editKey)
 const disabled = inject<Ref<boolean>>(disabledKey)
 </script>
 <template>
-  <div class="select-container">
+  <div class="select-container" v-if="data">
     <label for="select">
       <input :disabled="!edit" autocomplete="off" type="text" id="select" class="label" v-model="data.label"
         placeholder="Add a label" />
     </label>
-    <label for="description" v-if="(data.description?.length && data.description.length > 0) || edit">
+    <label for="description" v-if="(data?.description?.length && data.description.length) || edit">
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
         v-model="data.description" placeholder="Add a description (optional)" />
     </label>
-    <select v-if="!edit" v-model="data.value" class="select-element" ref="select" :disabled="disabled">
+    <select v-if="!edit" v-model="data.options" class="select-element" ref="select" :disabled="disabled">
       <option value="" disabled selected>Select your option</option>
-      <option v-for="option in props.data.options" :key="option.value" :value="option.value">{{ option.label }}</option>
+      <option v-for="option in data?.options" :key="option.value" :value="option.value">{{ option.label }}</option>
     </select>
     <div v-else class="adoptions">
-      <div v-if="props.data.options?.length">
+      <div v-if="data?.options?.length">
         <h3 class="current-options-heading">Current Options</h3>
         <ol class="current-options">
-          <li v-for="option in props.data.options" class="">
+          <li v-for="option in data?.options" class="">
             <div class="option">
               <span>{{ capitalise(option.value) }}</span>
               <span style="cursor: pointer">
@@ -74,6 +71,9 @@ const disabled = inject<Ref<boolean>>(disabledKey)
       </div>
       <input placeholder="Add Option" @keydown.enter="addOption" />
     </div>
+  </div>
+  <div v-else>
+    <p>No Form Element Data In Context</p>
   </div>
 </template>
 <style scoped>
@@ -194,7 +194,7 @@ input:focus {
 
 .current-options-heading {
   color: #4e4e4e;
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   margin-bottom: -5px;
 }
 </style>

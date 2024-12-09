@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, type PropType, watch } from 'vue'
-import type { Form, FormElementData, Item, Pages, Stores } from '../../types'
+import { ref, type PropType, watch, toRef, provide, type Ref } from 'vue'
+import type { Form, FormElementData, Input, Item, Pages, Stores } from '../../types'
+import { disabledKey, draggedElementKey, editKey } from '../../utils/symbols';
 
 const emits = defineEmits<{
   submit: [Form],
@@ -28,18 +29,20 @@ const props = defineProps({
     required: false
   }
 })
-const pages = Object.entries(props.data.pages || {})
-const stores = Object.entries(props.data.stores || {})
+const pages = toRef(() => props.data.pages || {})
+const stores = toRef(() => props.data.stores || {})
+const _pages = Object.entries(pages.value)
+const _stores = Object.entries(stores.value)
 const flowDirection = ref('forward')
 const currentFormIndex = ref(0)
 const currentStoreIndex = ref(0)
 
 function isDoneForms(currentIndex: number) {
-  return currentIndex >= pages.length - 1
+  return currentIndex >= _pages.length - 1
 }
 
 function isDoneStores(currentIndex: number) {
-  return currentIndex >= stores.length - 1
+  return currentIndex >= _stores.length - 1
 }
 
 function formSubmit(formIndex: number, fields: FormElementData[]) {
@@ -47,7 +50,7 @@ function formSubmit(formIndex: number, fields: FormElementData[]) {
 
   emits('complete', fields)
   flowDirection.value = 'forward'
-  if (isDoneForms(formIndex) && stores.length === 0) done()
+  if (isDoneForms(formIndex) && _stores.length === 0) done()
 }
 
 function storeSubmit(storeIndex: number, items: Item[]) {
@@ -59,7 +62,8 @@ function storeSubmit(storeIndex: number, items: Item[]) {
 }
 
 function done() {
-  emits('submit', { pages: Object.fromEntries(pages), stores: Object.fromEntries(stores) })
+  disabled.value = true
+  emits('submit', { pages: Object.fromEntries(_pages), stores: Object.fromEntries(_stores) })
 }
 
 function rerender() {
@@ -68,6 +72,7 @@ function rerender() {
 }
 
 function goBack() {
+  disabled.value = false;
   flowDirection.value = 'backward'
   if (currentStoreIndex.value > 0) {
     currentStoreIndex.value -= 1
@@ -78,27 +83,31 @@ function goBack() {
 }
 
 watch(() => props.reRender, rerender)
+const disabled = ref(false)
+provide<Ref<boolean>>(editKey, ref(false))
+provide<Ref<boolean>>(disabledKey, disabled)
+provide<Ref<Input | undefined>>(draggedElementKey, ref(undefined))
 </script>
 <template>
   <div class="content__holder">
     <TransitionGroup tag="div" :name="flowDirection === 'forward' ? 'slide_out' : 'slide_in'">
-      <div v-for="[index, page] of pages" v-if="currentFormIndex < pages.length">
-        <FormRenderer v-if="currentFormIndex === +index" :data="page" @submit="formSubmit(+index, page)"
-          @back="goBack" />
+      <div v-for="[index, page] of _pages" v-if="currentFormIndex < _pages.length">
+        <FormRenderer v-if="currentFormIndex === +index" @submit="formSubmit(+index, page)" @back="goBack"
+          :data="page" />
       </div>
-      <div v-for="[index, store] of stores"
-        v-if="stores.length && currentFormIndex >= pages.length && currentStoreIndex < stores.length">
+      <div v-for="[index, store] of _stores"
+        v-if="_stores.length && currentFormIndex >= _pages.length && currentStoreIndex < _stores.length">
         <StoreRenderer v-if="currentStoreIndex === +index" :data="store" @submit="storeSubmit(+index, store)"
           @price="emits('price', $event)" @back="goBack" />
       </div>
-      <div class="processing" v-if="currentFormIndex >= pages.length && currentStoreIndex >= stores.length">
+      <div class="processing" v-if="currentFormIndex >= _pages.length && currentStoreIndex >= _stores.length">
         <div class="loading-spinner" v-if="showSpinner"></div>
         <div v-else>
-          <div v-for="[_, page] in pages">
-            <FormRenderer :data="page" :disabled="true" />
+          <div v-for="[_, page] in _pages">
+            <FormRenderer :data="page" />
           </div>
-          <div v-for="[_, store] of stores">
-            <StoreRenderer :data="store" :disabled="true" />
+          <div v-for="[_, store] of _stores">
+            <StoreRenderer :data="store" />
           </div>
         </div>
       </div>

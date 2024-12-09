@@ -1,28 +1,26 @@
 <script setup lang="ts">
-import { type PropType, type Ref, inject } from 'vue'
+import { type Ref, inject } from 'vue'
 import type {RadioElementData} from "../../../../types";
-import { editKey, disabledKey } from '../../_utils';
-const props = defineProps({
-    data: {
-        type: Object as PropType<RadioElementData>,
-        required: true
-    }
-})
+import { editKey, formElementDataKey } from '../../../../utils/symbols';
+
 
 const edit = inject<Ref<boolean>>(editKey)
-const disabled = inject<Ref<boolean>>(disabledKey)
+const data = inject<Ref<RadioElementData>>(formElementDataKey)
 </script>
 
 <template>
-    <div class="radio-container">
-        <div v-if="!edit" v-for="option in data.options">
-            <label>{{ option.label }}</label>
-            <input autocomplete="off" type="radio" :value="option.value" />
-        </div>
-        <div v-else class="adoptions">
-
-        </div>
+  <div class="radio-container" v-if="data">
+    <div v-if="!edit" v-for="option in data?.options">
+      <label>{{ option.label }}</label>
+      <input autocomplete="off" type="radio" :value="option.value" />
     </div>
+    <div v-else class="adoptions">
+
+    </div>
+  </div>
+  <div v-else>
+    <p>No Form Element Data In Context</p>
+  </div>
 </template>
 
 <style scoped>

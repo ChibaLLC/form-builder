@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, reactive } from 'vue';
-import type { Pages, Form, Stores, Store, Page, Input } from '../../../types'
-import { disabledKey, draggedElementKey, editKey } from '../_utils';
+import type { Pages, Form, Stores, Store, Page, Input, FormElementData } from '../../../types'
+import { disabledKey, draggedElementKey, editKey, formElementDataListKey } from '../../../utils/symbols';
 import { createFormPage } from './Page/_utils';
 import { createStorePage } from '../../Store/_utils';
 
@@ -17,10 +17,10 @@ function addPage(starter?: Page) {
   pages.push(createFormPage(Page, form.pages, starter))
 }
 
-const store = resolveComponent("Store")
+const Store = resolveComponent("Store")
 const stores = shallowReactive<ReturnType<typeof createStorePage>[]>([])
 function addStore(starter?: Store) {
-  stores.push(createStorePage(store, form.stores, starter))
+  stores.push(createStorePage(Store, form.stores, starter))
 }
 
 const emits = defineEmits<{
@@ -48,7 +48,7 @@ const props = defineProps({
 
 const draggedElement = ref<Input | undefined>(undefined)
 provide<Ref<boolean>>(editKey, ref(true))
-provide<Ref<boolean>>(disabledKey, ref(false))
+provide<Ref<boolean>>(disabledKey, ref(true))
 provide<Ref<Input | undefined>>(draggedElementKey, draggedElement)
 
 function setDragged(value: Input) {
@@ -61,18 +61,17 @@ async function submit() {
 
 const hasPages = Object.values(props.starter.pages || {}).some(form => form.length)
 const hasStores = Object.values(props.starter.stores).some(store => store.length)
-setTimeout(() => {
-  if (hasPages || hasStores) {
-    for (const form in props.starter.pages) {
-      addPage(props.starter.pages[form])
-    }
-    for (const store in props.starter.stores) {
-      addStore(props.starter.stores[store])
-    }
-  } else {
-    addPage()
+
+if (hasPages || hasStores) {
+  for (const form in props.starter.pages) {
+    addPage(props.starter.pages[form])
   }
-})
+  for (const store in props.starter.stores) {
+    addStore(props.starter.stores[store])
+  }
+} else {
+  addPage()
+}
 
 onMounted(() => {
   if (window.innerWidth < 768) {
