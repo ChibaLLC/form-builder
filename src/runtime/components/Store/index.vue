@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, type PropType, type Ref, computed, inject } from 'vue'
+import { ref, type PropType, type Ref, inject } from 'vue'
 import type { Item } from '../../types'
 import { editKey } from '../../utils/symbols';
 

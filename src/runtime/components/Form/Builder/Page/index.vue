@@ -2,7 +2,7 @@
 import { resolveComponent, inject, type Ref, ref, type PropType, onMounted, watch } from 'vue';
 import type { Input, Page, FormElementData } from '~/src/runtime/types';
 import { editKey, draggedElementKey, activePageIndexKey } from '../../../../utils/symbols';
-import { Elements } from './_utils';
+import { Elements } from '../../../../local';
 
 const edit = inject<Ref<boolean>>(editKey)
 const draggedElement = inject<Ref<Input | undefined>>(draggedElementKey)

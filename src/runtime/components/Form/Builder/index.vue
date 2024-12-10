@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, watch, computed, type Reactive, toRef, isReactive, shallowRef } from 'vue';
+import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, watch, computed, type Reactive, toRef, isReactive, shallowRef, type Component } from 'vue';
 import type { Pages, Form, Stores, Store, Page, Input, FormElementData } from '../../../types'
 import { activePageIndexKey, disabledKey, draggedElementKey, editKey } from '../../../utils/symbols';
-import { clearPages, createFormPage } from './Page/_utils';
-import { createStorePage } from '../../Store/_utils';
+import { clearPages, createFormPage, createStorePage } from '../../../local';
 import { useState } from '#app';
 
 const Page = resolveComponent('FormBuilderPage')
@@ -13,13 +12,13 @@ const form = useState<{ pages: Pages; stores: Stores }>(() => ({
 }))
 
 
-const pages = shallowReactive<ReturnType<typeof createFormPage>[]>([])
+const pages = shallowReactive<Component[]>([])
 function addPage(starter?: Page) {
   pages.push(createFormPage(Page, form.value.pages, starter))
 }
 
 const Store = resolveComponent("Store")
-const stores = shallowReactive<ReturnType<typeof createStorePage>[]>([])
+const stores = shallowReactive<Component[]>([])
 function addStore(starter?: Store) {
   stores.push(createStorePage(Store, form.value.stores, starter))
 }
