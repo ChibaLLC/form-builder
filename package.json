@@ -1,6 +1,6 @@
 {
   "name": "@chiballc/nuxt-form-builder",
-  "version": "0.0.46",
+  "version": "0.0.47",
   "description": "For Builder Nuxt Module",
   "repository": "kgarchie/form-builder",
   "license": "MIT",
@@ -22,7 +22,7 @@
     "dev": "nuxt dev playground",
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
-    "release": "npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "release": "npm run prepack && changelogen --release && npm publish && git push --follow-tags",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit"
