@@ -1,58 +1,51 @@
 <script setup lang="ts">
 import type { FormElementData } from '../../../types'
 import { isStatic, isInput, isButton } from "../../../utils/functions";
-import { inject, type Ref, type PropType, provide, toRef, ref, onMounted } from 'vue';
+import { inject, type Ref, provide, onMounted, type Reactive, isReactive, computed, isRef, ref } from 'vue';
 import { editKey, formElementDataKey } from '../../../utils/symbols';
-
-const props = defineProps({
-  data: {
-    type: Object as PropType<FormElementData>,
-    required: true
-  }
-})
+const props = defineProps<{
+  data: Reactive<FormElementData>,
+  active?: Ref<boolean> | boolean
+}>()
 const emit = defineEmits<{
   delete: [number | string],
   focus: [boolean, FormElementData]
 }>()
 
+if (!isReactive(props.data)) {
+  console.error("Non reactive data: ", props.data)
+  throw new Error("Non reactive data emitted")
+}
+
 const edit = inject<Ref<boolean>>(editKey)
-provide<Ref<FormElementData>>(formElementDataKey, toRef(() => props.data))
-  
-const onClick = (e: Event) => {
-  if (!edit?.value) return
-  const dropzone = document.getElementById("dropzone");
-  if (!container.value?.contains(e.target as Node)) {
-    container.value?.classList.remove("element-active")
-    emit("focus", false, props.data)
-    dropzone?.removeEventListener("click", onClick)
-  }
-}
+provide<Reactive<FormElementData>>(formElementDataKey, props.data)
 
-const container = ref<HTMLElement | undefined>()
 function focusWithin() {
-  if(!edit?.value) return
-  if (!container.value) return console.error("What the fuck?")
-  container.value.classList.add("element-active")
+  if (!edit?.value) return
   emit("focus", true, props.data)
-  const dropzone = document.getElementById("dropzone")
-  dropzone?.addEventListener("click", onClick);
 }
 
+const container = ref<HTMLDivElement | null>(null)
 onMounted(() => {
   document?.addEventListener("keydown", (e) => {
     if (!edit?.value) return
-    const dropzone = document.getElementById("dropzone")
     if (e.key === "Escape") {
-      container.value?.classList.remove("element-active")
       emit("focus", false, props.data)
-      dropzone?.removeEventListener("click", onClick)
     }
   })
 })
+
+const active = computed(() => {
+  if (isRef(props.active)) {
+    return props.active.value
+  } else {
+    return props.active
+  }
+})
 </script>
 <template>
-  <div class="renderer-container" :draggable="edit" :class="{ 'hover-active': edit }" @click="focusWithin"
-    ref="container">
+  <div class="renderer-container" :draggable="edit" :class="{ 'hover-active': edit, 'element-active': active }"
+    @click="focusWithin" ref="container">
     <div class="close-icon-container" v-if="edit">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" @click="emit('delete', data.index)"
         class="close-icon">

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { resolveComponent, inject, type Ref, ref, type PropType, onMounted, watch } from 'vue';
 import type { Input, Page, FormElementData } from '~/src/runtime/types';
-import { editKey, draggedElementKey } from '../../../../utils/symbols';
+import { editKey, draggedElementKey, activePageIndexKey } from '../../../../utils/symbols';
 import { Elements } from './_utils';
 
 const edit = inject<Ref<boolean>>(editKey)
 const draggedElement = inject<Ref<Input | undefined>>(draggedElementKey)
+const activePageIndex = inject<Ref<number | undefined>>(activePageIndexKey)
 const dropzone = ref<HTMLElement | null>(null)
 
 const props = defineProps({
@@ -29,7 +30,7 @@ const emits = defineEmits<{
 }>()
 
 const FieldComponent = resolveComponent("FormElementsRenderer")
-const elements = new Elements(FieldComponent)
+const elements = new Elements(FieldComponent, props.index)
 elements.starter(props.starter)
 elements.on('add', (elData: FormElementData) => {
   emits('addField', props.index, elData)
@@ -40,8 +41,9 @@ elements.on('delete', (elData: FormElementData) => {
 elements.on('update', (elData: FormElementData) => {
   emits('updateField', props.index, elData)
 })
-
-watch(elements.active, (val) => emits("active", val))
+watch(elements.active, (val) => {
+  emits("active", val)
+})
 
 const onDrop = (e: Event) => {
   e.preventDefault()
@@ -89,9 +91,9 @@ const onDragleave = (e: Event) => {
       </div>
     </div>
     <form class="canvas-form" id="dropzone" @submit.prevent @drop="onDrop" @dragover="onDragover"
-      @dragleave="onDragleave">
+      @click="activePageIndex = index" @dragleave="onDragleave">
       <div v-if="elements.components.size">
-        <component v-for="[index, comp] in elements.components" :is="comp" />
+        <component v-for="[index, comp] of elements.components" :is="comp" />
       </div>
       <div v-else style="display: grid; width: 100%; place-items: center; padding: 2rem 0 4rem 0;">
         <!-- drag and drop by icon 54 from <a href="https://thenounproject.com/browse/icons/term/drag-and-drop/" target="_blank" title="drag and drop Icons">Noun Project</a> (CC BY 3.0) -->

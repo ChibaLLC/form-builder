@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { inject, type Ref } from 'vue';
+import { inject, type Ref, type Reactive } from 'vue';
 import { formElementDataKey, disabledKey } from '../../../utils/symbols';
 import type { ButtonElementData } from '~/src/runtime/types';
 
-const data = inject<Ref<ButtonElementData>>(formElementDataKey)
+const data = inject<Reactive<ButtonElementData>>(formElementDataKey)
 const disabled = inject<Ref<boolean>>(disabledKey)
 </script>
 

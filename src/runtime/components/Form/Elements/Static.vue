@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { inject, type Ref } from 'vue';
+import { inject, type Reactive } from 'vue';
 import { formElementDataKey } from '../../../utils/symbols';
 import type { StaticElementData } from '~/src/runtime/types';
 
-const data = inject<Ref<StaticElementData>>(formElementDataKey)
+const data = inject<Reactive<StaticElementData>>(formElementDataKey)
 </script>
 
 <template>

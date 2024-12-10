@@ -34,7 +34,7 @@ a{
 .icon {
   width: 35px;
   height: 35px;
-  background-color: #393939;
+  background-color: #2b2a2a;
   display: grid;
   place-items: center;
   border-radius: 4px;
@@ -70,6 +70,6 @@ a{
 }
 
 .panel-item:hover{
-  background-color: #333333;
+  background-color: #262626;
 }
 </style>

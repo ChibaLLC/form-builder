@@ -1,23 +1,41 @@
 <template>
     <div style="display: flex; align-items: center; gap: 0.5rem;">
         <label class="switch">
-            <input type="checkbox" @click="toggleCheckbox">
+            <input type="checkbox" @click="toggleCheckbox" :checked="checked">
             <div class="slider round"></div>
         </label>
         <slot></slot>
     </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, type PropType, type ShallowRef, type Ref, isRef } from 'vue';
 
-const checked = ref(false)
+
 const emit = defineEmits<{
     change: [boolean]
 }>()
 function toggleCheckbox() {
     checked.value = !checked.value
+    if (isRef(props.model)) {
+        props.model.value = checked.value
+    } else if (props.model) {
+        console.warn(props.model, "Is Not A Ref")
+    }
     emit('change', checked.value)
 }
+
+const props = defineProps({
+    model: {
+        type: Object as PropType<ShallowRef<boolean> | Ref<boolean>>,
+        required: false
+    },
+    checked: {
+        type: Boolean,
+        default: () => false
+    }
+})
+
+const checked = ref(props.checked)
 </script>
 <style scoped>
 .switch {

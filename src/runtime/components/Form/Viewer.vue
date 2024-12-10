@@ -76,7 +76,7 @@ function goBack() {
   flowDirection.value = 'backward'
   if (currentStoreIndex.value > 0) {
     currentStoreIndex.value -= 1
-  } else if(currentFormIndex.value > 0) {
+  } else if (currentFormIndex.value > 0) {
     currentFormIndex.value -= 1
   } else {
     emits("back")
@@ -95,7 +95,7 @@ provide<Ref<Input | undefined>>(draggedElementKey, ref(undefined))
     <TransitionGroup tag="div" :name="flowDirection === 'forward' ? 'slide_out' : 'slide_in'">
       <div v-for="[index, page] of _pages" v-if="currentFormIndex < _pages.length">
         <FormRenderer v-if="currentFormIndex === +index" @submit="formSubmit(+index, page)" @back="goBack"
-          :data="page" />
+          :index="+index" :data="page" />
       </div>
       <div v-for="[index, store] of _stores"
         v-if="_stores.length && currentFormIndex >= _pages.length && currentStoreIndex < _stores.length">
@@ -105,8 +105,8 @@ provide<Ref<Input | undefined>>(draggedElementKey, ref(undefined))
       <div class="processing" v-if="currentFormIndex >= _pages.length && currentStoreIndex >= _stores.length">
         <div class="loading-spinner" v-if="showSpinner"></div>
         <div v-else>
-          <div v-for="[_, page] in _pages">
-            <FormRenderer :data="page" />
+          <div v-for="[index, page] in _pages">
+            <FormRenderer :data="page" :index="+index" />
           </div>
           <div v-for="[_, store] of _stores">
             <StoreRenderer :data="store" />

@@ -1,4 +1,4 @@
-import { type Ref, h, inject, defineComponent, resolveComponent, createVNode, shallowReactive, type Component, shallowRef } from "vue"
+import { type Ref, h, inject, defineComponent, resolveComponent, isReactive, shallowReactive, type Component, shallowRef, type Reactive, reactive, computed } from "vue"
 import type {
     Page,
     Pages,
@@ -10,7 +10,7 @@ import type {
     ImageInputElementData,
     InputElementData, RadioElementData, RichTextElementData, SelectElementData, StaticElementData, TextareaElementData
 } from "~/src/runtime/types"
-import { disabledKey, draggedElementKey, editKey } from "../../../../utils/symbols"
+import { activePageIndexKey, draggedElementKey } from "../../../../utils/symbols"
 import { Field } from '../../../../utils/constants';
 import {
     isInput,
@@ -65,8 +65,8 @@ export function createFormPage(Page: ResolvedComponent, canvases: Pages, starter
                         console.warn("Canvas Index not found")
                     }
                 },
-                onActive: (val: FormElementData) => {
-                    this.$emit("active", val)
+                onActive: (index: number, val: FormElementData) => {
+                    this.$emit("active", index, val)
                 },
                 starter: starter
             }))
@@ -75,40 +75,45 @@ export function createFormPage(Page: ResolvedComponent, canvases: Pages, starter
 }
 
 export class Elements {
-    private elements: Array<FormElementData> = []
+    private elements: Array<Reactive<FormElementData>> = []
     public components = shallowReactive(new Map<number, Component>())
-    public active = shallowRef<FormElementData | undefined>(undefined);
+    public active = shallowRef<Reactive<FormElementData> | undefined>(undefined);
     private events: { [key: string]: Array<(data: FormElementData) => void> } = {}
-    private FieldComponent: ResolvedComponent;
+    private FormElementsRenderer: ResolvedComponent;
     private movingElement: number | undefined;
     private latestEnter: number | undefined;
     private backpressure: { [key: string]: Array<FormElementData> } = {}
+    private pageIndex: number;
 
-    constructor(FormElementsRenderer: ResolvedComponent) {
-        this.FieldComponent = FormElementsRenderer
+    constructor(FormElementsRenderer: ResolvedComponent, pageIndex: number) {
+        this.FormElementsRenderer = FormElementsRenderer
+        this.pageIndex = pageIndex
     }
 
     private initialiseElementData(type: Input) {
         const index = this.elements.length;
+        let data;
         switch (true) {
             case isInput({ type }):
-                return {
+                data = {
                     inputType: type,
                     type: type,
                     label: (function (field: Field) {
                         switch (field) {
                             case Field.EMAIL:
                                 return "Email"
+                            default:
+                                return ''
                         }
-                        return ''
                     }(type)),
                     placeholder: '',
                     value: '',
                     index
                 } satisfies InputElementData;
+                break;
 
             case isImageInput({ type }):
-                return {
+                data = {
                     type: Field.IMAGE,
                     inputType: Field.IMAGE,
                     label: '',
@@ -116,33 +121,38 @@ export class Elements {
                     value: undefined,
                     index
                 } satisfies ImageInputElementData;
+                break;
+
             case isFileInput({ type }):
-                return {
+                data = {
                     type: Field.FILE,
                     inputType: Field.FILE,
                     label: '',
                     index
                 } satisfies FileInputElementData;
+                break;
 
             case isCheckbox({ type }):
-                return {
+                data = {
                     type: Field.CHECKBOX,
                     inputType: Field.CHECKBOX,
                     label: '',
                     multiple: true,
                     index
                 } satisfies CheckboxElementData;
+                break;
 
             case isButton({ type }):
-                return {
+                data = {
                     type: Field.BUTTON as any,
                     inputType: 'submit',
                     label: '',
                     index
                 } satisfies ButtonElementData;
+                break;
 
             case isRadio({ type }):
-                return {
+                data = {
                     type: Field.RADIO,
                     inputType: Field.RADIO,
                     label: '',
@@ -153,15 +163,16 @@ export class Elements {
                 break;
 
             case isStatic({ type }):
-                return {
+                data = {
                     type: Field.STATIC,
                     inputType: Field.STATIC,
                     index,
                     text: ''
                 } satisfies StaticElementData;
+                break;
 
             case isTextarea({ type }):
-                return {
+                data = {
                     type: Field.TEXTAREA,
                     inputType: Field.TEXTAREA,
                     label: '',
@@ -169,28 +180,32 @@ export class Elements {
                     value: '',
                     index
                 } satisfies TextareaElementData;
+                break;
 
             case isSelect({ type }):
-                return {
+                data = {
                     label: '',
                     type: Field.SELECT as any,
                     inputType: Field.SELECT as any,
                     index
                 } satisfies SelectElementData;
+                break;
 
             case isRichText({ type }):
-                return {
+                data = {
                     type: Field.RICHTEXT,
                     label: '',
                     value: '',
                     inputType: Field.RICHTEXT,
                     index
                 } satisfies RichTextElementData;
-
+                break
             default:
                 alert("Unsupported Field Type")
                 throw new Error("Unsupported Field Type")
         }
+
+        return reactive(data)
     }
 
 
@@ -201,7 +216,7 @@ export class Elements {
         return this;
     }
 
-    on(event: 'add' | 'delete' | 'update', callback: (data: FormElementData) => void) {
+    on(event: 'add' | 'delete' | 'update', callback: (data: Reactive<FormElementData>) => void) {
         if (!this.events[event]) this.events[event] = []
         this.events[event].push(callback)
         const backpressure = this.backpressure[event]
@@ -215,14 +230,19 @@ export class Elements {
         if (!data || data.length === 0) return this;
         data.map(el => {
             const index = el.index || this.elements.length
-            this.elements.push({ ...el, index })
+            const datum = reactive({ ...el, index })
+            this.elements.push(datum)
             this.emit('add', this.elements[index])
         })
         this.render()
         return this;
     }
 
-    private emit(event: 'add' | 'delete' | 'update', data: FormElementData) {
+    private emit(event: 'add' | 'delete' | 'update', data: Reactive<FormElementData>) {
+        if (!isReactive(data)) {
+            console.error("Non reactive data: ", data)
+            throw new Error("Non reactive data emitted")
+        }
         const functions = this.events[event]
         if (!functions || event.length === 0) {
             if (!this.backpressure[event]) {
@@ -236,7 +256,11 @@ export class Elements {
         }
     }
 
-    createComponent(data: FormElementData) {
+    createComponent(data: Reactive<FormElementData>) {
+        if (!isReactive(data)) {
+            console.error("Non reactive data: ", data)
+            throw new Error("Non reactive data emitted")
+        }
         return defineComponent({
             setup: () => {
                 const onDragStart = (_: Event) => {
@@ -245,11 +269,27 @@ export class Elements {
                 const onDragEnter = (_: Event) => {
                     this.latestEnter = data.index
                 }
-                return { FieldComponent: this.FieldComponent, delete: this.delete.bind(this), onDragStart, onDragEnter, setActive: this.setActive.bind(this) }
+                const activePageIndex = inject<Ref<number | undefined>>(activePageIndexKey)
+                return {
+                    FormElementsRenderer: this.FormElementsRenderer,
+                    delete: this.delete.bind(this),
+                    onDragStart, onDragEnter,
+                    setActive: this.setActive.bind(this),
+                    pageIndex: this.pageIndex,
+                    reactive: {
+                        active: this.active,
+                        activePageIndex: activePageIndex!,
+                    }
+                }
             },
             render() {
-                return h('div', { onDragstart: this.onDragStart, onDragenter: this.onDragEnter }, h(this.FieldComponent, {
+                return h('div', { onDragstart: this.onDragStart, onDragenter: this.onDragEnter }, h(this.FormElementsRenderer, {
                     data: data,
+                    active: computed(() => {
+                        const onCurrentPage = this.pageIndex === this.reactive.activePageIndex.value
+                        const onCurrentElement = this.reactive.active.value === data
+                        return onCurrentElement && onCurrentPage
+                    }),
                     onDelete: (idx: number) => {
                         this.delete(idx)
                     },
@@ -270,11 +310,11 @@ export class Elements {
         return this;
     }
 
-    isRendered(el: FormElementData) {
+    isRendered(el: Reactive<FormElementData>) {
         return this.components.has(el.index)
     }
 
-    update(index: number, data: FormElementData) {
+    update(index: number, data: Reactive<FormElementData>) {
         const component = this.createComponent(data)
         this.components.delete(index)
         this.components.set(data.index, component)
@@ -294,10 +334,15 @@ export class Elements {
         return this;
     }
 
-    setActive(state: boolean, data: FormElementData) {
+    setActive(state: boolean, data: Reactive<FormElementData>) {
+        if (!isReactive(data)) {
+            console.error("Non reactive data: ", data)
+            throw new Error("Non reactive data emitted")
+        }
+
         if (!state && !this.active.value) return
 
-        if (this.active.value?.index === data.index) {
+        if (this.active.value === data) {
             if (state === true) {
                 this.active.value = data
             } else {
@@ -336,4 +381,16 @@ export class Elements {
         const newIndex = Number(this.latestEnter)
         this.move(movingIndex, newIndex)
     }
+}
+
+export function clearPages() {
+    document.querySelectorAll("#dropzone").forEach(el => {
+        const container = el.closest(".canvas-container")
+        if (container) {
+            container.remove()
+        } else {
+            console.warn("Container not found for", el)
+        }
+    })
+    console.warn("cCleared all pages | page data may have not been cleared yet")
 }

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { type PropType, type Ref, inject, reactive } from 'vue'
+import { type Ref, type Reactive, inject, ref } from 'vue'
 import type { SelectElementData } from "../../../../types";
 import { disabledKey, editKey, formElementDataKey } from '../../../../utils/symbols';
 
-const data = inject<Ref<SelectElementData>>(formElementDataKey)
+const data = inject<Reactive<SelectElementData>>(formElementDataKey)
 if (data) {
-  data.value.options = reactive(data.value.options || [])
+  if (!data.options) data.options = []
+  if (!data.value) data.value = ""
+  if (!data.description) data.description =""
 }
 function capitalise(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -18,15 +20,15 @@ const emit = defineEmits<{
 
 function addOption(event: any) {
   const value = event.target.value
-  data?.value.options?.push({ label: value, value: value })
+  data?.options?.push({ label: value, value: value })
   event.target.value = ''
 }
 
 function removeOption(value: string) {
   if (!data) return console.warn("No Form Element Data Provided")
-  const index = data.value.options?.findIndex(d => d.value === value)
+  const index = data.options?.findIndex(d => d.value === value)
   if (index !== undefined && index >= 0) {
-    data.value.options?.splice(index, 1)
+    data.options?.splice(index, 1)
   }
 }
 

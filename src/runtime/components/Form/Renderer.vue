@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, inject, type PropType } from 'vue'
+import { type ShallowRef, inject, type PropType, type Ref, type Reactive } from 'vue'
 import { disabledKey } from '../../utils/symbols';
 import type { FormElementData } from '../../types';
 
@@ -9,18 +9,18 @@ const emits = defineEmits<{
 }>()
 
 const disabled = inject<Ref<boolean>>(disabledKey)
-defineProps({
-  data: {
-    type: Object as PropType<FormElementData[]>,
-    requuired: true
-  }
-})
+defineProps<{
+  data: Reactive<FormElementData[]>,
+  active?: { pageIndex: number, data: FormElementData } | undefined,
+  index: number
+}>()
 </script>
 <template>
   <Title>Form</Title>
   <div class="form-container">
     <form class="form-renderer" @submit.prevent="emits('submit')">
-      <FormElementsRenderer v-for="element in data" :key="element.index" :data="element" />
+      <FormElementsRenderer v-for="element in data" :key="element.index" :data="element"
+        :active="index === active?.pageIndex && active.data.index === element.index" />
       <div class="form-footer" v-if="!disabled">
         <button type="button" @click="emits('back');" class="form-back-button">Back</button>
         <button type="submit" class="form-submit-button">

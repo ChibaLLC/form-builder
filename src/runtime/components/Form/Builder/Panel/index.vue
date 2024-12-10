@@ -143,7 +143,7 @@ a {
   flex-direction: column;
   gap: 0.5rem;
   color: white;
-  background-color: #262626;
+  background-color: #323232;
 }
 
 .panel .search-box {
@@ -171,7 +171,7 @@ a {
   width: 100%;
   padding: 0.4rem 0 0.4rem 1.8rem;
   border-radius: 4px;
-  background-color: #323232;
+  background-color: #262626;
   color: white;
   border: none;
 }

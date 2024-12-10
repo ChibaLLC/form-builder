@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { inject, type Ref } from 'vue'
-import type {FileInputElementData} from "../../../../types";
+import { inject, type Ref, type Reactive, ref } from 'vue'
+import type { FileInputElementData } from "../../../../types";
 import { editKey, disabledKey, formElementDataKey } from '../../../../utils/symbols';
 
-const data = inject<Ref<FileInputElementData>>(formElementDataKey)
+const data = inject<Reactive<FileInputElementData>>(formElementDataKey)
 
 const emit = defineEmits<{
   delete: [idx: number]
@@ -21,7 +21,10 @@ function onChange(event: any) {
   }
 
   if (files.length === 0) return console.warn("No valid files provided")
-  if (data) data.value.value = files
+  if (data) {
+    if (!data.value) data.value = undefined
+    data.value = files
+  }
 }
 
 const edit = inject<Ref<boolean>>(editKey)
@@ -56,15 +59,15 @@ const disabled = inject<Ref<boolean>>(disabledKey)
 }
 
 ul,
-ol{
+ol {
   list-style: none;
 }
 
-a{
+a {
   text-decoration: none;
 }
 
-.file-container{
+.file-container {
   display: flex;
   flex-direction: column;
   width: 80%;

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, watch, computed } from 'vue';
+import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, watch, computed, type Reactive, toRef, isReactive, shallowRef } from 'vue';
 import type { Pages, Form, Stores, Store, Page, Input, FormElementData } from '../../../types'
-import { disabledKey, draggedElementKey, editKey } from '../../../utils/symbols';
-import { createFormPage } from './Page/_utils';
+import { activePageIndexKey, disabledKey, draggedElementKey, editKey } from '../../../utils/symbols';
+import { clearPages, createFormPage } from './Page/_utils';
 import { createStorePage } from '../../Store/_utils';
 import { useState } from '#app';
 
@@ -48,6 +48,8 @@ const props = defineProps({
 
 
 const draggedElement = ref<Input | undefined>(undefined)
+const activePage = ref<number | undefined>(undefined)
+provide<Ref<number | undefined>>(activePageIndexKey, activePage)
 provide<Ref<boolean>>(editKey, ref(true))
 provide<Ref<boolean>>(disabledKey, ref(true))
 provide<Ref<Input | undefined>>(draggedElementKey, draggedElement)
@@ -63,9 +65,9 @@ async function submit() {
 const starterPages = computed(() => Object.values(props.starter.pages || {}))
 const starterStore = computed(() => Object.values(props.starter.stores))
 
-
 watch([starterPages, starterStore], ([pages, stores]) => {
   if (pages.length || stores.length) {
+    clearPages()
     for (const page of pages) {
       addPage(page)
     }
@@ -89,7 +91,7 @@ onMounted(() => {
   })
 })
 
-const active = ref<FormElementData | undefined>(undefined)
+const active = shallowRef<Reactive<FormElementData> | undefined>(undefined)
 </script>
 <template>
   <div class="three" :style="styles">
@@ -99,7 +101,7 @@ const active = ref<FormElementData | undefined>(undefined)
     <div class="builder">
       <div class="canvas-container">
         <div v-for="page of pages">
-          <component :is="page" @active="active = $event" />
+          <component :is="page" @active="active = $event;" />
         </div>
         <div v-for="store of stores">
           <component :is="store" />
@@ -137,7 +139,7 @@ const active = ref<FormElementData | undefined>(undefined)
       </div>
     </div>
     <div>
-      <FormBuilderProperties :styles="styles" :data="active" />
+      <FormBuilderProperties :styles="styles" :active="active" />
     </div>
   </div>
 </template>

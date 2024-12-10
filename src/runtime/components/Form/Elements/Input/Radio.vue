@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { type Ref, inject } from 'vue'
+import { type Ref, inject, type Reactive } from 'vue'
 import type {RadioElementData} from "../../../../types";
 import { editKey, formElementDataKey } from '../../../../utils/symbols';
 
 
 const edit = inject<Ref<boolean>>(editKey)
-const data = inject<Ref<RadioElementData>>(formElementDataKey)
+const data = inject<Reactive<RadioElementData>>(formElementDataKey)
 </script>
 
 <template>

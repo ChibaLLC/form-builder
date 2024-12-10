@@ -1,40 +1,29 @@
 <script setup lang="ts">
-import { defineComponent, inject, type PropType, h, type Ref, reactive, computed, watch } from 'vue'
+import { defineComponent, inject, type PropType, h, type Ref, computed, type Reactive, ref, watch, toRef } from 'vue'
 import type { CheckboxElementData } from "../../../../types";
 import { disabledKey, editKey, formElementDataKey } from '../../../../utils/symbols';
+import { deleteValues } from '../../../../utils/functions';
 
-const data = inject<Ref<CheckboxElementData>>(formElementDataKey);
+const data = inject<Reactive<CheckboxElementData>>(formElementDataKey);
 if (data) {
-  data.value.options = reactive(data.value.options || [])
-  data.value.value = reactive(data.value.value || {})
-  data.value.multiple = false
+  if (!data.options) data.options = []
+  if (!data.value) data.value = {}
+  if (!data.multiple) data.multiple = false
+  if (!data.description) data.description = ""
 }
 function addOption(event: Event) {
   const value = (event.target as HTMLInputElement)?.value
   if (!value) return console.warn("No value provided")
 
-  data?.value.options?.push({ label: value, value: value });
+  data?.options?.push({ label: value, value: value });
   (event.target as HTMLInputElement).value = ''
 }
 
 function removeOption(value: string) {
   if (!data) return
-  const index = data.value.options?.findIndex(d => d.value === value)
+  const index = data.options?.findIndex(d => d.value === value)
   if (index !== undefined && index >= 0) {
-    data.value.options?.splice(index, 1)
-  }
-}
-
-function deleteValues<T extends Object>(obj: T, key?: keyof T) {
-  if (!obj) return
-  if (!key) {
-    for (const key in obj) {
-      delete obj[key]
-    }
-  } else {
-    if (obj[key]) {
-      delete obj[key]
-    }
+    data.options?.splice(index, 1)
   }
 }
 
@@ -46,27 +35,27 @@ const Option = defineComponent({
     }
   },
   setup(props) {
-    const data = inject<Ref<CheckboxElementData>>(formElementDataKey);
+    const data = inject<Reactive<CheckboxElementData>>(formElementDataKey);
     if (!data) return console.warn("No Element Data Found For Option")
     const disabled = inject<Ref<boolean>>(disabledKey)
 
     const checked = computed({
       get() {
-        const value = data.value.value?.[props.option.label]
+        const value = data.value?.[props.option.label]
         return value === props.option.value
       },
       set(val) {
-        if (!data.value.value) data.value.value = {}
+        if (!data.value) data.value = {}
         if (val) {
           if (!data.value.multiple) {
-            deleteValues(data.value.value)
+            deleteValues(data.value)
           }
-          data.value.value[props.option.label] = props.option.value
+          data.value[props.option.label] = props.option.value
         } else {
           if (data.value.multiple) {
-            deleteValues(data.value.value, props.option.label)
+            deleteValues(data.value, props.option.label)
           } else {
-            deleteValues(data.value.value)
+            deleteValues(data.value)
           }
         }
       }
@@ -81,16 +70,23 @@ const Option = defineComponent({
       }
     }
 
-    return { checked, onInput, disabled, data }
+    return { checked, onInput, disabled }
   },
   render() {
-    const input = h('input', { onChange: this.onInput, checked: this.checked, type: 'checkbox', style: { cursor: "pointer" }, disabled: this.disabled, required: !!this.data.rules?.find(r => r === 'required') })
+    const input = h('input', { onChange: this.onInput, checked: this.checked, type: 'checkbox', style: { cursor: "pointer" }, disabled: this.disabled })
     const label = h('label', { onClick: () => { input.el!.click() }, style: { cursor: "pointer", outline: "none" } }, this.$props.option.label)
     return h('div', { class: 'option' }, [input, label])
   }
 })
 
 const edit = inject<Ref<boolean>>(editKey)
+const input = ref<HTMLInputElement | null>(null)
+if (data?.rules?.find(r => r === 'required')) {
+  watch(data, (val) => {
+    if (!input.value) return console.warn("Hidden input missing!!")
+    input.value.checked = !!Object.values(val.value || {}).length
+  })
+}
 </script>
 
 <template>
@@ -99,10 +95,12 @@ const edit = inject<Ref<boolean>>(editKey)
       <input :disabled="!edit" autocomplete="off" type="text" id="select" class="label" v-model="data.label"
         placeholder="Add a label" />
     </label>
-    <label for="description" v-if="(data?.description?.length && data.description.length > 0) || edit">
+    <label for="description" v-if="(data?.description?.length && data.description.length) || edit">
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
         v-model="data.description" placeholder="Add a description (optional)" />
     </label>
+    <input type="checkbox" :required="!!data.rules?.find(r => r === 'required')" ref="input"
+      style="position: absolute; top: 2rem; left: 0.5rem; opacity: 0;" @click.prevent>
     <div v-if="data.options?.length" class="options">
       <div v-for="option in data?.options" class="option">
         <Option :option="option" />
@@ -120,15 +118,7 @@ const edit = inject<Ref<boolean>>(editKey)
       <p>No options added.</p>
     </div>
     <div class="adoptions" v-if="edit">
-      <input placeholder="Add Options" @keydown.enter="addOption" />
-    </div>
-    <div v-if="edit"
-      style="margin-top: 1rem; margin-left: 0.1rem; display: flex; gap: 0.25rem; align-items: center; width: fit-content;">
-      <input type="checkbox" id="allow_multiple" v-model="data.multiple" style="cursor: pointer;" />
-      <label for="allow_multiple" style="margin: 0;">
-        <small style="font-size: 14px; cursor: pointer;" @click="data.multiple && deleteValues(data.value || {})">Allow
-          multiple selection</small>
-      </label>
+      <input placeholder="Add An Option" @keydown.enter="addOption" />
     </div>
   </div>
   <div v-else>
@@ -142,6 +132,7 @@ const edit = inject<Ref<boolean>>(editKey)
   flex-direction: column;
   width: 100%;
   margin: auto;
+  position: relative;
 }
 
 .adoptions input {

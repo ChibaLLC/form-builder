@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, inject } from 'vue'
+import { type Ref, type Reactive, inject, ref } from 'vue'
 import { isTextarea, isSelect, isRadio, isCheckbox, isImageInput, isFileInput } from "../../../../utils/functions";
 import { disabledKey, editKey, formElementDataKey } from '../../../../utils/symbols';
 import type {
@@ -7,7 +7,16 @@ import type {
 } from "../../../../types";
 const disabled = inject<Ref<boolean>>(disabledKey)
 const edit = inject<Ref<boolean>>(editKey)
-const data = inject<Ref<InputElementData>>(formElementDataKey)
+const data = inject<Reactive<InputElementData>>(formElementDataKey)
+if (data) {
+  if (!data.value) {
+    data.value = undefined
+  }
+
+  if (!data.description) {
+    data.description = ""
+  }
+} 
 </script>
 <template>
   <template v-if="data">
@@ -21,15 +30,15 @@ const data = inject<Ref<InputElementData>>(formElementDataKey)
     <div v-else>
       <label for="label">
         <input :disabled="!edit" autocomplete="off" :type="data.inputType" id="label" class="label"
-          :style="{ marginBottom: (data?.description?.length || edit) ? '0rem' : '0.5rem' }" v-model="data.label"
-          placeholder="Add a label" />
+          :style="{ marginBottom: (data?.description?.length || edit) ? '0rem' : '0.5rem' }"
+          v-model="data.label" placeholder="Add a label" />
       </label>
-      <label for="description" v-if="(data?.description && data.description.length) || edit">
+      <label for="description" v-if="(data?.description && data.description?.length) || edit">
         <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
           v-model="data.description" placeholder="Add a description (optional)" />
       </label>
-      <input autocomplete="off" :type="data?.inputType" :accept="data?.accept" v-model="data.value" style="width: 100%" :required="!!data.rules?.find(r => r === 'required')"
-        :disabled="disabled" />
+      <input autocomplete="off" :type="data?.inputType" :accept="data?.accept" v-model="data.value"
+        style="width: 100%" :required="!!data.rules?.find(r => r === 'required')" :disabled="disabled" />
     </div>
   </template>
   <div v-else>

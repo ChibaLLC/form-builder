@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { inject, type Ref } from 'vue'
+import { inject, type Ref, type Reactive, ref } from 'vue'
 import type { ImageInputElementData } from "../../../../types";
 import { ImageTypeEnum } from "../../../../utils/constants";
 import { editKey, disabledKey, formElementDataKey } from '../../../../utils/symbols';
 
-const data = inject<Ref<ImageInputElementData>>(formElementDataKey)
-if (data) data.value.accept = Object.values(ImageTypeEnum).join(',')
+const data = inject<Reactive<ImageInputElementData>>(formElementDataKey)
+if (data) {
+  if (!data.accept) data.accept = ""
+  data.accept = Object.values(ImageTypeEnum).join(',')
+  if (!data.description) data.description = ""
+}
 
 function onChange(event: any) {
   const files = event.target.files
@@ -19,7 +23,7 @@ function onChange(event: any) {
   }
 
   if (files.length === 0) return console.warn("No valid files provided")
-  if (data?.value) data.value.value = files
+  if (data?.value) data.value = files
 }
 
 const edit = inject<Ref<boolean>>(editKey)
@@ -36,7 +40,7 @@ const disabled = inject<Ref<boolean>>(disabledKey)
       <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
         v-model="data.description" placeholder="Add a description (optional)" />
     </label>
-    <input autocomplete="off" v-if="!edit" type="file" @change="onChange" :accept="data?.accept" style="width: 100%"
+    <input autocomplete="off" v-if="!edit" type="file" @change="onChange" :accept="data.accept" style="width: 100%"
       :required="!!data.rules?.find(r => r === 'required')" :disabled="disabled" />
   </div>
   <div v-else>

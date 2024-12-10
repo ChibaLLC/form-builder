@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { type PropType, type Ref, inject } from 'vue'
-import type {TextareaElementData} from "../../../../types";
+import { type Ref, inject, type Reactive, ref } from 'vue'
+import type { TextareaElementData } from "../../../../types";
 import { editKey, disabledKey, formElementDataKey } from '../../../../utils/symbols';
 
 const edit = inject<Ref<boolean>>(editKey)
 const disabled = inject<Ref<boolean>>(disabledKey)
-const data = inject<Ref<TextareaElementData>>(formElementDataKey)
+const data = inject<Reactive<TextareaElementData>>(formElementDataKey)
+if (data && !data.description) {
+  data.description = ""
+}
 </script>
 
 <template>
@@ -36,15 +39,15 @@ const data = inject<Ref<TextareaElementData>>(formElementDataKey)
 }
 
 ul,
-ol{
+ol {
   list-style: none;
 }
 
-a{
+a {
   text-decoration: none;
 }
 
-.textarea-container{
+.textarea-container {
   display: flex;
   flex-direction: column;
   width: 80%;
@@ -88,7 +91,8 @@ label:not(:focus) input.description {
   outline: 1px solid rgba(78, 78, 78, 0.1);
 }
 
-label:focus-within input, label:focus input {
+label:focus-within input,
+label:focus input {
   cursor: text;
   border-radius: 0.25rem;
   outline: 1px solid rgba(78, 78, 78, 0.4);
@@ -99,7 +103,8 @@ label:focus-within input, label:focus input {
 }
 
 
-label:focus-within input::placeholder, label:focus input::placeholder {
+label:focus-within input::placeholder,
+label:focus input::placeholder {
   text-decoration: none;
 }
 

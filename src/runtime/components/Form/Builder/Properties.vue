@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type CSSProperties, type PropType } from "vue";
+import { isCheckbox, deleteValues, isSelect } from "../../../utils/functions";
+import { computed, type CSSProperties, type PropType, type Reactive, type Ref, ref, watch, watchEffect } from "vue";
 import type { FormElementData } from "~/src/runtime/types";
 
 const props = defineProps({
@@ -7,42 +8,94 @@ const props = defineProps({
         type: Object as PropType<CSSProperties>,
         required: true
     },
-    data: {
-        type: Object as PropType<FormElementData>,
+    active: {
+        type: Object as PropType<Reactive<FormElementData> | undefined>,
         required: false
     }
 })
 
-function markRequired(checked: boolean) {
-    if (!props.data) return console.log("Huuuuhh!!!????")
-    if (checked) {
-        props.data.rules = ["required"]
-    } else {
-        props.data.rules = props.data.rules?.filter(r => r !== "required")
+const required = computed({
+    get: () => !!props.active?.rules?.find(r => r === 'required'),
+    set: (val) => {
+        if (!props.active) return console.log("Huuuuhh!!!????")
+        if (val) {
+            if (!props.active?.rules) props.active.rules = []
+            props.active.rules.push("required")
+        } else {
+            props.active.rules = props.active.rules?.filter(r => r !== "required")
+        }
     }
+})
+
+const temp = ref("")
+function addOption() {
+    const datum = temp.value.trim()
+    if (!datum) return
+    props.active?.options.push({
+        label: datum,
+        value: datum
+    })
+    temp.value = ""
 }
 </script>
 
 <template>
     <div class="properties" :style="styles">
         <h3 class="font-bold">Properties</h3>
-        <div style="position: relative; display: flex; flex-direction: column; height: 100%;">
+        <div style="position: relative; display: flex; flex-direction: column; height: 98%;">
             <Transition name="fade">
-                <TransitionGroup name="slide-fade" v-if="data" tag="div"
+                <TransitionGroup name="slide-fade" v-if="active" tag="div"
                     style="display: flex; flex-direction: column; height: 100%; position: absolute; width: 100%;">
-                    <div :key="data.index">
+                    <div :key="active.index">
                         <ul style="margin-top: 1rem;">
-                            <h4 style="font-size: medium; margin-bottom: 0.4rem;">{{ data.label || "{ No Label }" }}
-                            </h4>
+                            <h4 style="margin-bottom: 8px;">Meta</h4>
                             <li>
-                                <FormElementsInputSwitch @change="markRequired">
-                                    Required
+                                <label style="font-size: medium; margin-bottom: 0.4rem;">
+                                    <p>Label</p>
+                                    <input v-model="active.label" class="input">
+                                </label>
+                            </li>
+                            <li>
+                                <FormElementsInputSwitch :checked="required" class="switch-container"
+                                    @change="required = $event">
+                                    <p>Required</p>
+                                </FormElementsInputSwitch>
+                            </li>
+                            <li v-if="isCheckbox(active)">
+                                <FormElementsInputSwitch class="switch-container" :checked="active.multiple"
+                                    @change="active.multiple = $event"
+                                    @click="active.multiple && deleteValues(active.value || {})">
+                                    <p>Multiple</p>
                                 </FormElementsInputSwitch>
                             </li>
                         </ul>
+                        <hr>
+                        <ul v-if="isCheckbox(active) || isSelect(active)">
+                            <li class="unset options">
+                                <h4>Options</h4>
+                                <ul style="margin-top: -5px;">
+                                    <li v-for="item of active.options" class="unset item">
+                                        <div style="
+                                        max-width: 200px;
+                                        overflow: hidden;
+                                        margin-right: 10px;
+                                        text-overflow: ellipsis;
+                                         text-wrap: nowrap;">{{ item.label }}</div>
+                                        <div class="delete"
+                                            @click="active.options = active.options?.filter(i => i.value !== item.value)">
+                                            Remove</div>
+                                    </li>
+                                    <li class="unset">
+                                        <input type="text" class="input" style="width: 150px; margin-left: -10px;"
+                                            @keydown.enter="addOption" placeholder="Type an option here" v-model="temp">
+                                        <span class="add" @click="addOption">Add</span>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
                     </div>
-
-                    <div style="margin-top: auto; margin-bottom: 1rem; display: flex; gap: 0.25rem" key="footer">
+                    <div style="margin-top: auto; margin-bottom: 1rem; display: flex; gap: 0.25rem; padding: 1rem;"
+                        key="footer">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                             style="width: 15px;">
                             <path
@@ -52,7 +105,7 @@ function markRequired(checked: boolean) {
                         Press the <code style="margin-top: 0.1ch;">Escape</code> key to deselect
                     </div>
                 </TransitionGroup>
-                <div v-else style="margin-top: 1rem; margin-right: 1rem;">
+                <div v-else style="padding: 1rem;">
                     <p style="display: flex; gap: 0.5rem;">
                         <svg viewBox="0 0 13 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 40px;">
                             <path
@@ -87,24 +140,66 @@ a {
 
 .properties {
     width: 100%;
-    background-color: #262626;
-    padding: 1rem;
+    background-color: #323232;
     color: white;
     position: relative;
     overflow: hidden;
     height: 100%;
+
+    --padding-x: 1rem;
+    --green: rgb(6, 138, 76)
+}
+
+.properties h4 {
+    font-size: 16px;
 }
 
 .font-bold {
     font-weight: bold;
     font-size: larger;
+    padding: 1rem 1rem 0;
 }
 
 .properties ul {
-    background-color: whitesmoke;
-    padding: 0.5rem;
+    padding: 0.8rem var(--padding-x) 0.5rem;
     border-radius: 2px;
-    background-color: #2b2a2a;
+    background-color: #262626;
+}
+
+.properties li {
+    padding: 0.25rem 0;
+    height: 40px;
+    width: 100%;
+}
+
+.unset ul {
+    width: calc(100% + (var(--padding-x) * 2));
+    margin-left: calc(var(--padding-x) * -1);
+}
+
+.properties ul>li:not(.unset)>* {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.input {
+    width: 180px;
+    padding: 8px 10px;
+    background-color: #323232;
+    border-radius: 6px;
+    border: none;
+    color: white;
+    outline: none;
+}
+
+.properties li:not(.unset)>*:not(:has(>input)) {
+    margin-top: 6px;
+}
+
+.input:focus {
+    outline: 1px solid var(--green);
 }
 
 .slide-fade-enter-active,
@@ -132,5 +227,48 @@ a {
 .fade-leave-to {
     opacity: 0;
     position: absolute;
+}
+
+.switch-container {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.options li {
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    padding-right: 1rem;
+    padding-left: 1rem;
+}
+
+.options .item>div {
+    margin-top: 7px;
+}
+
+.options .item:hover {
+    background-color: #323232;
+    border-radius: 5px;
+}
+
+.options .delete {
+    cursor: pointer;
+}
+
+.options .delete:hover {
+    color: red;
+}
+
+.options .add {
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+.options .add:hover {
+    color: var(--green);
+}
+
+hr {
+    opacity: 0;
 }
 </style>
