@@ -170,10 +170,10 @@ const PageSchema = z.array(FormElementDataSchema);
 const StoreSchema = z.array(ItemSchema);
 
 // Pages Schema
-const PagesSchema = z.record(z.number(), PageSchema);
+const PagesSchema = z.record(z.union([z.number(), z.string()]), PageSchema);
 
 // Stores Schema
-const StoresSchema = z.record(z.number(), StoreSchema);
+const StoresSchema = z.record(z.union([z.number(), z.string()]), StoreSchema);
 
 // Form Schema
 const FormSchema = z.object({
