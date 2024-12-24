@@ -1,5 +1,5 @@
 import { Field, ImageTypeEnum } from "./utils/constants"
-import type { ModuleOptions } from './module'
+import type { ModuleOptions } from '../module'
 
 export type Input =
   Field.DATE
@@ -31,9 +31,8 @@ export interface _ElementData {
 
 export interface StaticElementData extends _ElementData {
   type: Field.STATIC,
-  label?: never
   inputType: Field.STATIC
-  value?: never
+  value: never
   text: string
 }
 
@@ -150,4 +149,5 @@ declare module 'nuxt/schema' {
   interface NuxtConfig { ['nuxtFormBuilder']?: Partial<ModuleOptions> }
   interface NuxtOptions { ['nuxtFormBuilder']?: ModuleOptions }
 }
-export type { ModuleOptions, default } from './module'
+
+export type { ModuleOptions, default } from '../module'

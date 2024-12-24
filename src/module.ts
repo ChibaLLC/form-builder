@@ -1,21 +1,31 @@
-import { defineNuxtModule, createResolver, addComponentsDir, addImportsDir } from '@nuxt/kit'
+import {
+  defineNuxtModule,
+  createResolver,
+  addComponentsDir,
+  addImportsDir,
+  addServerImportsDir,
+} from "@nuxt/kit";
 
 // Module options TypeScript interface definition
-export interface ModuleOptions { }
+export interface ModuleOptions {}
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
-    name: 'nuxt-form-builder',
-    configKey: 'nuxtFormBuilder',
+    name: "nuxt-form-builder",
+    configKey: "nuxtFormBuilder",
   },
   defaults: {},
   setup(_options, _nuxt) {
-    const resolver = createResolver(import.meta.url)
-    addImportsDir(resolver.resolve('./runtime/utils'), {
-      prepend: true
-    })
+    const resolver = createResolver(import.meta.url);
+    const autoImports = resolver.resolve("./runtime/utils");
+    addImportsDir(autoImports, {
+      prepend: true,
+    });
+    addServerImportsDir(autoImports, {
+      prepend: true,
+    });
     addComponentsDir({
-      path: resolver.resolve('./runtime/components')
-    })
+      path: resolver.resolve("./runtime/components"),
+    });
   },
-})
+});

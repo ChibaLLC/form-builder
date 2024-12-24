@@ -169,7 +169,9 @@ export class Elements {
                     type: Field.STATIC,
                     inputType: Field.STATIC,
                     index,
-                    text: ''
+                    text: '',
+                    label: undefined as never,
+                    value: undefined as never
                 } satisfies StaticElementData;
                 break;
 
