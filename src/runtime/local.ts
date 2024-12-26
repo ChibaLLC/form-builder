@@ -244,8 +244,7 @@ export class Elements {
 
     private emit(event: 'add' | 'delete' | 'update', data: Reactive<FormElementData>) {
         if (!isReactive(data)) {
-            console.error("Non reactive data: ", data)
-            throw new Error("Non reactive data emitted")
+            console.warn("Non reactive data found: ", data)
         }
         const functions = this.events[event]
         if (!functions || event.length === 0) {
@@ -262,8 +261,7 @@ export class Elements {
 
     createComponent(data: Reactive<FormElementData>): Component {
         if (!isReactive(data)) {
-            console.error("Non reactive data: ", data)
-            throw new Error("Non reactive data emitted")
+            console.warn("Non reactive data passed to create component of Elements: ", data)
         }
         return defineComponent({
             setup: () => {
@@ -340,8 +338,7 @@ export class Elements {
 
     setActive(state: boolean, data: Reactive<FormElementData>) {
         if (!isReactive(data)) {
-            console.error("Non reactive data: ", data)
-            throw new Error("Non reactive data emitted")
+            console.error("Non reactive data passed to setActive of Elements: ", data)
         }
 
         if (!state && !this.active.value) return

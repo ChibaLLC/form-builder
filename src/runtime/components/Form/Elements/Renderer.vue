@@ -14,7 +14,7 @@ const emit = defineEmits<{
 
 if (!isReactive(props.data)) {
   console.error("Non reactive data: ", props.data)
-  throw new Error("Non reactive data emitted")
+  throw new Error("Non reactive data passed as props. Please wrap it in the reactive vue function")
 }
 
 const edit = inject<Ref<boolean>>(editKey)
