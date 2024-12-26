@@ -127,7 +127,8 @@ export type Item = {
   price: number,
   carted: boolean,
   liked: boolean,
-  images: Array<string>
+  images: Array<string>,
+  stock: number
 }
 
 export type Page = Array<FormElementData>

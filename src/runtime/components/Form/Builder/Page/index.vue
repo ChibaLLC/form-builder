@@ -122,7 +122,7 @@ const onDragleave = (e: Event) => {
             font-family="'Helvetica Neue', Helvetica, Arial-Unicode, Arial, Sans-serif">from the Noun Project</text>
         </svg>
         <h1 style="width: fit-content; font-size: large;">Drag and drop elements here</h1>
-        <p>Drag an item from the left panel and drop them here</p>
+        <p>Drag an item from the left panel and drop it here</p>
       </div>
     </form>
   </div>

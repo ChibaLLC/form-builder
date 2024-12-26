@@ -113,10 +113,10 @@ if (props.starter?.length) {
   </div>
   <div class="add-item-container" :class="{ 'hidden': modalHidden }" ref="modal" @keyup.esc="closeModal">
     <form class="add-item" @submit.prevent="emitItem">
-      <h3>Add An Item to the Store</h3>
+      <h3>Add an item to the store</h3>
       <div style="padding-top: 1rem">
         <input type="text" placeholder="Name" class="add-item-input" autocomplete="off" required v-model="item.name" />
-        <input type="number" placeholder="Quantity" class="add-item-input" autocomplete="off" v-model="item.qtty">
+        <input type="number" placeholder="Quantity" class="add-item-input" autocomplete="off" v-model="item.stock">
         <input type="number" placeholder="Price" class="add-item-input" autocomplete="off" required
           v-model="item.price" />
         <input type="file" class="add-item-input" multiple required v-on:change="constructImageUrl" />
