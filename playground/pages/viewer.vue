@@ -13,13 +13,18 @@ onMounted(() => {
     console.warn('No form data found')
   }
 })
+
+const rerender = ref(false)
 </script>
 
 <template>
   <Title>Viewer</Title>
   <ClientOnly>
-    <FormViewer :data="formData as any" @price="addPrice" style="margin-top: 10rem" @submit="console.log"/>
+    <FormViewer :data="formData as any" @price="addPrice" style="margin-top: 10rem" @submit="console.log" :re-render="rerender" @back="console.log('Back')" />
   </ClientOnly>
+  <button @click="rerender = !rerender">
+    Rerender
+  </button>
 </template>
 
 <style scoped>

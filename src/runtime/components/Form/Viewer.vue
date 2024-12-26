@@ -1,108 +1,147 @@
 <script setup lang="ts">
-import { ref, type PropType, watch, toRef, provide, type Ref } from 'vue'
-import type { Form, FormElementData, Input, Item, Pages, Stores } from '../../types'
-import { disabledKey, draggedElementKey, editKey } from '../../utils/symbols';
+import { ref, type PropType, watch, toRef, provide, type Ref } from "vue";
+import type {
+  Form,
+  FormElementData,
+  Input,
+  Item,
+  Pages,
+  Stores,
+} from "../../types";
+import { disabledKey, draggedElementKey, editKey } from "../../utils/symbols";
 
 const emits = defineEmits<{
-  submit: [Form],
-  complete: [FormElementData[] | Item[]],
-  price: [number],
-  back: []
-}>()
+  submit: [Form];
+  complete: [FormElementData[] | Item[]];
+  price: [number];
+  back: [];
+}>();
 const props = defineProps({
   data: {
     type: Object as PropType<Form>,
     default: {
       forms: {} as Pages,
-      stores: {} as Stores
+      stores: {} as Stores,
     },
-    required: true
+    required: true,
   },
   reRender: {
     type: Boolean,
     default: false,
-    required: false
+    required: false,
   },
   showSpinner: {
     type: Boolean,
     default: false,
-    required: false
-  }
-})
-const pages = toRef(() => props.data.pages || {})
-const stores = toRef(() => props.data.stores || {})
-const _pages = Object.entries(pages.value)
-const _stores = Object.entries(stores.value)
-const flowDirection = ref('forward')
-const currentFormIndex = ref(0)
-const currentStoreIndex = ref(0)
+    required: false,
+  },
+});
+const pages = toRef(() => props.data.pages || {});
+const stores = toRef(() => props.data.stores || {});
+const _pages = Object.entries(pages.value);
+const _stores = Object.entries(stores.value);
+const flowDirection = ref("forward");
+const currentFormIndex = ref(0);
+const currentStoreIndex = ref(0);
 
 function isDoneForms(currentIndex: number) {
-  return currentIndex >= _pages.length - 1
+  return currentIndex >= _pages.length - 1;
 }
 
 function isDoneStores(currentIndex: number) {
-  return currentIndex >= _stores.length - 1
+  return currentIndex >= _stores.length - 1;
 }
 
 function formSubmit(formIndex: number, fields: FormElementData[]) {
-  currentFormIndex.value = formIndex + 1
+  currentFormIndex.value = formIndex + 1;
 
-  emits('complete', fields)
-  flowDirection.value = 'forward'
-  if (isDoneForms(formIndex) && _stores.length === 0) done()
+  emits("complete", fields);
+  flowDirection.value = "forward";
+  if (isDoneForms(formIndex) && _stores.length === 0) done();
 }
 
 function storeSubmit(storeIndex: number, items: Item[]) {
-  currentStoreIndex.value = storeIndex + 1
+  currentStoreIndex.value = storeIndex + 1;
 
-  emits('complete', items)
-  flowDirection.value = 'forward'
-  if (isDoneStores(storeIndex)) done()
+  emits("complete", items);
+  flowDirection.value = "forward";
+  if (isDoneStores(storeIndex)) done();
 }
 
 function done() {
-  disabled.value = true
-  emits('submit', { pages: Object.fromEntries(_pages), stores: Object.fromEntries(_stores) })
+  disabled.value = true;
+  emits("submit", {
+    pages: Object.fromEntries(_pages),
+    stores: Object.fromEntries(_stores),
+  });
 }
 
 function rerender() {
-  currentFormIndex.value = 0
-  currentStoreIndex.value = 0
+  currentFormIndex.value = 0;
+  currentStoreIndex.value = 0;
+  disabled.value = false
 }
 
 function goBack() {
   disabled.value = false;
-  flowDirection.value = 'backward'
+  flowDirection.value = "backward";
   if (currentStoreIndex.value > 0) {
-    currentStoreIndex.value -= 1
+    currentStoreIndex.value -= 1;
   } else if (currentFormIndex.value > 0) {
-    currentFormIndex.value -= 1
+    currentFormIndex.value -= 1;
   } else {
-    emits("back")
-    rerender()
+    emits("back");
+    rerender();
   }
 }
 
-watch(() => props.reRender, rerender)
-const disabled = ref(false)
-provide<Ref<boolean>>(editKey, ref(false))
-provide<Ref<boolean>>(disabledKey, disabled)
-provide<Ref<Input | undefined>>(draggedElementKey, ref(undefined))
+watch(() => props.reRender, rerender);
+const disabled = ref(false);
+provide<Ref<boolean>>(editKey, ref(false));
+provide<Ref<boolean>>(disabledKey, disabled);
+provide<Ref<Input | undefined>>(draggedElementKey, ref(undefined));
 </script>
 <template>
   <div class="content__holder">
-    <TransitionGroup tag="div" :name="flowDirection === 'forward' ? 'slide_out' : 'slide_in'">
-      <div v-for="[index, page] of _pages" v-if="currentFormIndex < _pages.length">
-        <FormRenderer v-if="currentFormIndex === +index" @submit="formSubmit(+index, page)" @back="goBack"
-          :index="+index" :data="page" />
+    <TransitionGroup
+      tag="div"
+      :name="flowDirection === 'forward' ? 'slide_out' : 'slide_in'"
+    >
+      <div
+        v-for="[index, page] of _pages"
+        v-if="currentFormIndex < _pages.length"
+      >
+        <FormRenderer
+          v-if="currentFormIndex === +index"
+          @submit="formSubmit(+index, page)"
+          @back="goBack"
+          :index="+index"
+          :data="page"
+        />
       </div>
-      <div v-for="[index, store] of _stores"
-        v-if="_stores.length && currentFormIndex >= _pages.length && currentStoreIndex < _stores.length">
-        <StoreRenderer v-if="currentStoreIndex === +index" :data="store" @submit="storeSubmit(+index, store)"
-          @price="emits('price', $event)" @back="goBack" />
+      <div
+        v-for="[index, store] of _stores"
+        v-if="
+          _stores.length &&
+          currentFormIndex >= _pages.length &&
+          currentStoreIndex < _stores.length
+        "
+      >
+        <StoreRenderer
+          v-if="currentStoreIndex === +index"
+          :data="store"
+          @submit="storeSubmit(+index, store)"
+          @price="emits('price', $event)"
+          @back="goBack"
+        />
       </div>
-      <div class="processing" v-if="currentFormIndex >= _pages.length && currentStoreIndex >= _stores.length">
+      <div
+        class="processing"
+        v-if="
+          currentFormIndex >= _pages.length &&
+          currentStoreIndex >= _stores.length
+        "
+      >
         <div class="loading-spinner" v-if="showSpinner"></div>
         <div v-else>
           <div v-for="[index, page] in _pages">
@@ -125,7 +164,7 @@ provide<Ref<Input | undefined>>(draggedElementKey, ref(undefined))
   place-items: center;
 }
 
-.content__holder>div {
+.content__holder > div {
   position: relative;
   width: 100%;
   overflow: hidden;
@@ -173,7 +212,6 @@ provide<Ref<Input | undefined>>(draggedElementKey, ref(undefined))
   height: 50px;
   will-change: transform;
 }
-
 
 .slide_out-enter-active {
   width: 0;
