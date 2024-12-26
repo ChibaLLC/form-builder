@@ -95,6 +95,18 @@ onMounted(() => {
     ".image"
   ) as NodeListOf<HTMLImageElement>;
 });
+
+const quantity = computed({
+  get: () => {
+    if(!props.item.qtty){
+      props.item.qtty = 1
+    }
+    return props.item.qtty
+  },
+  set(value) {
+    props.item.qtty = value;
+  },
+});
 </script>
 <template>
   <div class="shop-card">
@@ -150,7 +162,10 @@ onMounted(() => {
           class="image main-image"
           ref="mainImage"
         />
-        <div style="margin-bottom: 0.4rem;" v-if="item.images?.length && item.images.length > 1">
+        <div
+          style="margin-bottom: 0.4rem"
+          v-if="item.images?.length && item.images.length > 1"
+        >
           <img
             v-for="(image, index) in item?.images?.slice(1)"
             :key="image"
@@ -284,22 +299,21 @@ onMounted(() => {
               <button
                 class="minus"
                 aria-label="Decrease"
-                @click="item.qtty = +item.qtty - 1"
+                @click="quantity = +item.qtty - 1"
               >
                 &minus;
               </button>
               <input
                 type="number"
                 class="input-box"
-                value="1"
                 min="1"
                 max="10"
-                v-model="item.qtty"
+                v-model="quantity"
               />
               <button
                 class="plus"
                 aria-label="Increase"
-                @click="item.qtty = +item.qtty + 1"
+                @click="quantity = +item.qtty + 1"
               >
                 &plus;
               </button>
@@ -412,7 +426,7 @@ onMounted(() => {
 
 .item-detail {
   display: flex;
-  align-items: center
+  align-items: center;
 }
 
 .item-detail > div {
