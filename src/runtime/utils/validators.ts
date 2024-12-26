@@ -154,7 +154,8 @@ const FormElementDataSchema = z.union([
 // Item Schema
 const ItemSchema = z.object({
   index: z.number(),
-  qtty: z.number(),
+  qtty: z.number().optional().default(0),
+  stock: z.number().optional().default(0),
   store: z.number(),
   name: z.string(),
   price: z.number(),
