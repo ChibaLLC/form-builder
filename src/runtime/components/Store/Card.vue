@@ -84,7 +84,7 @@ function nextImage() {
 function makeActive(index: number) {
   if (!images.value) return;
   if (!mainImage.value || !images.value) return;
-  const temp = images.value[index].src;
+  const temp = images.value[index].src;1
   images.value[index].src = mainImage.value.src;
   mainImage.value.src = temp;
   currentIndex.value = index;

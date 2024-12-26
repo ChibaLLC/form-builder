@@ -385,14 +385,16 @@ export class Elements {
 }
 
 export function clearPages() {
-    document.querySelectorAll("#dropzone").forEach(el => {
-        const container = el.closest(".canvas-container")
-        if (container) {
-            container.remove()
-        } else {
-            console.warn("Container not found for", el)
-        }
-    })
+    if(import.meta.client){
+        document.querySelectorAll("#dropzone").forEach((el) => {
+          const container = el.closest(".canvas-container");
+          if (container) {
+            container.remove();
+          } else {
+            console.warn("Container not found for", el);
+          }
+        });
+    }
     console.warn("cCleared all pages | page data may have not been cleared yet")
 }
 
