@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, watch, computed, type Reactive, toRef, isReactive, shallowRef, type Component } from 'vue';
+import { type CSSProperties, type PropType, type Ref, ref, onMounted, provide, resolveComponent, shallowReactive, watch, computed, type Reactive, shallowRef, type Component } from 'vue';
 import type { Pages, Form, Stores, Store, Page, Input, FormElementData } from '../../../types'
 import { activePageIndexKey, disabledKey, draggedElementKey, editKey } from '../../../utils/symbols';
 import { clearPages, createFormPage, createStorePage } from '../../../local';
@@ -63,7 +63,6 @@ async function submit() {
 
 const starterPages = computed(() => Object.values(props.starter.pages || {}))
 const starterStore = computed(() => Object.values(props.starter.stores))
-
 watch([starterPages, starterStore], ([pages, stores]) => {
   if (pages.length || stores.length) {
     clearPages()
