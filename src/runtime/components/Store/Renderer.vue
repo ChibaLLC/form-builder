@@ -1,42 +1,61 @@
 <script setup lang="ts">
-import { type PropType, computed, inject, type Ref } from 'vue'
-import type { Store } from '../../types'
-import { disabledKey } from '../../utils/symbols';
+import { type PropType, computed, inject, type Ref } from "vue";
+import type { Item, Store } from "../../types";
+import { disabledKey } from "../../utils/symbols";
 
 const props = defineProps({
   data: {
     type: Object as PropType<Store>,
     default: {} as Store,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
 const emits = defineEmits<{
-  submit: [],
-  price: [any],
-  back: []
-}>()
+  submit: [];
+  price: [number];
+  back: [];
+}>();
 
-const disabled = inject<Ref<boolean>>(disabledKey)
+const disabled = inject<Ref<boolean>>(disabledKey);
 const items = computed(() => {
   if (disabled?.value) {
-    return props.data?.filter(item => item.carted)
+    return props.data?.filter((item) => item.carted);
   }
-  return props.data
-})
+  return props.data;
+});
+
+function removePrice(item: Item) {
+  if (!item.qtty) item.qtty = 1;
+  const qtty = Math.abs(item.qtty);
+  emits("price", -((Math.abs(item.price) || 0) * qtty));
+}
+
+function addPrice(item: Item) {
+  if (!item.qtty) item.qtty = 1;
+  const qtty = Math.abs(item.qtty);
+  emits("price", (Math.abs(item.price) || 0) * qtty);
+}
 </script>
 
 <template>
   <div class="store-container">
     <div class="store-renderer">
-      <StoreCard v-for="item in items" :key="item.index" :item="item" @cart="emits('price', Math.abs(item.price) || 0)"
-        :edit="false" @uncart="emits('price', -Math.abs(item.price) || 0)" />
+      <StoreCard
+        v-for="item in items"
+        :key="item.index"
+        :item="item"
+        @cart="addPrice(item)"
+        :edit="false"
+        @uncart="removePrice(item)"
+        @qtty="addPrice(item)"
+      />
     </div>
     <div class="store-footer" v-if="!disabled">
-      <button type="button" @click="emits('back')" class="store-back-button">Back</button>
-      <button class="store-submit-button" @click="emits('submit')">
-        Done
+      <button type="button" @click="emits('back')" class="store-back-button">
+        Back
       </button>
+      <button class="store-submit-button" @click="emits('submit')">Done</button>
     </div>
   </div>
 </template>
@@ -70,7 +89,7 @@ const items = computed(() => {
   border-radius: 0.25rem;
   transition: background-color 0.25s;
   border: none;
-  cursor: pointer
+  cursor: pointer;
 }
 
 .store-submit-button:hover {

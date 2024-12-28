@@ -77,7 +77,6 @@ function deleteStore() {
 }
 
 if (props.starter?.length) {
-
   items.value = props.starter
   props.starter.forEach(i => {
     emits('item', i)

@@ -23,6 +23,7 @@ const emits = defineEmits<{
   cart: [];
   uncart: [];
   delete: [number];
+  qtty: [number]
 }>();
 
 const edit = inject<Ref<boolean>>(editKey);
@@ -104,7 +105,11 @@ const quantity = computed({
     return props.item.qtty
   },
   set(value) {
+    if(!props.item.carted) {
+      return alert("Please click on the cart icon first.")
+    }
     props.item.qtty = value;
+    emits("qtty", value)
   },
 });
 </script>
