@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, type PropType, computed, type Ref, inject } from "vue";
 import type { Item } from "../../types";
-import { editKey } from "../../utils/symbols";
+import { disabledKey, editKey } from "../../utils/symbols";
 
 const liked = ref(false);
 const images = ref<NodeListOf<HTMLImageElement> | null>(null);
@@ -26,7 +26,7 @@ const emits = defineEmits<{
 }>();
 
 const edit = inject<Ref<boolean>>(editKey);
-
+const disabled = inject<Ref<boolean>>(disabledKey);
 function like() {
   if (edit?.value) return;
   liked.value = true;
@@ -299,6 +299,7 @@ const quantity = computed({
               <button
                 class="minus"
                 aria-label="Decrease"
+                :disabled="disabled"
                 @click="quantity = +item.qtty - 1"
               >
                 &minus;
@@ -309,10 +310,12 @@ const quantity = computed({
                 min="1"
                 max="10"
                 v-model="quantity"
+                :disabled="disabled"
               />
               <button
                 class="plus"
                 aria-label="Increase"
+                :disabled="disabled"
                 @click="quantity = +item.qtty + 1"
               >
                 &plus;
