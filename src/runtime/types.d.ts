@@ -123,7 +123,7 @@ type Infinity = "infinity"
 export type Item = {
   index: number,
   qtty: number,
-  store: number,
+  store: string | number,
   name: string,
   price: number,
   carted: boolean,
@@ -134,8 +134,8 @@ export type Item = {
 
 export type Page = Array<FormElementData>
 export type Store = Array<Item>
-export type Pages = Record<number, Page>
-export type Stores = Record<number, Store>
+export type Pages = Record<string | number, Page>
+export type Stores = Record<string | number, Store>
 
 export type Form = {
   pages: Pages,

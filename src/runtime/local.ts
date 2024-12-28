@@ -99,9 +99,9 @@ export class Elements {
   private movingElement: number | undefined;
   private latestEnter: number | undefined;
   private backpressure: { [key: string]: Array<FormElementData> } = {}
-  private readonly pageIndex: number;
+  private readonly pageIndex: string | number;
 
-  constructor(FormElementsRenderer: ResolvedComponent, pageIndex: number) {
+  constructor(FormElementsRenderer: ResolvedComponent, pageIndex: string | number) {
     this.FormElementsRenderer = FormElementsRenderer
     this.pageIndex = pageIndex
   }

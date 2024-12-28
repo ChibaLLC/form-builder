@@ -20,7 +20,7 @@ const props = defineProps({
   data: {
     type: Object as PropType<Form>,
     default: {
-      forms: {} as Pages,
+      pages: {} as Pages,
       stores: {} as Stores,
     },
     required: true,
@@ -36,36 +36,37 @@ const props = defineProps({
     required: false,
   },
 });
-const pages = toRef(() => props.data.pages || {});
-const stores = toRef(() => props.data.stores || {});
+const pages = toRef(() => props.data.pages);
+const stores = toRef(() => props.data.stores);
 const _pages = Object.entries(pages.value);
 const _stores = Object.entries(stores.value);
 const flowDirection = ref("forward");
 const currentFormIndex = ref(0);
 const currentStoreIndex = ref(0);
 
-function isDoneForms(currentIndex: number) {
-  return currentIndex >= _pages.length - 1;
+
+function isDoneForms() {
+  return currentFormIndex.value >= _pages.length - 1;
 }
 
-function isDoneStores(currentIndex: number) {
-  return currentIndex >= _stores.length - 1;
+function isDoneStores() {
+  return currentStoreIndex.value >= _stores.length - 1;
 }
 
-function formSubmit(formIndex: number, fields: FormElementData[]) {
-  currentFormIndex.value = formIndex + 1;
+function formSubmit(fields: FormElementData[]) {
+  currentFormIndex.value += 1;
 
   emits("complete", fields);
   flowDirection.value = "forward";
-  if (isDoneForms(formIndex) && _stores.length === 0) done();
+  if (isDoneForms() && _stores.length === 0) done();
 }
 
-function storeSubmit(storeIndex: number, items: Item[]) {
-  currentStoreIndex.value = storeIndex + 1;
+function storeSubmit(items: Item[]) {
+  currentStoreIndex.value += 1;
 
   emits("complete", items);
   flowDirection.value = "forward";
-  if (isDoneStores(storeIndex)) done();
+  if (isDoneStores()) done();
 }
 
 function done() {
@@ -112,10 +113,10 @@ provide<Ref<Input | undefined>>(draggedElementKey, ref(undefined));
         v-if="currentFormIndex < _pages.length"
       >
         <FormRenderer
-          v-if="currentFormIndex === +index"
-          @submit="formSubmit(+index, page)"
+          v-if="_pages[currentFormIndex][1] === page"
+          @submit="formSubmit(page)"
           @back="goBack"
-          :index="+index"
+          :index="index"
           :data="page"
         />
       </div>
@@ -128,9 +129,9 @@ provide<Ref<Input | undefined>>(draggedElementKey, ref(undefined));
         "
       >
         <StoreRenderer
-          v-if="currentStoreIndex === +index"
+          v-if="_stores[currentStoreIndex][1] === store"
           :data="store"
-          @submit="storeSubmit(+index, store)"
+          @submit="storeSubmit(store)"
           @price="emits('price', $event)"
           @back="goBack"
         />
@@ -145,7 +146,7 @@ provide<Ref<Input | undefined>>(draggedElementKey, ref(undefined));
         <div class="loading-spinner" v-if="showSpinner"></div>
         <div v-else>
           <div v-for="[index, page] in _pages">
-            <FormRenderer :data="page" :index="+index" />
+            <FormRenderer :data="page" :index="index" />
           </div>
           <div v-for="[_, store] of _stores">
             <StoreRenderer :data="store" />

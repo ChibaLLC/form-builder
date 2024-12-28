@@ -48,7 +48,7 @@ const props = defineProps({
 
 const draggedElement = ref<Input | undefined>(undefined)
 const activePage = ref<number | undefined>(undefined)
-provide<Ref<number | undefined>>(activePageIndexKey, activePage)
+provide<Ref<number | string | undefined>>(activePageIndexKey, activePage)
 provide<Ref<boolean>>(editKey, ref(true))
 provide<Ref<boolean>>(disabledKey, ref(true))
 provide<Ref<Input | undefined>>(draggedElementKey, draggedElement)

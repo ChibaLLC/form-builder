@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type ShallowRef, inject, type PropType, type Ref, type Reactive } from 'vue'
+import { inject, type Ref, type Reactive } from 'vue'
 import { disabledKey } from '../../utils/symbols';
 import type { FormElementData } from '../../types';
 
@@ -11,8 +11,8 @@ const emits = defineEmits<{
 const disabled = inject<Ref<boolean>>(disabledKey)
 defineProps<{
   data: Reactive<FormElementData[]>,
-  active?: { pageIndex: number, data: FormElementData } | undefined,
-  index: number
+  active?: { pageIndex: string, data: FormElementData } | undefined,
+  index: string
 }>()
 </script>
 <template>

@@ -5,13 +5,13 @@ import { editKey } from '../../utils/symbols';
 
 const emits = defineEmits<{
   item: [item: Item],
-  deleteStore: [store: number],
+  deleteStore: [store: string],
   deleteItem: [item: Item]
 }>()
 
 const props = defineProps({
   storeIndex: {
-    type: Number,
+    type: String,
     required: true
   },
   starter: {
