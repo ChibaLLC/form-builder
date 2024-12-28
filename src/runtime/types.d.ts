@@ -118,7 +118,8 @@ export type FormElementData =
   | FileInputElementData
   | TextareaElementData
   | RichTextElementData
-
+  
+type Infinity = "infinity"
 export type Item = {
   index: number,
   qtty: number,
@@ -128,7 +129,7 @@ export type Item = {
   carted: boolean,
   liked: boolean,
   images: Array<string>,
-  stock: number
+  stock: number | Infinity
 }
 
 export type Page = Array<FormElementData>

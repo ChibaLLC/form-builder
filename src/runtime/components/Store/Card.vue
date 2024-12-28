@@ -115,7 +115,9 @@ const quantity = computed({
 </script>
 <template>
   <div class="shop-card">
-    <div class="veil" v-if="Number(item.qtty) <= 0"></div>
+    <div class="veil" v-if="item.stock !== 'infinity' && Number(item.stock) <= 0">
+      <p>Out of Stock</p>
+    </div>
     <div class="close-icon-container" v-if="edit">
       <svg
         viewBox="0 0 24 24"
@@ -550,5 +552,27 @@ svg {
 
 .quantity .input-box[type="number"] {
   -moz-appearance: textfield;
+}
+
+.veil {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-color: rgba(255, 0, 43, 0.2);
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+.veil p {
+  text-transform: uppercase;
+  color: rgb(122, 122, 122);
+  font-weight: 1000;
+  font-size: xx-large;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  width: max-content;
 }
 </style>
