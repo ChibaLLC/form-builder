@@ -121,7 +121,7 @@ export type FormElementData =
   
 type Infinity = "infinity"
 export type Item = {
-  index: number,
+  index: string | number,
   qtty: number,
   store: string | number,
   name: string,
