@@ -23,32 +23,32 @@ const emits = defineEmits<{
   cart: [];
   uncart: [];
   delete: [number | string];
-  qtty: [number, Item]
+  qtty: [number, Item];
 }>();
 
 const edit = inject<Ref<boolean>>(editKey);
 const disabled = inject<Ref<boolean>>(disabledKey);
 function like() {
-  if (edit?.value) return;
+  if (edit?.value || disabled?.value) return;
   liked.value = true;
   props.item.liked = true;
 }
 
 function cart() {
-  if (edit?.value) return;
+  if (edit?.value || disabled?.value) return;
   carted.value = true;
   props.item.carted = true;
   emits("cart");
 }
 
 function unlike() {
-  if (edit?.value) return;
+  if (edit?.value || disabled?.value) return;
   liked.value = false;
   props.item.liked = false;
 }
 
 function uncart() {
-  if (edit?.value) return;
+  if (edit?.value || disabled?.value) return;
   carted.value = false;
   props.item.carted = false;
   emits("uncart");
@@ -85,7 +85,8 @@ function nextImage() {
 function makeActive(index: number) {
   if (!images.value) return;
   if (!mainImage.value || !images.value) return;
-  const temp = images.value[index].src;1
+  const temp = images.value[index].src;
+  1;
   images.value[index].src = mainImage.value.src;
   mainImage.value.src = temp;
   currentIndex.value = index;
@@ -99,22 +100,28 @@ onMounted(() => {
 
 const quantity = computed({
   get() {
-    if(!props.item.qtty){
-      props.item.qtty = 1
+    if (!props.item.qtty) {
+      props.item.qtty = 1;
     }
-    return props.item.qtty
+    return props.item.qtty;
   },
   set(value) {
-    if(!props.item.carted) {
-      return alert("Please click on the cart icon first.")
+    if (value > 0 && !props.item.carted) {
+      cart();
+    } else if (value > 0) {
+      emits("qtty", value, props.item);
+    } else if (value === 0 && props.item.carted) {
+      uncart();
     }
-    emits("qtty", value, props.item)
   },
 });
 </script>
 <template>
   <div class="shop-card">
-    <div class="veil" v-if="item.stock !== 'infinity' && Number(item.stock) <= 0">
+    <div
+      class="veil"
+      v-if="item.stock !== 'infinity' && Number(item.stock) <= 0"
+    >
       <p>Out of Stock</p>
     </div>
     <div class="close-icon-container" v-if="edit">
@@ -313,7 +320,7 @@ const quantity = computed({
               <input
                 type="number"
                 class="input-box"
-                min="1"
+                min="0"
                 max="10"
                 v-model="quantity"
                 :disabled="disabled"
@@ -452,7 +459,7 @@ const quantity = computed({
 
 .shop-card-buttons {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .shop-card-icon {
@@ -573,5 +580,10 @@ svg {
   left: 50%;
   transform: translate(-50%, -50%) rotate(-45deg);
   width: max-content;
+}
+
+.shop-card-quantity {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

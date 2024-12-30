@@ -1,8 +1,10 @@
 <script setup lang="ts">
 const formData = ref<FormData | undefined>(undefined);
+const price = ref(0);
 
 function addPrice(val: any) {
   console.log("Price added", val);
+  price.value += val;
 }
 
 onMounted(() => {
@@ -29,7 +31,23 @@ const rerender = ref(false);
       @back="console.log('Back')"
     />
   </ClientOnly>
-  <button @click="rerender = !rerender">Rerender</button>
+  <div
+    style="
+      max-width: 800px;
+      padding: 1rem;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    "
+  >
+    <button @click="rerender = !rerender" style="padding: 0.5rem 1rem">
+      Rerender
+    </button>
+    <p>
+      Tital price <span style="color: rebeccapurple">{{ price }}</span>
+    </p>
+  </div>
 </template>
 
 <style scoped></style>

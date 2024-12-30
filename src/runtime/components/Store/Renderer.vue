@@ -26,27 +26,25 @@ const items = computed(() => {
 });
 
 function removePrice(item: Item) {
-  emits("price", -(Math.abs(item.price) || 0));
+  if (!item.qtty || item.qtty < 0) item.qtty = 1;
+  emits("price", -((Math.abs(item.price) || 0) * item.qtty));
 }
 
 function addPrice(item: Item) {
-  emits("price", Math.abs(item.price) || 0);
+  if (!item.qtty || item.qtty < 0) item.qtty = 1;
+  emits("price", (Math.abs(item.price) || 0) * item.qtty);
 }
 
 function changeQtty(qtty: number, item: Item) {
   item.qtty = Math.abs(item.qtty);
-  if (!item.qtty) item.qtty = 1;
+  if (!item.qtty || item.qtty < 0) item.qtty = 1;
 
-  if (qtty >= item.qtty) {
+  if (qtty > item.qtty) {
     item.qtty = qtty;
-    addPrice(item);
+    emits("price", item.price)
   } else {
-    if (qtty > 0) {
-      item.qtty = qtty;
-      removePrice(item);
-    } else {
-      item.carted = false;
-    }
+    item.qtty = qtty;
+    emits("price", -item.price)
   }
 }
 </script>
@@ -58,9 +56,9 @@ function changeQtty(qtty: number, item: Item) {
         v-for="item in items"
         :key="item.index"
         :item="item"
-        @cart="changeQtty(1, item)"
+        @cart="addPrice(item)"
         :edit="false"
-        @uncart="changeQtty(0, item)"
+        @uncart="removePrice(item)"
         @qtty="changeQtty"
       />
     </div>
