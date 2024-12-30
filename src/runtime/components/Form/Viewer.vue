@@ -46,11 +46,11 @@ const currentStoreIndex = ref(0);
 
 
 function isDoneForms() {
-  return currentFormIndex.value >= _pages.length - 1;
+  return currentFormIndex.value >= _pages.length;
 }
 
 function isDoneStores() {
-  return currentStoreIndex.value >= _stores.length - 1;
+  return currentStoreIndex.value >= _stores.length;
 }
 
 function formSubmit(fields: FormElementData[]) {
