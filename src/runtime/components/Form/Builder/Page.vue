@@ -16,7 +16,6 @@ import {
   activePageIndexKey,
 } from "../../../utils/symbols";
 import { Elements } from "../../../local";
-import { number } from "zod";
 
 const edit = inject<Ref<boolean>>(editKey);
 const draggedElement = inject<Ref<Input | undefined>>(draggedElementKey);

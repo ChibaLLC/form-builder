@@ -22,8 +22,8 @@ const carted = computed({
 const emits = defineEmits<{
   cart: [];
   uncart: [];
-  delete: [number];
-  qtty: [number]
+  delete: [number | string];
+  qtty: [number, Item]
 }>();
 
 const edit = inject<Ref<boolean>>(editKey);
@@ -98,7 +98,7 @@ onMounted(() => {
 });
 
 const quantity = computed({
-  get: () => {
+  get() {
     if(!props.item.qtty){
       props.item.qtty = 1
     }
@@ -108,8 +108,7 @@ const quantity = computed({
     if(!props.item.carted) {
       return alert("Please click on the cart icon first.")
     }
-    props.item.qtty = value;
-    emits("qtty", value)
+    emits("qtty", value, props.item)
   },
 });
 </script>

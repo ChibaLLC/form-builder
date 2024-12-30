@@ -26,15 +26,28 @@ const items = computed(() => {
 });
 
 function removePrice(item: Item) {
-  if (!item.qtty) item.qtty = 1;
-  const qtty = Math.abs(item.qtty);
-  emits("price", -((Math.abs(item.price) || 0) * qtty));
+  emits("price", -(Math.abs(item.price) || 0));
 }
 
 function addPrice(item: Item) {
+  emits("price", Math.abs(item.price) || 0);
+}
+
+function changeQtty(qtty: number, item: Item) {
+  item.qtty = Math.abs(item.qtty);
   if (!item.qtty) item.qtty = 1;
-  const qtty = Math.abs(item.qtty);
-  emits("price", (Math.abs(item.price) || 0) * qtty);
+
+  if (qtty >= item.qtty) {
+    item.qtty = qtty;
+    addPrice(item);
+  } else {
+    if (qtty > 0) {
+      item.qtty = qtty;
+      removePrice(item);
+    } else {
+      item.carted = false;
+    }
+  }
 }
 </script>
 
@@ -45,10 +58,10 @@ function addPrice(item: Item) {
         v-for="item in items"
         :key="item.index"
         :item="item"
-        @cart="addPrice(item)"
+        @cart="changeQtty(1, item)"
         :edit="false"
-        @uncart="removePrice(item)"
-        @qtty="addPrice(item)"
+        @uncart="changeQtty(0, item)"
+        @qtty="changeQtty"
       />
     </div>
     <div class="store-footer" v-if="!disabled">

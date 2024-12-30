@@ -33,7 +33,7 @@ function addItemModal() {
 
 function emitItem() {
   if (!item.value) return console.warn("item.value has no item")
-  item.value.index = items.value[items.value.length - 1]?.index + 1 || 0
+  item.value.index = items.value.length
   item.value.store = props.storeIndex
   items.value.push(item.value)
   emits('item', item.value)
@@ -41,11 +41,11 @@ function emitItem() {
   item.value = {} as Item
 }
 
-function emitDeleteItem(id: number) {
-  const item = items.value.find(i => i.index === id)
+function emitDeleteItem(id: number | string) {
+  const item = items.value.find(i => `${i.index}` === `${id}`)
   if (!item) return console.warn("Item not found")
 
-  items.value = items.value.filter(i => i.index !== id)
+  items.value = items.value.filter(i => `${i.index}` !== `${id}`)
   emits('deleteItem', item)
 }
 
