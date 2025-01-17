@@ -76,8 +76,18 @@ function emitDeleteItem(id: number | string) {
   emits("deleteItem", item);
 }
 
+const isInfinite = computed(() => item.value.stock === "infinity");
+
 function closeModal() {
   modalHidden.value = true;
+  const inputs =
+    addItemModal.value?.querySelectorAll<HTMLInputElement>(
+      'input[type="file"]'
+    );
+  inputs?.forEach((input) => {
+    input.value = "";
+    input.files = null;
+  });
 }
 
 function constructImageUrl(item: Item, event: Event) {
@@ -215,7 +225,7 @@ onUnmounted(() => {
     @keyup.esc="closeModal"
   >
     <form class="add-item" @submit.prevent="processItem">
-      <div style="padding-top: 1rem">
+      <div style="padding-top: 1.5rem">
         <input
           type="text"
           placeholder="Name"
@@ -224,13 +234,37 @@ onUnmounted(() => {
           required
           v-model="item.name"
         />
-        <input
-          type="number"
-          placeholder="Quantity"
-          class="add-item-input"
-          autocomplete="off"
-          v-model="item.stock"
-        />
+        <div style="display: flex; flex-direction: column; margin-top: 6px">
+          <input
+            type="number"
+            :disabled="isInfinite"
+            :placeholder="isInfinite ? 'Infinite' : 'Quantity'"
+            class="add-item-input"
+            autocomplete="off"
+            v-model="item.stock"
+          />
+          <label
+            style="display: flex; flex-direction: column; padding: 5px 5px"
+          >
+            <div>
+              <input
+                type="checkbox"
+                @change="(event) => {
+                if((event.target as HTMLInputElement).checked){
+                  item.stock = 'infinity'
+                } else {
+                  // @ts-expect-error
+                  item.stock = undefined
+                }
+              }"
+              />
+              <span style="margin-left: 5px">Infinite</span>
+            </div>
+            <small
+              >Check this if the item is intangible (cannot be depleted)</small
+            >
+          </label>
+        </div>
         <input
           type="number"
           placeholder="Price"

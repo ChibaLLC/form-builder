@@ -45,7 +45,7 @@ const rerender = ref(false);
       Rerender
     </button>
     <p>
-      Tital price <span style="color: rebeccapurple">{{ price }}</span>
+      Total price <span style="color: rebeccapurple">{{ price }}</span>
     </p>
   </div>
 </template>

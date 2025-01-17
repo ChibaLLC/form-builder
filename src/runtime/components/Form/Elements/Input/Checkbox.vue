@@ -1,115 +1,179 @@
 <script setup lang="ts">
-import { defineComponent, inject, type PropType, h, type Ref, computed, type Reactive, ref, watch, toRef } from 'vue'
+import {
+  defineComponent,
+  inject,
+  type PropType,
+  h,
+  type Ref,
+  computed,
+  type Reactive,
+  ref,
+  watch,
+  toRef,
+} from "vue";
 import type { CheckboxElementData } from "../../../../types";
-import { disabledKey, editKey, formElementDataKey } from '../../../../utils/symbols';
-import { deleteValues } from '../../../../utils/functions';
+import {
+  disabledKey,
+  editKey,
+  formElementDataKey,
+} from "../../../../utils/symbols";
+import { deleteValues } from "../../../../utils/functions";
 
 const data = inject<Reactive<CheckboxElementData>>(formElementDataKey);
 if (data) {
-  if (!data.options) data.options = []
-  if (!data.value) data.value = {}
-  if (!data.multiple) data.multiple = false
-  if (!data.description) data.description = ""
+  if (!data.options) data.options = [];
+  if (!data.value) data.value = {};
+  if (!data.multiple) data.multiple = false;
+  if (!data.description) data.description = "";
 }
 function addOption(event: Event) {
-  const value = (event.target as HTMLInputElement)?.value
-  if (!value) return console.warn("No value provided")
+  const value = (event.target as HTMLInputElement)?.value;
+  if (!value) return console.warn("No value provided");
 
   data?.options?.push({ label: value, value: value });
-  (event.target as HTMLInputElement).value = ''
+  (event.target as HTMLInputElement).value = "";
 }
 
 function removeOption(value: string) {
-  if (!data) return
-  const index = data.options?.findIndex(d => d.value === value)
+  if (!data) return;
+  const index = data.options?.findIndex((d) => d.value === value);
   if (index !== undefined && index >= 0) {
-    data.options?.splice(index, 1)
+    data.options?.splice(index, 1);
   }
 }
 
 const Option = defineComponent({
   props: {
     option: {
-      type: Object as PropType<{ label: string, value: string }>,
-      required: true
-    }
+      type: Object as PropType<{ label: string; value: string }>,
+      required: true,
+    },
   },
   setup(props) {
     const data = inject<Reactive<CheckboxElementData>>(formElementDataKey);
-    if (!data) return console.warn("No Element Data Found For Option")
-    const disabled = inject<Ref<boolean>>(disabledKey)
+    if (!data) return console.warn("No Element Data Found For Option");
+    const disabled = inject<Ref<boolean>>(disabledKey);
 
     const checked = computed({
       get() {
-        const value = data.value?.[props.option.label]
-        return value === props.option.value
+        const value = data.value?.[props.option.label];
+        return value === props.option.value;
       },
       set(val) {
-        if (!data.value) data.value = {}
+        if (!data.value) data.value = {};
         if (val) {
           if (!data.value.multiple) {
-            deleteValues(data.value)
+            deleteValues(data.value);
           }
-          data.value[props.option.label] = props.option.value
+          data.value[props.option.label] = props.option.value;
         } else {
           if (data.value.multiple) {
-            deleteValues(data.value, props.option.label)
+            deleteValues(data.value, props.option.label);
           } else {
-            deleteValues(data.value)
+            deleteValues(data.value);
           }
         }
-      }
-    })
+      },
+    });
 
     function onInput(e: Event) {
-      const target = e.target as HTMLInputElement
+      const target = e.target as HTMLInputElement;
       if (target.checked) {
-        checked.value = true
+        checked.value = true;
       } else {
-        checked.value = false
+        checked.value = false;
       }
     }
 
-    return { checked, onInput, disabled }
+    return { checked, onInput, disabled };
   },
   render() {
-    const input = h('input', { onChange: this.onInput, checked: this.checked, type: 'checkbox', style: { cursor: "pointer" }, disabled: this.disabled })
-    const label = h('label', { onClick: () => { input.el!.click() }, style: { cursor: "pointer", outline: "none" } }, this.$props.option.label)
-    return h('div', { class: 'option' }, [input, label])
-  }
-})
+    const input = h("input", {
+      onChange: this.onInput,
+      checked: this.checked,
+      type: "checkbox",
+      style: { cursor: "pointer" },
+      disabled: this.disabled,
+    });
+    const label = h(
+      "label",
+      {
+        onClick: () => {
+          input.el!.click();
+        },
+        style: { cursor: "pointer", outline: "none" },
+      },
+      this.$props.option.label
+    );
+    return h("div", { class: "option" }, [input, label]);
+  },
+});
 
-const edit = inject<Ref<boolean>>(editKey)
-const input = ref<HTMLInputElement | null>(null)
-if (data?.rules?.find(r => r === 'required')) {
+const edit = inject<Ref<boolean>>(editKey);
+const input = ref<HTMLInputElement | null>(null);
+if (data?.rules?.find((r) => r === "required")) {
   watch(data, (val) => {
-    if (!input.value) return console.warn("Hidden input missing!!")
-    input.value.checked = !!Object.values(val.value || {}).length
-  })
+    if (!input.value) return console.warn("Hidden input missing!!");
+    input.value.checked = !!Object.values(val.value || {}).length;
+  });
 }
 </script>
 
 <template>
   <div class="checkbox-container" v-if="data">
     <label for="select">
-      <input :disabled="!edit" autocomplete="off" type="text" id="select" class="label" v-model="data.label"
-        placeholder="Add a label" />
+      <input
+        :disabled="!edit"
+        autocomplete="off"
+        type="text"
+        id="select"
+        class="label"
+        v-model="data.label"
+        placeholder="Add a label"
+      />
     </label>
-    <label for="description" v-if="(data?.description?.length && data.description.length) || edit">
-      <input :disabled="!edit" autocomplete="off" type="text" id="description" class="description"
-        v-model="data.description" placeholder="Add a description (optional)" />
+    <label
+      for="description"
+      v-if="(data?.description?.length && data.description.length) || edit"
+    >
+      <input
+        :disabled="!edit"
+        autocomplete="off"
+        type="text"
+        id="description"
+        class="description"
+        v-model="data.description"
+        placeholder="Add a description (optional)"
+      />
     </label>
-    <input type="checkbox" :required="!!data.rules?.find(r => r === 'required')" ref="input"
-      style="position: absolute; top: 2rem; left: 0.5rem; opacity: 0;" @click.prevent>
+    <input
+      type="checkbox"
+      :required="!!data.rules?.find((r) => r === 'required')"
+      ref="input"
+      style="position: absolute; top: 2rem; left: 0.5rem; opacity: 0"
+      @click.prevent
+    />
     <div v-if="data.options?.length" class="options">
       <div v-for="option in data?.options" class="option">
         <Option :option="option" />
-        <span style="cursor: pointer; margin-left: auto; margin-right: 0.35rem;" v-if="edit">
-          <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-            @click="removeOption(option.value)">
-            <path fill-rule="evenodd" clip-rule="evenodd"
+        <span
+          style="cursor: pointer; margin-left: auto; margin-right: 0.35rem"
+          v-if="edit"
+        >
+          <svg
+            width="20px"
+            height="20px"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            @click="removeOption(option.value)"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
               d="M12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22ZM8.96965 8.96967C9.26254 8.67678 9.73742 8.67678 10.0303 8.96967L12 10.9394L13.9696 8.96969C14.2625 8.6768 14.7374 8.6768 15.0303 8.96969C15.3232 9.26258 15.3232 9.73746 15.0303 10.0303L13.0606 12L15.0303 13.9697C15.3232 14.2625 15.3232 14.7374 15.0303 15.0303C14.7374 15.3232 14.2625 15.3232 13.9696 15.0303L12 13.0607L10.0303 15.0303C9.73744 15.3232 9.26256 15.3232 8.96967 15.0303C8.67678 14.7374 8.67678 14.2626 8.96967 13.9697L10.9393 12L8.96965 10.0303C8.67676 9.73744 8.67676 9.26256 8.96965 8.96967Z"
-              fill="#d22020" />
+              fill="#d22020"
+            />
           </svg>
         </span>
       </div>
@@ -182,7 +246,6 @@ label:not(:focus) input.description {
   color: black;
 }
 
-
 .checkbox-container:hover label:focus-within input,
 .checkbox-container:hover label:focus input:hover {
   outline: 1px solid rgba(78, 78, 78, 0.1);
@@ -198,7 +261,6 @@ label:focus input {
   width: fit-content;
   transition: padding 0.25s, border-radius 0.25s;
 }
-
 
 label:focus-within input::placeholder,
 label:focus input::placeholder {
