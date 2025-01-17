@@ -107,6 +107,9 @@ const quantity = computed({
     return props.item.qtty;
   },
   set(value) {
+    if (props.item.stock !== "infinity" && value > props.item.stock) {
+      return alert("Sorry, there are no more items to fulfill your order quantity.");
+    }
     if (value > 0 && !props.item.carted) {
       cart();
     } else if (value > 0) {

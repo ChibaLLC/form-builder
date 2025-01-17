@@ -41,10 +41,10 @@ function changeQtty(qtty: number, item: Item) {
 
   if (qtty > item.qtty) {
     item.qtty = qtty;
-    emits("price", item.price)
+    emits("price", item.price);
   } else {
     item.qtty = qtty;
-    emits("price", -item.price)
+    emits("price", -item.price);
   }
 }
 </script>

@@ -29,7 +29,7 @@ import {
   draggedElementKey,
   editKey,
 } from "../../../utils/symbols";
-import { clearPages, createFormPage, createStorePage } from "../../../local";
+import { clearEmptyPages, clearPages, createFormPage, createStorePage } from "../../../local";
 import { useState } from "#app";
 
 const Page = resolveComponent("FormBuilderPage");
@@ -45,7 +45,8 @@ function addPage(starter?: Page) {
 
 const Store = resolveComponent("Store");
 const stores = shallowReactive<Component[]>([]);
-function addStore(starter?: Store) {
+async function addStore(starter?: Store) {
+  await clearEmptyPages()
   stores.push(createStorePage(Store, form.value.stores, starter));
 }
 

@@ -79,11 +79,18 @@ const deleteItems = () => {
     elements.delete(el.index);
   });
 };
+const deletePageIfEmpty = () => {
+  if(elements.value.length === 0){
+    emits('deleteCanvas', props.index)
+  }
+}
 onBeforeMount(() => {
   window.addEventListener("nuxt-form-builder:clear-pages", deleteItems);
+  window.addEventListener("nuxt-form-builder:clear-empty-pages", deletePageIfEmpty)
 });
 onUnmounted(() => {
   window.removeEventListener("nuxt-form-builder:clear-pages", deleteItems);
+  window.removeEventListener("nuxt-form-builder:clear-empty-pages", deletePageIfEmpty)
 });
 </script>
 <template>

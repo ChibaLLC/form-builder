@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { ref, type PropType, type Ref, inject } from "vue";
+import {
+  ref,
+  type PropType,
+  type Ref,
+  inject,
+  onMounted,
+  onUnmounted,
+  computed,
+} from "vue";
 import type { Item } from "../../types";
 import { editKey } from "../../utils/symbols";
 
@@ -23,20 +31,39 @@ const props = defineProps({
 const shop = ref<HTMLElement | null>(null);
 const item = ref<Item>({} as Item);
 const items = ref<Array<Item>>([]);
-const modal = ref(null);
+const addItemModal = ref<HTMLDivElement | null>(null);
 const modalHidden = ref(true);
 const edit = inject<Ref<boolean>>(editKey);
 
-function addItemModal() {
+function showAddItemModal() {
+  const fileInputs =
+    addItemModal.value?.querySelectorAll<HTMLInputElement>(
+      'input[type="file"]'
+    );
+  fileInputs?.forEach((input) => {
+    input.value = "";
+    input.files = null;
+  });
   modalHidden.value = !modalHidden.value;
 }
 
-function emitItem() {
+const isNewItem = computed(
+  () => item.value.index === undefined || item.value.index === null
+);
+
+function processItem() {
   if (!item.value) return console.warn("item.value has no item");
-  item.value.index = items.value.length;
-  item.value.store = props.storeIndex;
-  items.value.push(item.value);
-  emits("item", item.value);
+  if (isNewItem) {
+    item.value.index = items.value.length;
+    item.value.store = props.storeIndex;
+    items.value.push(item.value);
+    emits("item", item.value);
+  } else {
+    // Item is in edit mode
+    // This is done in place because the data is reactive
+    return;
+  }
+
   closeModal();
   item.value = {} as Item;
 }
@@ -69,12 +96,20 @@ function constructImageUrl(item: Item, event: Event) {
     };
     reader.readAsDataURL(obj);
   }
+
+  target.files = null;
 }
 
 function deleteStore() {
   emits("deleteStore", props.storeIndex);
   shop.value?.remove();
 }
+
+const deleteStoreIfEmpty = () => {
+  if (items.value.length === 0) {
+    deleteStore();
+  }
+};
 
 if (props.starter?.length) {
   items.value = props.starter;
@@ -83,23 +118,50 @@ if (props.starter?.length) {
   });
 }
 
-const editingItem = ref<Item>();
+onMounted(() => {
+  window.addEventListener(
+    "nuxt-form-builder:clear-empty-stores",
+    deleteStoreIfEmpty
+  );
+});
+onUnmounted(() => {
+  window.removeEventListener(
+    "nuxt-form-builder:clear-empty-stores",
+    deleteStoreIfEmpty
+  );
+});
 </script>
 
 <template>
   <div ref="shop">
     <div class="shop-icons">
       <div class="icon new">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          @click="addItemModal"
-        >
-          <path
-            d="M4 1V4H1V6H4V9H6V6H9V4H6V1H4ZM3 20.0066V11H5V19H13V14C13 13.45 13.45 13 14 13L19 12.999V5H11V3H20.0066C20.5552 3 21 3.45576 21 4.00247V15L15 20.996L4.00221 21C3.4487 21 3 20.5551 3 20.0066ZM18.171 14.999L15 15V18.169L18.171 14.999Z"
-          ></path>
-        </svg>
+        <Transition mode="out-in">
+          <div class="icon edit" v-if="!edit">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              @click="edit = true"
+            >
+              <path
+                d="M6.41421 15.89L16.5563 5.74785L15.1421 4.33363L5 14.4758V15.89H6.41421ZM7.24264 17.89H3V13.6473L14.435 2.21231C14.8256 1.82179 15.4587 1.82179 15.8492 2.21231L18.6777 5.04074C19.0682 5.43126 19.0682 6.06443 18.6777 6.45495L7.24264 17.89ZM3 19.89H21V21.89H3V19.89Z"
+              ></path>
+            </svg>
+          </div>
+          <div class="icon edit" v-else>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              @click="edit = false"
+            >
+              <path
+                d="M12.0003 3C17.3924 3 21.8784 6.87976 22.8189 12C21.8784 17.1202 17.3924 21 12.0003 21C6.60812 21 2.12215 17.1202 1.18164 12C2.12215 6.87976 6.60812 3 12.0003 3ZM12.0003 19C16.2359 19 19.8603 16.052 20.7777 12C19.8603 7.94803 16.2359 5 12.0003 5C7.7646 5 4.14022 7.94803 3.22278 12C4.14022 16.052 7.7646 19 12.0003 19ZM12.0003 16.5C9.51498 16.5 7.50026 14.4853 7.50026 12C7.50026 9.51472 9.51498 7.5 12.0003 7.5C14.4855 7.5 16.5003 9.51472 16.5003 12C16.5003 14.4853 14.4855 16.5 12.0003 16.5ZM12.0003 14.5C13.381 14.5 14.5003 13.3807 14.5003 12C14.5003 10.6193 13.381 9.5 12.0003 9.5C10.6196 9.5 9.50026 10.6193 9.50026 12C9.50026 13.3807 10.6196 14.5 12.0003 14.5Z"
+              ></path>
+            </svg>
+          </div>
+        </Transition>
       </div>
       <div class="icon delete">
         <svg
@@ -116,8 +178,32 @@ const editingItem = ref<Item>();
     </div>
     <div class="shop-container" :class="{ 'bg-wheat': edit }">
       <div class="items">
-        <div v-for="item in items" class="item">
-          <StoreCard :item="item" @delete="emitDeleteItem" @edit="editingItem = item"/>
+        <div
+          class="add-item-card-button"
+          title="add item"
+          role="button"
+          v-if="edit"
+          @click="showAddItemModal"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path
+              d="M11 11V7H13V11H17V13H13V17H11V13H7V11H11ZM12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20Z"
+            ></path>
+          </svg>
+        </div>
+        <div v-for="storeItem in items" class="item">
+          <StoreCard
+            :item="storeItem"
+            @delete="emitDeleteItem"
+            @edit="
+              item = storeItem;
+              showAddItemModal();
+            "
+          />
         </div>
       </div>
     </div>
@@ -125,11 +211,10 @@ const editingItem = ref<Item>();
   <div
     class="add-item-container"
     :class="{ hidden: modalHidden }"
-    ref="modal"
+    ref="addItemModal"
     @keyup.esc="closeModal"
   >
-    <form class="add-item" @submit.prevent="emitItem">
-      <h3>Add an item to the store</h3>
+    <form class="add-item" @submit.prevent="processItem">
       <div style="padding-top: 1rem">
         <input
           type="text"
@@ -158,58 +243,13 @@ const editingItem = ref<Item>();
           type="file"
           class="add-item-input"
           multiple
-          required
+          :required="isNewItem"
           v-on:change="constructImageUrl(item, $event)"
         />
       </div>
       <div class="add-item-buttons">
         <button class="add-item-button" type="submit">Add</button>
         <button class="cancel-button" @click="closeModal">Cancel</button>
-      </div>
-    </form>
-  </div>
-  <div
-    class="add-item-container"
-    v-if="editingItem"
-    :class="{ hidden: editingItem === undefined }"
-    ref="modal"
-    @keyup.esc="editingItem = undefined"
-  >
-    <form class="add-item" @submit.prevent="editingItem = undefined">
-      <h3>Edit item: {{ editingItem.name }}</h3>
-      <div style="padding-top: 1rem">
-        <input
-          type="text"
-          placeholder="Name"
-          class="add-item-input"
-          autocomplete="off"
-          required
-          v-model="editingItem.name"
-        />
-        <input
-          type="number"
-          placeholder="Quantity"
-          class="add-item-input"
-          autocomplete="off"
-          v-model="editingItem.stock"
-        />
-        <input
-          type="number"
-          placeholder="Price"
-          class="add-item-input"
-          autocomplete="off"
-          required
-          v-model="editingItem.price"
-        />
-        <input
-          type="file"
-          class="add-item-input"
-          multiple
-          v-on:change="constructImageUrl(item, $event)"
-        />
-      </div>
-      <div class="add-item-buttons">
-        <button class="add-item-button" type="submit">OK</button>
       </div>
     </form>
   </div>
@@ -368,6 +408,27 @@ const editingItem = ref<Item>();
 .items {
   display: grid;
   grid-template-columns: repeat(auto-fill, 300px);
-  justify-content: center;
+  justify-content: left;
+  gap: 10px;
+}
+
+.add-item-card-button {
+  background-color: white;
+  border-radius: 10px;
+  color: rgba(128, 128, 128, 0.8);
+  display: grid;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+
+  transition: background-color 0.3s ease-out;
+}
+
+.add-item-card-button:hover {
+  background-color: rgb(235, 235, 235);
+}
+
+.add-item-card-button svg {
+  width: 250px;
+  margin: auto;
 }
 </style>
