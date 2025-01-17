@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.18
+
+[compare changes](https://github.com/kgarchie/form-builder/compare/v0.1.17...v0.1.18)
+
+### 🏡 Chore
+
+- **release:** V0.1.17 ([6dcfd09](https://github.com/kgarchie/form-builder/commit/6dcfd09))
+
+### ❤️ Contributors
+
+- Kgarchie ([@kgarchie](http://github.com/kgarchie))
+
 ## v0.1.17
 
 [compare changes](https://github.com/kgarchie/form-builder/compare/v0.1.16...v0.1.17)
