@@ -52,7 +52,7 @@ const isNewItem = computed(
 );
 
 function processItem() {
-  if (!item.value) return console.warn("item.value has no item");
+  if (!item.value?.name) return console.warn("item.value has no item");
   if (isNewItem) {
     item.value.index = items.value.length;
     item.value.store = props.storeIndex;
@@ -94,17 +94,16 @@ function constructImageUrl(item: Item, event: Event) {
   const target = event.target as HTMLInputElement;
   const files = target.files;
   if (!files) return console.warn("No files selected");
+  if (!item.images) item.images = [];
 
-  for (const file in files) {
-    const obj = files[file];
-    if (typeof obj !== "object") continue;
-
+  for (const key in files) {
+    const file = files[key];
+    if (typeof file !== "object") continue;
     const reader = new FileReader();
     reader.onload = (e) => {
-      if (!item.images) item.images = [];
       item.images.push(e.target?.result as string);
     };
-    reader.readAsDataURL(obj);
+    reader.readAsDataURL(file);
   }
 
   target.files = null;
