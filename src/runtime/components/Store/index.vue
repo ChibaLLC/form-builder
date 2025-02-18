@@ -53,7 +53,7 @@ const isNewItem = computed(
 
 function processItem() {
   if (!item.value?.name) return console.warn("item.value has no item");
-  if (isNewItem) {
+  if (isNewItem.value) {
     item.value.index = items.value.length;
     item.value.store = props.storeIndex;
     items.value.push(item.value);
@@ -76,7 +76,7 @@ function emitDeleteItem(id: number | string) {
   emits("deleteItem", item);
 }
 
-const isInfinite = computed(() => item.value.stock === "infinity");
+const isInfinite = computed(() => item.value?.stock?.toString().includes("infinit"));
 
 function closeModal() {
   modalHidden.value = true;
