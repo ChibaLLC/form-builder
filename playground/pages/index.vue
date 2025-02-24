@@ -11,5 +11,4 @@ async function saveForm(data: any) {
 </template>
 
 <style scoped>
-
 </style>
