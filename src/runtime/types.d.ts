@@ -16,17 +16,24 @@ export type Input =
 
 export type ElementOptions = Array<{ value: string, label: string }>
 export interface _ElementData {
-  type: any,
-  label: string,
-  inputType: string,
-  accept?: string | undefined,
-  onClick?: () => void,
-  options?: any,
-  value?: any,
-  index: number,
-  placeholder?: string,
-  rules?: Array<'required' | `max:${number}` | `min:${number}` | `same:${string}`>,
-  description?: string,
+  type: any;
+  label: string;
+  inputType: string;
+  accept?: string | undefined;
+  onClick?: () => void;
+  options?: any;
+  value?: any;
+  index: number;
+  placeholder?: string;
+  rules?: Array<
+    "required" | `max:${number}` | `min:${number}` | `same:${string}`
+  >;
+  description?: string;
+  dependsOn?: {
+    label: undefined | string;
+    value: string;
+    condition: "lt" | "gt" | "eq";
+  };
 }
 
 export interface StaticElementData extends _ElementData {

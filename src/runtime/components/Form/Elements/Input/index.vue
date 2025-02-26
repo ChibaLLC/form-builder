@@ -29,7 +29,7 @@ if (data) {
     <FormElementsInputSelect v-else-if="isSelect(data)" />
     <div v-else>
       <label for="label">
-        <input :disabled="!edit" autocomplete="off" :type="data.inputType" id="label" class="label"
+        <input :disabled="!edit" autocomplete="off" type="text" id="label" class="label"
           :style="{ marginBottom: (data?.description?.length || edit) ? '0rem' : '0.5rem' }"
           v-model="data.label" placeholder="Add a label" />
       </label>
