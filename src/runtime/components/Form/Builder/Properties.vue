@@ -12,7 +12,7 @@ import {
   type Reactive,
   ref,
 } from "vue";
-import type { FormElementData, Pages, Stores } from "~/src/runtime/types";
+import type { _ElementData, FormElementData, Pages, Stores } from "~/src/runtime/types";
 
 const props = defineProps({
   styles: {
@@ -78,10 +78,11 @@ const dependsOnField = computed(() => {
   return fields.value.find((f) => f.label === props.active?.dependsOn?.label);
 });
 
-function updateDependsOnCondition(event: Event) {
+type Equality = NonNullable<_ElementData['dependsOn']>['condition']
+function updateDependsOnCondition(value: Equality) {
+  console.log(value)
   if (!props.active?.dependsOn) return console.log("WTF!");
-  const target = event.target as HTMLSelectElement;
-  props.active.dependsOn.condition = target.value as any;
+  props.active.dependsOn.condition = value;
 }
 </script>
 
@@ -169,8 +170,8 @@ function updateDependsOnCondition(event: Event) {
                     <div>
                       <select
                         class="input"
-                        style="width: 40px; border-radius: 3px"
-                        @change="updateDependsOnCondition"
+                        style="width: 4em; border-radius: 3px"
+                        @change="(event) => updateDependsOnCondition((event.target as HTMLSelectElement).value as Equality)"
                       >
                         <option
                           value="eq"

@@ -1,31 +1,101 @@
 <script setup lang="ts">
-import { inject, type Ref, type Reactive } from 'vue'
-import { disabledKey } from '../../utils/symbols';
-import type { FormElementData } from '../../types';
+import { inject, type Ref, type Reactive } from "vue";
+import { disabledKey } from "../../utils/symbols";
+import type { _ElementData, FormElementData } from "../../types";
+import { isNumberField } from "../../utils/functions";
 
 const emits = defineEmits<{
-  submit: []
-  back: []
-}>()
+  submit: [];
+  back: [];
+}>();
 
-const disabled = inject<Ref<boolean>>(disabledKey)
-defineProps<{
-  data: Reactive<FormElementData[]>,
-  active?: { pageIndex: string, data: FormElementData } | undefined,
-  index: string
-}>()
+const disabled = inject<Ref<boolean>>(disabledKey);
+const props = defineProps<{
+  data: Reactive<FormElementData[]>;
+  active?: { pageIndex: string; data: FormElementData } | undefined;
+  index: string;
+}>();
+
+function trim(val: any) {
+  if (typeof val !== "string") {
+    return val;
+  }
+
+  return val.toLowerCase().trim();
+}
+
+function number(val: any) {
+  if (!val) return 0;
+  const num = Number(val);
+  if (Number.isNaN(num)) {
+    try {
+      return parseInt(val);
+    } catch (e) {
+      console.error(e);
+      return 0;
+    }
+  } else {
+    return num;
+  }
+}
+
+function dependancyFulfilled<T extends _ElementData>(el: T) {
+  if (!el.dependsOn) return true;
+  let val;
+  for (const field of props.data) {
+    if (field.label === el.dependsOn.label) {
+      val = field;
+    }
+  }
+  if (!val) {
+    console.warn("No deps: WTF??");
+    return true;
+  }
+
+  if (isNumberField(val)) {
+    switch (el.dependsOn?.condition) {
+      default:
+        console.error("WTF???");
+        return true;
+      case "eq":
+        return number(val.value) === number(el.dependsOn?.value);
+      case "gt":
+        return number(val.value) >= number(el.dependsOn?.value);
+      case "lt":
+        return number(val.value) <= number(el.dependsOn?.value);
+    }
+  }
+  switch (el.dependsOn?.condition) {
+    default:
+      console.error("WTF???");
+      return true;
+    case "eq":
+      return trim(val.value) === trim(el.dependsOn?.value);
+    case "gt":
+      return trim(val.value) >= trim(el.dependsOn?.value);
+    case "lt":
+      return trim(val.value) <= trim(el.dependsOn?.value);
+  }
+}
 </script>
 <template>
   <Title>Form</Title>
   <div class="form-container">
     <form class="form-renderer" @submit.prevent="emits('submit')">
-      <FormElementsRenderer v-for="element in data" :key="element.index" :data="element"
-        :active="index === active?.pageIndex && active.data.index === element.index" />
+      <template v-for="el in data" :key="el.index">
+        <FormElementsRenderer
+          v-if="dependancyFulfilled(el)"
+          :data="el"
+          :active="
+            index === active?.pageIndex && active.data.index === el.index
+          "
+        />
+      </template>
       <div class="form-footer" v-if="!disabled">
-        <button type="button" @click="emits('back');" class="form-back-button">Back</button>
-        <button type="submit" class="form-submit-button">
-          Submit
+        <button type="button" @click="emits('back')" class="form-back-button">
+          Back
         </button>
+        <button type="submit" class="form-submit-button">Submit</button>
       </div>
     </form>
   </div>
