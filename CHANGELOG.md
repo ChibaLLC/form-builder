@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.21
+
+[compare changes](https://github.com/kgarchie/form-builder/compare/v0.1.20...v0.1.21)
+
+### 🏡 Chore
+
+- **release:** V0.1.20 ([b58e646](https://github.com/kgarchie/form-builder/commit/b58e646))
+
+### ❤️ Contributors
+
+- Kgarchie <archiethebig@gmail.com>
+
 ## v0.1.20
 
 [compare changes](https://github.com/kgarchie/form-builder/compare/v0.1.19...v0.1.20)
