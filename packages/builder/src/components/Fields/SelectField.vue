@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormField } from "@/types";
 import { ref } from "vue";
+import { Input } from "../ui/input";
 
 const props = defineProps<{
   field: FormField;
@@ -61,7 +62,7 @@ const clearAllOptions = () => {
       class="block text-sm font-medium text-gray-700 mb-2 cursor-pointer"
       @click="isEditingLabel = true"
     >
-      <input
+      <Input
         v-if="isEditingLabel"
         v-model="field.label"
         @blur="exitFromEditing()"

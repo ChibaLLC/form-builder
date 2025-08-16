@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormField } from "@/types";
 import { ref } from "vue";
+import { Input } from "../ui/input";
 
 const props = defineProps<{
   field: FormField;
@@ -47,7 +48,7 @@ const isEditingLabel = ref(false);
       </span>
     </label>
 
-    <input
+    <Input
       type="text"
       :placeholder="field.placeholder"
       class="w-full px-3 py-2 border border-gray-300 rounded-md"
