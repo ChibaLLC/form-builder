@@ -1,5 +1,2 @@
 /* Ship only Tailwind utilities to avoid overriding consumer base styles */
-@import "tailwindcss/utilities";
-
-/* Scan this package's source to include only needed classes */
-@source "../**/*.{vue,ts,tsx,js}";
+@import "tailwindcss";
