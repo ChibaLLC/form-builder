@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import FormSettings from "./FormSettings.vue";
-import StoreProducts from "./StoreProducts.vue";
 import FormPreview from "./FormPreview.vue";
 
 import Header from "./Form/Header.vue";

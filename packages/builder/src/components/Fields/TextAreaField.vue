@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { FormField } from "@/types";
 import { ref } from "vue";
-import { Input } from "../ui/input";
 
 const props = defineProps<{
   field: FormField;
@@ -35,14 +34,14 @@ const exitFromEditingLabel = () => {
       class="block text-sm font-medium text-gray-700 mb-2 cursor-pointer"
       @click="isEditingLabel = true"
     >
-      <Input
+      <input
         v-if="isEditingLabel"
         v-model="field.label"
         @blur="exitFromEditingLabel()"
         @keyup.enter="exitFromEditingLabel()"
         @keyup.escape="exitFromEditingLabel()"
         class="bg-transparent border-b border-blue-500 outline-none"
-        ref="labelInput"
+        ref="labelinput"
       />
       <span v-else>
         {{ field.label }}
