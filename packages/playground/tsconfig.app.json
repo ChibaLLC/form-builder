@@ -13,10 +13,15 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@chiballc/form-builder/*": ["../builder/*"]
+      "@chiballc/form-builder/*": ["../builder/src/*"]
     },
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/types/**/*.d.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/types/**/*.d.ts"
+  ]
 }

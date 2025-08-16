@@ -9,7 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@chiballc/form-builder": path.resolve(__dirname, "../builder"),
+      "@chiballc/form-builder": path.resolve(__dirname, "../builder/src"),
       vue: "vue/dist/vue.esm-bundler.js",
     },
   },

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import FormBuilderInterface from "../../builder/src/components/FormBuilderInterface.vue";
+import { FormBuilderInterface } from "@chiballc/form-builder";
+
+// import FormBuilderInterface from "../../builder/src/components/FormBuilderInterface.vue";
 </script>
 
 <template>
