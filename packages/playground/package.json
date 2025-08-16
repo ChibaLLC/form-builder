@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chiballc/form-builder": "workspace:*",
     "vue": "^3.5.18"
   },
   "devDependencies": {

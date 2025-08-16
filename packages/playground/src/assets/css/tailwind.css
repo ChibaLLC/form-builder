@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* Ensure Tailwind scans the builder package sources for class usage */
+@source "../../../../builder/src/**/*.{vue,ts,tsx,js}";
