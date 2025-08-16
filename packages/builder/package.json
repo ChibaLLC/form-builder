@@ -1,12 +1,20 @@
 {
-  "name": "builder",
+  "name": "@chiballc/form-builder",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./index.d.ts"
+    }
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "dev": "tsc --watch",
+    "build": "tsc && vite build"
   },
   "dependencies": {
     "vue": "^3.5.18"
