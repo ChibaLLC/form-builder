@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { FormBuilderInterface } from "@chiballc/form-builder";
+// import { FormBuilderInterface } from "@chiballc/form-builder";
+import FormBuilderInterface from "@chiballc/form-builder/components/FormBuilderInterface.vue";
 
 // import FormBuilderInterface from "../../builder/src/components/FormBuilderInterface.vue";
 </script>
@@ -8,17 +9,4 @@ import { FormBuilderInterface } from "@chiballc/form-builder";
   <FormBuilderInterface />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+<style scoped></style>

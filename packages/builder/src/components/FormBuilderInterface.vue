@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import FormPreview from "./FormPreview.vue";
 
 import Header from "./Form/Header.vue";
-import type { FormField, FormSchema } from "@/types";
+import type { FormField, FormSchema, Store as StoreType } from "@/types";
 import Elements from "./Form/Elements.vue";
 import Renderer from "./Form/Builder/Renderer.vue";
 import Settings from "./Settings/Settings.vue";
@@ -11,39 +11,50 @@ import Store from "./Store/Store.vue";
 
 // Data
 const form = ref<FormSchema>({
-  title: "",
-  description: "",
+  id: 1,
+  title: "My Form",
+  description: "Build your form here",
   pages: [
     {
       id: 1,
-      title: "",
-      description: "",
+      title: "Page 1",
+      description: "First page of the form",
       fields: [] as FormField[],
     },
   ],
-  settings: {},
+  settings: {
+    submitText: "Submit",
+    resetText: "Reset",
+    layout: "vertical",
+    spacing: "normal",
+    theme: "light",
+  },
 } as FormSchema);
+
 const activeTab = ref("builder");
-const pageTitle = ref("");
-const formFields = ref([]);
+const stores = ref<StoreType[]>([]);
+
 const tabs = [
   { key: "builder", label: "Form Builder" },
   { key: "store", label: "Store & Products" },
   { key: "settings", label: "Settings" },
 ];
+
 const showPreview = ref(false);
-// Toggle preview modal
+
 function togglePreview() {
   showPreview.value = !showPreview.value;
 }
 
-// Handle ESC key to close properties panel
+function updateStores(newStores: StoreType[]) {
+  stores.value = newStores;
+}
 </script>
 
 <template>
   <div class="min-h-screen bg-white">
     <!-- Header -->
-    <Header :form="{ title: 'Test Form' } as FormSchema" />
+    <Header :form="form" @toggle-preview="togglePreview" />
 
     <!-- Tab Navigation -->
     <nav class="bg-white border-b border-gray-200 px-6">
@@ -77,7 +88,7 @@ function togglePreview() {
 
       <!-- Store & Products Tab -->
       <div v-else-if="activeTab === 'store'" class="h-full">
-        <Store />
+        <Store @update-stores="updateStores" />
       </div>
 
       <!-- Settings Tab -->
@@ -89,9 +100,8 @@ function togglePreview() {
     <!-- Preview Modal -->
     <FormPreview
       v-if="showPreview"
-      :form-title="pageTitle || 'Untitled Form'"
-      :form-description="'Preview of your form'"
-      :fields="formFields"
+      :form="form"
+      :stores="stores"
       @close="togglePreview"
     />
 

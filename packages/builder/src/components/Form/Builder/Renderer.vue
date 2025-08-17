@@ -22,7 +22,6 @@ function getFieldComponent(fieldType: string) {
     date: DatePickerField,
     rating: RatingScaleField,
     select: SelectField,
-    // Add other field components as needed
   };
 
   return components[fieldType] || TextInputField;
@@ -62,6 +61,7 @@ const addNewPage = () => {
     description: "",
     fields: [],
   } as PageSchema;
+  props.form.pages.push(newPage);
   switchToPage(newPage);
 };
 const removePage = (pageId: number) => {
@@ -76,7 +76,6 @@ const removePage = (pageId: number) => {
     const index = props.form.pages.findIndex((page) => page.id === pageId);
     if (index > -1) {
       props.form.pages.splice(index, 1);
-      // Switch to first available page if current page was deleted
       if (currentPage.value.id === pageId) {
         currentPage.value = props.form.pages[0] || 1;
         switchToPage(currentPage.value);
@@ -151,6 +150,9 @@ onMounted(() => {
                 </svg>
               </button>
             </div>
+            <div>
+              <button @click.prevent="addNewPage()">+</button>
+            </div>
           </div>
         </div>
       </div>
@@ -163,25 +165,6 @@ onMounted(() => {
           placeholder="Enter Page Title"
           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
-        <button
-          @click="addNewPage"
-          class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-        >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-            />
-          </svg>
-          Add Page
-        </button>
       </div>
 
       <!-- Canvas wrapper with floating actions -->

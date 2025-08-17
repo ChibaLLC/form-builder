@@ -1,68 +1,88 @@
 <template>
-  <div class="min-h-screen py-8" :class="themeClasses" style="background: var(--fb-color-background, #f9fafb)">
+  <div class="min-h-screen py-8">
     <div class="max-w-4xl mx-auto px-4">
       <!-- Header -->
       <div class="flex items-center justify-between mb-8">
-        <button 
+        <button
           @click="$emit('close')"
           class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
           Back to Builder
         </button>
-        
-        <button class="px-6 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors">
+
+        <button
+          class="px-6 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors"
+        >
           Publish
         </button>
       </div>
 
       <!-- Form Container -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div
+        class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+      >
         <!-- Form Header -->
         <div class="text-center py-8 px-6 border-b border-gray-200">
-          <h1 class="text-2xl font-semibold text-gray-900 mb-2">{{ formTitle }}</h1>
-          <p class="text-gray-600">{{ formDescription }}</p>
+          <h1 class="text-2xl font-semibold text-gray-900 mb-2">
+            {{ form.title || "Form Preview" }}
+          </h1>
+          <p class="text-gray-600">
+            {{ form.description || "Preview of your form" }}
+          </p>
         </div>
 
         <!-- Progress Steps -->
         <div class="px-6 py-6 border-b border-gray-200">
           <div class="flex items-center justify-center">
             <div class="flex items-center space-x-8">
-              <div 
-                v-for="(step, index) in steps" 
+              <div
+                v-for="(step, index) in steps"
                 :key="index"
                 class="flex flex-col items-center"
               >
                 <div class="flex items-center">
                   <!-- Step Circle -->
-                  <div 
+                  <div
                     :class="[
                       'w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium',
-                      currentStep > index 
-                        ? 'bg-green-500 text-white' 
-                        : currentStep === index 
-                          ? 'bg-green-500 text-white' 
-                          : 'bg-gray-200 text-gray-600'
+                      currentStep > index
+                        ? 'bg-green-500 text-white'
+                        : currentStep === index
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-200 text-gray-600',
                     ]"
                   >
                     {{ index + 1 }}
                   </div>
-                  
+
                   <!-- Progress Line -->
-                  <div 
+                  <div
                     v-if="index < steps.length - 1"
                     :class="[
                       'h-1 w-20 ml-4',
-                      currentStep > index ? 'bg-green-500' : 'bg-gray-200'
+                      currentStep > index ? 'bg-green-500' : 'bg-gray-200',
                     ]"
                   ></div>
                 </div>
-                
+
                 <!-- Step Info -->
                 <div class="mt-3 text-center">
-                  <div class="text-sm font-medium text-gray-900">{{ step.title }}</div>
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ step.title }}
+                  </div>
                   <div class="text-xs text-gray-500">{{ step.subtitle }}</div>
                 </div>
               </div>
@@ -72,86 +92,245 @@
 
         <!-- Form Content -->
         <div class="p-6">
-          <!-- Current Step Content -->
-          <div v-if="currentStep === 0" class="space-y-6">
+          <!-- Form Step Content -->
+          <div v-if="currentStepData.type === 'form'" class="space-y-6">
             <div class="bg-gray-50 rounded-lg p-6">
-              <h3 class="text-lg font-medium text-gray-900 mb-6">Personal Information</h3>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div v-for="field in currentStepFields" :key="field.id">
-                  <component 
+              <h3 class="text-lg font-medium text-gray-900 mb-6">
+                {{ currentStepData.title }}
+              </h3>
+              <p v-if="currentStepData.description" class="text-gray-600 mb-6">
+                {{ currentStepData.description }}
+              </p>
+
+              <div
+                v-if="currentStepData.fields.length > 0"
+                class="grid grid-cols-1 md:grid-cols-2 gap-6"
+              >
+                <div v-for="field in currentStepData.fields" :key="field.id">
+                  <component
                     :is="getPreviewFieldComponent(field.type)"
                     :field="field"
                     :preview="true"
                   />
                 </div>
               </div>
+              <div v-else class="text-center py-8">
+                <p class="text-gray-500">No fields added to this page yet.</p>
+              </div>
             </div>
           </div>
 
-          <!-- Additional steps would be rendered here -->
-          <div v-else-if="currentStep === 1" class="space-y-6">
-            <div class="text-center py-12">
-              <h3 class="text-lg font-medium text-gray-900 mb-2">Market Place</h3>
-              <p class="text-gray-600">Select services content would go here</p>
+          <!-- Store Step Content -->
+          <div v-else-if="currentStepData.type === 'store'" class="space-y-6">
+            <div class="bg-gray-50 rounded-lg p-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-6">
+                {{ currentStepData.title }}
+              </h3>
+
+              <div v-if="currentStepData.stores.length > 0" class="space-y-6">
+                <div
+                  v-for="store in currentStepData.stores"
+                  :key="store.id"
+                  class="bg-white rounded-lg p-4 border border-gray-200"
+                >
+                  <h4 class="text-md font-semibold text-gray-800 mb-4">
+                    {{ store.name }}
+                  </h4>
+
+                  <div
+                    v-if="store.items.length > 0"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                  >
+                    <div
+                      v-for="item in store.items"
+                      :key="item.id"
+                      class="bg-gray-50 rounded-lg p-4 border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+                    >
+                      <!-- Product Image Placeholder -->
+                      <div
+                        class="w-full h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg mb-3 flex items-center justify-center"
+                      >
+                        <svg
+                          class="w-6 h-6 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
+
+                      <!-- Product Info -->
+                      <h5 class="font-medium text-gray-900 text-sm mb-1">
+                        {{ item.name }}
+                      </h5>
+                      <p class="text-xs text-gray-600 mb-2 line-clamp-2">
+                        {{ item.description || "No description" }}
+                      </p>
+
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-teal-600"
+                          >Ksh{{ item.price }}</span
+                        >
+                        <span
+                          class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded"
+                          >Qty: {{ item.quantity }}</span
+                        >
+                      </div>
+
+                      <!-- Selection checkbox -->
+                      <div class="mt-3 flex items-center">
+                        <input
+                          type="checkbox"
+                          class="mr-2"
+                          :id="`product-${item.id}`"
+                        />
+                        <label
+                          :for="`product-${item.id}`"
+                          class="text-xs text-gray-600"
+                          >Select this product</label
+                        >
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-else class="text-center py-8">
+                    <p class="text-gray-500">No products in this store yet.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div v-else class="text-center py-8">
+                <p class="text-gray-500">No stores configured yet.</p>
+              </div>
             </div>
           </div>
 
-          <div v-else-if="currentStep === 2" class="space-y-6">
-            <div class="text-center py-12">
-              <h3 class="text-lg font-medium text-gray-900 mb-2">Review & Payment</h3>
-              <p class="text-gray-600">Confirm details pay content would go here</p>
+          <!-- Review Step Content -->
+          <div v-else-if="currentStepData.type === 'review'" class="space-y-6">
+            <div class="bg-gray-50 rounded-lg p-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-6">
+                {{ currentStepData.title }}
+              </h3>
+
+              <div class="space-y-6">
+                <!-- Form Data Summary -->
+                <div class="bg-white rounded-lg p-4 border border-gray-200">
+                  <h4 class="font-medium text-gray-800 mb-3">
+                    Form Information
+                  </h4>
+                  <div class="space-y-2">
+                    <div v-for="page in form.pages" :key="page.id">
+                      <p class="text-sm">
+                        <strong>{{ page.title || `Page ${page.id}` }}:</strong>
+                        {{ page.fields.length }} fields
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Store Selection Summary -->
+                <div
+                  v-if="stores && stores.length > 0"
+                  class="bg-white rounded-lg p-4 border border-gray-200"
+                >
+                  <h4 class="font-medium text-gray-800 mb-3">
+                    Selected Products
+                  </h4>
+                  <p class="text-sm text-gray-600">
+                    Product selection summary would appear here
+                  </p>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center pt-6">
+                  <button
+                    class="px-8 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
+                  >
+                    {{ form.settings.submitText || "Submit Form" }}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Navigation Footer -->
-        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between">
-          <button 
+        <div
+          class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between"
+        >
+          <button
             @click="previousStep"
             :disabled="currentStep === 0"
             :class="[
               'flex items-center gap-2 px-6 py-2 border rounded-md transition-colors',
-              currentStep === 0 
-                ? 'border-gray-300 text-gray-400 cursor-not-allowed' 
-                : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+              currentStep === 0
+                ? 'border-gray-300 text-gray-400 cursor-not-allowed'
+                : 'border-gray-300 text-gray-700 hover:bg-gray-100',
             ]"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Previous
           </button>
 
-          <button 
+          <button
             @click="nextStep"
             :disabled="currentStep === steps.length - 1"
             :class="[
               'flex items-center gap-2 px-6 py-2 rounded-md transition-colors',
-              currentStep === steps.length - 1 
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                : 'bg-gray-800 text-white hover:bg-gray-900'
+              currentStep === steps.length - 1
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-gray-800 text-white hover:bg-gray-900',
             ]"
           >
             Next
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </div>
       </div>
     </div>
+    <FormRenderer :form="form" :stores="stores" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed } from "vue";
+import type { FormSchema, Store } from "@/types";
+import FormRenderer from "./FormRenderer.vue";
 
 // Props
 const props = defineProps<{
-  formTitle: string;
-  formDescription: string;
-  fields: any[];
+  form: FormSchema;
+  stores?: Store[];
 }>();
 
 // Emits
@@ -159,31 +338,76 @@ defineEmits<{
   close: [];
 }>();
 
-// Simple theme classes without theme plugin
-const themeClasses = computed(() => ({
-  'theme-default': true,
-  'animations-enabled': true
-}));
-
 // Data
 const currentStep = ref(0);
 
-const steps = [
-  { title: 'Build Pages', subtitle: 'Basic information' },
-  { title: 'Market Place', subtitle: 'Select services' },
-  { title: 'Review & Payment', subtitle: 'Confirm details pay' }
-];
+// Generate steps dynamically from form pages and stores
+const steps = computed(() => {
+  const formSteps = props.form.pages.map((page, index) => ({
+    title: page.title || `Page ${index + 1}`,
+    subtitle: `Form fields (${page.fields.length} fields)`,
+    type: "form",
+    pageId: page.id,
+  }));
+
+  const storeSteps =
+    props.stores && props.stores.length > 0
+      ? [
+          {
+            title: "Marketplace",
+            subtitle: `Select products (${props.stores.reduce((total, store) => total + store.items.length, 0)} products)`,
+            type: "store",
+          },
+        ]
+      : [];
+
+  const reviewStep = [
+    {
+      title: "Review & Submit",
+      subtitle: "Confirm and submit",
+      type: "review",
+    },
+  ];
+
+  return [...formSteps, ...storeSteps, ...reviewStep];
+});
 
 // Computed
-const currentStepFields = computed(() => {
-  // For now, show all fields in the first step
-  // In a real app, you'd filter fields by step
-  return props.fields;
+const currentStepData = computed(() => {
+  const step = steps.value[currentStep.value];
+  if (!step) return { fields: [], stores: [], type: "form" };
+
+  if (step.type === "form") {
+    const page = props.form.pages.find((p) => p.id === step.pageId);
+    return {
+      fields: page?.fields || [],
+      stores: [],
+      type: "form",
+      title: page?.title || step.title,
+      description: page?.description || "",
+    };
+  } else if (step.type === "store") {
+    return {
+      fields: [],
+      stores: props.stores || [],
+      type: "store",
+      title: step.title,
+      description: step.subtitle,
+    };
+  } else {
+    return {
+      fields: [],
+      stores: [],
+      type: "review",
+      title: step.title,
+      description: step.subtitle,
+    };
+  }
 });
 
 // Methods
 function nextStep() {
-  if (currentStep.value < steps.length - 1) {
+  if (currentStep.value < steps.value.length - 1) {
     currentStep.value++;
   }
 }
@@ -196,17 +420,17 @@ function previousStep() {
 
 function getPreviewFieldComponent(type: string) {
   const components = {
-    text: 'PreviewTextInput',
-    email: 'PreviewTextInput', 
-    phone: 'PreviewTextInput',
-    name: 'PreviewNameField',
-    longtext: 'PreviewTextArea',
-    date: 'PreviewDatePicker',
-    rating: 'PreviewRating',
-    file: 'PreviewFileUpload',
+    text: "PreviewTextInput",
+    email: "PreviewTextInput",
+    phone: "PreviewTextInput",
+    name: "PreviewNameField",
+    longtext: "PreviewTextArea",
+    date: "PreviewDatePicker",
+    rating: "PreviewRating",
+    file: "PreviewFileUpload",
   };
-  
-  return components[type] || 'PreviewTextInput';
+
+  return components[type] || "PreviewTextInput";
 }
 </script>
 
@@ -215,7 +439,7 @@ function getPreviewFieldComponent(type: string) {
 export default {
   components: {
     PreviewTextInput: {
-      props: ['field', 'preview'],
+      props: ["field", "preview"],
       template: `
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -228,11 +452,11 @@ export default {
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
-      `
+      `,
     },
-    
+
     PreviewNameField: {
-      props: ['field', 'preview'],
+      props: ["field", "preview"],
       template: `
         <div class="col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-3">{{ field.label }}</label>
@@ -247,11 +471,11 @@ export default {
             </div>
           </div>
         </div>
-      `
+      `,
     },
 
     PreviewTextArea: {
-      props: ['field', 'preview'],
+      props: ["field", "preview"],
       template: `
         <div class="col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-2">{{ field.label }}</label>
@@ -261,11 +485,11 @@ export default {
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           ></textarea>
         </div>
-      `
+      `,
     },
 
     PreviewDatePicker: {
-      props: ['field', 'preview'],
+      props: ["field", "preview"],
       template: `
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">{{ field.label }}</label>
@@ -280,11 +504,11 @@ export default {
             </svg>
           </div>
         </div>
-      `
+      `,
     },
 
     PreviewRating: {
-      props: ['field', 'preview'],
+      props: ["field", "preview"],
       template: `
         <div class="col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-3">{{ field.label }}</label>
@@ -294,15 +518,15 @@ export default {
             </svg>
           </div>
         </div>
-      `
+      `,
     },
 
     PreviewFileUpload: {
-      props: ['field', 'preview'],
+      props: ["field", "preview"],
       data() {
         return {
           isDragOver: false,
-          uploadedFiles: []
+          uploadedFiles: [],
         };
       },
       template: `
@@ -399,8 +623,13 @@ export default {
           const rect = event.currentTarget.getBoundingClientRect();
           const x = event.clientX;
           const y = event.clientY;
-          
-          if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+
+          if (
+            x < rect.left ||
+            x > rect.right ||
+            y < rect.top ||
+            y > rect.bottom
+          ) {
             this.isDragOver = false;
           }
         },
@@ -419,12 +648,19 @@ export default {
         },
         addFiles(files) {
           // Filter for allowed file types and size
-          const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+          const allowedTypes = [
+            "image/png",
+            "image/jpeg",
+            "image/jpg",
+            "application/pdf",
+          ];
           const maxSize = 10 * 1024 * 1024; // 10MB
-          
-          const validFiles = files.filter(file => {
+
+          const validFiles = files.filter((file) => {
             if (!allowedTypes.includes(file.type)) {
-              alert(`File ${file.name} is not a supported format. Please use PNG, JPG, or PDF.`);
+              alert(
+                `File ${file.name} is not a supported format. Please use PNG, JPG, or PDF.`,
+              );
               return false;
             }
             if (file.size > maxSize) {
@@ -433,21 +669,23 @@ export default {
             }
             return true;
           });
-          
+
           this.uploadedFiles = [...this.uploadedFiles, ...validFiles];
         },
         removeFile(index) {
           this.uploadedFiles.splice(index, 1);
         },
         formatFileSize(bytes) {
-          if (bytes === 0) return '0 Bytes';
+          if (bytes === 0) return "0 Bytes";
           const k = 1024;
-          const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+          const sizes = ["Bytes", "KB", "MB", "GB"];
           const i = Math.floor(Math.log(bytes) / Math.log(k));
-          return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-      }
-    }
-  }
-}
+          return (
+            parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+          );
+        },
+      },
+    },
+  },
+};
 </script>

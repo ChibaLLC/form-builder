@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useStoreDrag } from "../../composables/drag";
 import type { Store, StoreItem } from "@/types";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 const stores = ref<Store[]>([]);
 const activeStore = ref<Store>({} as Store);
@@ -15,6 +15,16 @@ const productForm = ref<StoreItem>({
   quantity: 0,
 });
 const { startStoreDrag, storeDragOver, storeDrop } = useStoreDrag(stores);
+
+// Emits to parent component
+const emit = defineEmits<{
+  'update-stores': [stores: Store[]]
+}>();
+
+// Watch stores and emit updates to parent
+watch(stores, (newStores) => {
+  emit('update-stores', newStores);
+}, { deep: true });
 
 // Functions
 const switchStore = (store: Store) => {
@@ -33,6 +43,7 @@ const addNewStore = () => {
   activeStore.value = newStore;
 };
 addNewStore();
+
 const removeStore = (storeId: number) => {
   if (stores.value.length <= 1) {
     alert("You must have at least one store.");
