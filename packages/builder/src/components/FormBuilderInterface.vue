@@ -1,24 +1,25 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import FormPreview from "./FormPreview.vue";
-
-import Header from "./Form/Header.vue";
+import { ref } from "vue";
+import FormPreviewFullscreen from "./FormPreviewFullscreen.vue";
+import PublishedFormRenderer from "./PublishedFormRenderer.vue";
 import type { FormField, FormSchema, Store as StoreType } from "@/types";
 import Elements from "./Form/Elements.vue";
 import Renderer from "./Form/Builder/Renderer.vue";
 import Settings from "./Settings/Settings.vue";
 import Store from "./Store/Store.vue";
+import { Eye, Download, Upload, Plus, Send, ArrowLeft, CheckCircle } from "lucide-vue-next";
+import Properties from "./Form/Element/Properties.vue";
 
 // Data
 const form = ref<FormSchema>({
   id: 1,
-  title: "My Form",
-  description: "Build your form here",
+  title: "Contact Form",
+  description: "Get in touch with us",
   pages: [
     {
       id: 1,
-      title: "Page 1",
-      description: "First page of the form",
+      title: "Basic Information",
+      description: "Tell us about yourself",
       fields: [] as FormField[],
     },
   ],
@@ -33,14 +34,39 @@ const form = ref<FormSchema>({
 
 const activeTab = ref("builder");
 const stores = ref<StoreType[]>([]);
+const showPreview = ref(false);
+const selectedField = ref<FormField | null>(null);
+const fileInput = ref<HTMLInputElement>();
+const isPublished = ref(false);
+const publishedFormData = ref<any>(null);
+const showPublishSuccess = ref(false);
 
 const tabs = [
-  { key: "builder", label: "Form Builder" },
-  { key: "store", label: "Store & Products" },
-  { key: "settings", label: "Settings" },
+  { id: "builder", label: "Form Builder", icon: "📝" },
+  { id: "store", label: "Store & Products", icon: "🛍️" },
+  { id: "settings", label: "Settings", icon: "⚙️" },
 ];
 
-const showPreview = ref(false);
+function selectField(field: FormField) {
+  console.log(field);
+  selectedField.value = field;
+}
+
+function updateField(updates: Partial<FormField>) {
+  if (selectedField.value) {
+    Object.assign(selectedField.value, updates);
+  }
+}
+
+function addPage() {
+  const newId = Math.max(...form.value.pages.map((p) => p.id)) + 1;
+  form.value.pages.push({
+    id: newId,
+    title: `Page ${newId}`,
+    description: `Description for page ${newId}`,
+    fields: [],
+  });
+}
 
 function togglePreview() {
   showPreview.value = !showPreview.value;
@@ -49,280 +75,366 @@ function togglePreview() {
 function updateStores(newStores: StoreType[]) {
   stores.value = newStores;
 }
+
+function handleExport() {
+  const dataStr = JSON.stringify(form.value, null, 2);
+  const dataUri =
+    "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+  const exportLink = document.createElement("a");
+  exportLink.setAttribute("href", dataUri);
+  exportLink.setAttribute("download", `form-${Date.now()}.json`);
+  document.body.appendChild(exportLink);
+  exportLink.click();
+  document.body.removeChild(exportLink);
+}
+
+function handleImport() {
+  fileInput.value?.click();
+}
+
+function handleFileImport(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target?.result as string);
+        form.value = importedData;
+      } catch (error) {
+        console.error("Failed to import form:", error);
+        alert("Failed to import form. Please check the file format.");
+      }
+    };
+    reader.readAsText(file);
+  }
+}
+
+function handlePublish() {
+  // Validate form has at least one field
+  const hasFields = form.value.pages.some(page => page.fields.length > 0);
+  
+  if (!hasFields) {
+    alert("Please add at least one field to your form before publishing.");
+    return;
+  }
+  
+  // Save the form data (in a real app, this would be sent to a server)
+  publishedFormData.value = JSON.parse(JSON.stringify(form.value));
+  
+  // Show publish success notification
+  showPublishSuccess.value = true;
+  
+  // Auto-hide success message after 3 seconds
+  setTimeout(() => {
+    showPublishSuccess.value = false;
+    // Switch to published view
+    isPublished.value = true;
+  }, 2000);
+}
+
+function handleFormSubmit(data: { formData: Record<string, any>; selectedProducts: any[] }) {
+  console.log("Form submitted with data:", data);
+  
+  // Create a summary message
+  let message = "Form submitted successfully!\n\n";
+  
+  // Add form fields summary
+  const fieldCount = Object.keys(data.formData).length;
+  if (fieldCount > 0) {
+    message += `✅ ${fieldCount} form field(s) filled\n`;
+  }
+  
+  // Add selected products summary
+  if (data.selectedProducts.length > 0) {
+    message += `\n🛍️ Selected Products:\n`;
+    let totalAmount = 0;
+    data.selectedProducts.forEach(product => {
+      const subtotal = product.price * product.selectedQuantity;
+      totalAmount += subtotal;
+      message += `• ${product.name} (${product.selectedQuantity}x @ $${product.price}) = $${subtotal}\n`;
+    });
+    message += `\n💰 Total: $${totalAmount.toFixed(2)}`;
+  } else {
+    message += "\nNo products selected.";
+  }
+  
+  message += "\n\nCheck the console for detailed data.";
+  
+  alert(message);
+  
+  // Log detailed data to console
+  console.group("📋 Form Submission Details");
+  console.log("Form ID:", publishedFormData.value.id);
+  console.log("Form Title:", publishedFormData.value.title);
+  console.log("Form Data:", data.formData);
+  if (data.selectedProducts.length > 0) {
+    console.log("Selected Products:", data.selectedProducts);
+    console.table(data.selectedProducts.map(p => ({
+      Store: p.storeName,
+      Product: p.name,
+      Price: `$${p.price}`,
+      Quantity: p.selectedQuantity,
+      Subtotal: `$${(p.price * p.selectedQuantity).toFixed(2)}`
+    })));
+  }
+  console.groupEnd();
+  
+  // In a real application, you would send this data to your backend
+  // Example:
+  // await api.submitForm({
+  //   formId: publishedFormData.value.id,
+  //   data: data.formData,
+  //   products: data.selectedProducts
+  // });
+}
+
+function backToBuilder() {
+  isPublished.value = false;
+  publishedFormData.value = null;
+}
 </script>
 
 <template>
-  <div class="min-h-screen bg-white">
-    <!-- Header -->
-    <Header :form="form" @toggle-preview="togglePreview" />
-
-    <!-- Tab Navigation -->
-    <nav class="bg-white border-b border-gray-200 px-6">
-      <div class="flex space-x-8">
-        <button
-          v-for="tab in tabs"
-          :key="tab.key"
-          :class="[
-            'py-4 px-1 border-b-2 font-medium text-sm transition-colors',
-            activeTab === tab.key
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-          ]"
-          @click="activeTab = tab.key"
-        >
-          {{ tab.label }}
-        </button>
+  <!-- Published Form View -->
+  <div v-if="isPublished" class="min-h-screen bg-gray-50">
+    <!-- Header for Published View -->
+    <header class="bg-white border-b border-gray-200">
+      <div class="px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <button
+              @click="backToBuilder"
+              class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ArrowLeft class="w-5 h-5" />
+            </button>
+            <div>
+              <h1 class="text-lg font-semibold text-gray-900">Published Form</h1>
+              <p class="text-sm text-gray-500">This is how your form will appear to users</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full flex items-center gap-2">
+              <CheckCircle class="w-4 h-4" />
+              Published
+            </div>
+          </div>
+        </div>
       </div>
-    </nav>
+    </header>
+    
+    <!-- Published Form Renderer -->
+    <PublishedFormRenderer
+      v-if="publishedFormData"
+      :form="publishedFormData"
+      :stores="stores"
+      :show-stores="true"
+      :show-header="true"
+      @submit="handleFormSubmit"
+    />
+  </div>
+  
+  <!-- Form Builder View -->
+  <div v-else class="min-h-screen bg-gray-50">
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-gray-200">
+      <div class="px-6 py-4">
+        <div class="flex items-center justify-between">
+          <!-- Logo & Title -->
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center"
+            >
+              <span class="text-white font-bold text-lg">FB</span>
+            </div>
+            <h1 class="text-xl font-bold text-gray-900">Form Builder</h1>
+          </div>
 
-    <!-- Main Content -->
-    <div class="h-[calc(100vh-140px)]">
+          <!-- Action Buttons -->
+          <div class="flex items-center gap-3">
+            <button
+              @click="handleImport"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Upload class="w-4 h-4" />
+              Import
+            </button>
+            <button
+              @click="handleExport"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Download class="w-4 h-4" />
+              Export
+            </button>
+            <button
+              @click="togglePreview"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <Eye class="w-4 h-4" />
+              Preview
+            </button>
+            <button
+              @click="handlePublish"
+              class="px-5 py-2 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 shadow-sm"
+            >
+              <Send class="w-4 h-4" />
+              Publish Form
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex items-center gap-1 mt-4">
+          <button
+            v-for="tab in tabs"
+            :key="tab.id"
+            @click="activeTab = tab.id"
+            :class="[
+              'px-6 py-2.5 text-sm font-medium rounded-t-lg transition-all',
+              activeTab === tab.id
+                ? 'bg-gray-50 text-gray-900 border-t-2 border-green-500'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
+            ]"
+          >
+            <span class="mr-2">{{ tab.icon }}</span>
+            {{ tab.label }}
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="flex h-[calc(100vh-140px)]">
       <!-- Form Builder Tab -->
-      <div v-if="activeTab === 'builder'" class="flex h-full">
-        <!-- Form Elements Sidebar -->
-        <Elements />
+      <template v-if="activeTab === 'builder'">
+        <!-- Left: Elements Panel -->
+        <div
+          class="w-72 bg-white border-r border-gray-200 overflow-hidden flex flex-col"
+        >
+          <div class="p-4 border-b border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-900">Form Elements</h3>
+            <p class="text-xs text-gray-500 mt-1">Drag elements to add them</p>
+          </div>
+          <div class="flex-1 overflow-y-auto p-4">
+            <Elements />
+          </div>
+        </div>
 
-        <!-- Form Canvas -->
-        <Renderer :form="form" />
-      </div>
+        <!-- Center: Canvas -->
+        <div class="flex-1 bg-gray-50 overflow-auto">
+          <div class="p-6">
+            <!-- Page Tabs -->
+            <div class="bg-white rounded-lg shadow-sm mb-6">
+              <div class="px-4 py-3 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <button
+                      v-for="(page, index) in form.pages"
+                      :key="page.id"
+                      class="px-4 py-1.5 text-sm font-medium rounded-md"
+                      :class="[
+                        index === 0
+                          ? 'bg-green-50 text-green-700 border border-green-200'
+                          : 'text-gray-600 hover:bg-gray-50',
+                      ]"
+                    >
+                      {{ page.title || `Page ${index + 1}` }}
+                    </button>
+                    <button
+                      @click="addPage"
+                      class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                    >
+                      <Plus class="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-6">
+                <Renderer :form="form" @select-field="selectField" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-80 bg-white border-l border-gray-200 overflow-hidden">
+          <Properties
+            v-if="selectedField"
+            :field="selectedField"
+            @update="updateField"
+          />
+          <div v-else class="p-6 text-center">
+            <div
+              class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3"
+            >
+              <span class="text-2xl">✏️</span>
+            </div>
+            <h3 class="text-sm font-medium text-gray-900 mb-1">
+              No element selected
+            </h3>
+            <p class="text-xs text-gray-500">
+              Click on a form element to edit its properties
+            </p>
+          </div>
+        </div>
+      </template>
 
       <!-- Store & Products Tab -->
-      <div v-else-if="activeTab === 'store'" class="h-full">
-        <Store @update-stores="updateStores" />
-      </div>
+      <template v-else-if="activeTab === 'store'">
+        <div class="flex-1 bg-white">
+          <Store @update-stores="updateStores" />
+        </div>
+      </template>
 
       <!-- Settings Tab -->
-      <div v-else-if="activeTab === 'settings'" class="h-full">
-        <Settings />
-      </div>
+      <template v-else-if="activeTab === 'settings'">
+        <div class="flex-1 bg-white">
+          <Settings :form="form" />
+        </div>
+      </template>
     </div>
 
-    <!-- Preview Modal -->
-    <FormPreview
+    <!-- Full-screen Preview -->
+    <FormPreviewFullscreen
       v-if="showPreview"
       :form="form"
       :stores="stores"
       @close="togglePreview"
     />
 
-    <!-- Hidden file input for import -->
+    <!-- Hidden file input -->
     <input
       ref="fileInput"
       type="file"
       accept=".json"
       @change="handleFileImport"
-      style="display: none"
+      class="hidden"
     />
+    
+    <!-- Publish Success Notification -->
+    <Transition
+      enter-active-class="transition ease-out duration-300"
+      enter-from-class="transform translate-y-full opacity-0"
+      enter-to-class="transform translate-y-0 opacity-100"
+      leave-active-class="transition ease-in duration-200"
+      leave-from-class="transform translate-y-0 opacity-100"
+      leave-to-class="transform translate-y-full opacity-0"
+    >
+      <div
+        v-if="showPublishSuccess"
+        class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50"
+      >
+        <div class="bg-green-600 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-3">
+          <CheckCircle class="w-6 h-6" />
+          <div>
+            <p class="font-semibold">Form Published Successfully!</p>
+            <p class="text-sm text-green-100">Redirecting to published view...</p>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
-
-<style scoped>
-/* Theme system CSS variables */
-.form-builder-interface {
-  background: var(--fb-color-background, #ffffff);
-  color: var(--fb-color-text, #1e293b);
-  font-family: var(--fb-typography-fontFamily, "Inter, system-ui, sans-serif");
-  font-size: var(--fb-typography-fontSize, 14px);
-  min-height: 100vh;
-}
-
-.theme-selector {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--fb-color-surface, #f8fafc);
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid var(--fb-color-border, #e2e8f0);
-  box-shadow: 0 2px 4px var(--fb-color-shadow, rgba(0, 0, 0, 0.1));
-}
-
-.theme-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--fb-color-textSecondary, #64748b);
-}
-
-.theme-select {
-  padding: 0.25rem 0.5rem;
-  border: 1px solid var(--fb-color-border, #e2e8f0);
-  border-radius: 4px;
-  background: var(--fb-color-background, #ffffff);
-  color: var(--fb-color-text, #1e293b);
-  font-size: 0.875rem;
-  cursor: pointer;
-}
-
-.theme-select:focus {
-  outline: none;
-  border-color: var(--fb-color-borderFocus, #3b82f6);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-/* Add any custom styles here */
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1;
-}
-
-/* Grid column span classes */
-.col-span-1 {
-  grid-column: span 1 / span 1;
-}
-.col-span-2 {
-  grid-column: span 2 / span 2;
-}
-.col-span-3 {
-  grid-column: span 3 / span 3;
-}
-.col-span-4 {
-  grid-column: span 4 / span 4;
-}
-.col-span-5 {
-  grid-column: span 5 / span 5;
-}
-.col-span-6 {
-  grid-column: span 6 / span 6;
-}
-.col-span-7 {
-  grid-column: span 7 / span 7;
-}
-.col-span-8 {
-  grid-column: span 8 / span 8;
-}
-.col-span-9 {
-  grid-column: span 9 / span 9;
-}
-.col-span-10 {
-  grid-column: span 10 / span 10;
-}
-.col-span-11 {
-  grid-column: span 11 / span 11;
-}
-.col-span-12 {
-  grid-column: span 12 / span 12;
-}
-
-/* Grid template columns classes */
-.grid-cols-1 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.grid-cols-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.grid-cols-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-.grid-cols-5 {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-.grid-cols-6 {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-
-/* Gap classes */
-.gap-1 {
-  gap: 0.25rem;
-}
-.gap-2 {
-  gap: 0.5rem;
-}
-.gap-3 {
-  gap: 0.75rem;
-}
-.gap-4 {
-  gap: 1rem;
-}
-.gap-6 {
-  gap: 1.5rem;
-}
-.gap-8 {
-  gap: 2rem;
-}
-
-/* Responsive grid behavior */
-@media (max-width: 768px) {
-  .responsive-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .responsive-grid > div {
-    grid-column: span 1 !important;
-  }
-}
-
-/* Column settings dropdown positioning */
-.column-settings-dropdown {
-  z-index: 50;
-}
-
-/* Click outside to close functionality */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.column-settings-dropdown {
-  animation: fadeIn 0.15s ease-out;
-}
-
-/* Drag and drop visual feedback */
-.drag-handle {
-  cursor: grab;
-}
-
-.drag-handle:active {
-  cursor: grabbing;
-}
-
-/* Field hover states */
-.field-wrapper:hover .delete-button {
-  opacity: 1;
-}
-
-.delete-button {
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-/* Selected field highlight */
-.field-selected {
-  box-shadow: 0 0 0 2px #3b82f6;
-  border-radius: 0.5rem;
-}
-
-/* Grid layout container */
-.grid-container {
-  display: grid;
-  width: 100%;
-  min-height: 200px;
-}
-
-/* Empty state styling */
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  border: 2px dashed #d1d5db;
-  border-radius: 0.5rem;
-  background-color: rgba(249, 250, 251, 0.5);
-}
-
-.empty-state.drag-over {
-  border-color: #60a5fa;
-  background-color: rgba(239, 246, 255, 0.5);
-}
-</style>
