@@ -1,227 +1,244 @@
 <script setup lang="ts">
 import type { FormField } from "@/types";
+import {
+  Settings,
+  Type,
+  AlignLeft,
+  CheckSquare,
+  Hash,
+  ToggleLeft,
+} from "lucide-vue-next";
 
-const props = defineProps<{
-  selectedField: FormField;
-  fields: FormField[];
+interface Props {
+  field: FormField;
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits<{
+  update: [updates: Partial<FormField>];
 }>();
-const emits = defineEmits(["close"]);
-const fieldHasPlaceholder = (fieldType: string) => {
-  return ["text", "email", "phone", "longtext"].includes(fieldType);
-};
+
+function updateField(key: string, value: any) {
+  emit("update", { [key]: value });
+}
 const addOption = () => {
-  if (!props.selectedField.options) {
-    props.selectedField.options = [];
+  if (!props.field.options) {
+    props.field.options = [];
   }
-  const newOptionNumber = props.selectedField.options.length + 1;
-  props.selectedField.options.push({
+  const newOptionNumber = props.field.options.length + 1;
+  props.field.options.push({
     label: `Option ${newOptionNumber}`,
     value: `Option ${newOptionNumber}`,
   });
 };
 const removeOption = (index: number) => {
-  if (props.selectedField.options && props.selectedField.options.length > 1) {
-    props.selectedField.options.splice(index, 1);
+  if (props.field.options && props.field.options.length > 1) {
+    props.field.options.splice(index, 1);
   }
 };
+// Field type configurations
+const fieldTypes = {
+  text: { icon: Type, label: "Text Input" },
+  email: { icon: Type, label: "Email" },
+  phone: { icon: Type, label: "Phone" },
+  number: { icon: Hash, label: "Number" },
+  longtext: { icon: AlignLeft, label: "Text Area" },
+  checkbox: { icon: CheckSquare, label: "Checkbox" },
+  select: { icon: ToggleLeft, label: "Dropdown" },
+};
 </script>
+
 <template>
-  <aside
-    v-if="selectedField"
-    class="w-96 bg-white border-l border-gray-200 overflow-y-auto"
-  >
-    <div class="p-6">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-lg font-semibold text-gray-900">Element Properties</h3>
-        <button
-          class="text-gray-400 hover:text-gray-600"
-          @click="emits('close')"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+  <div class="h-full flex flex-col">
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center gap-2">
+        <Settings class="w-5 h-5 text-gray-500" />
+        <h3 class="font-semibold text-gray-900">Element Properties</h3>
+      </div>
+    </div>
+
+    <!-- Properties Form -->
+    <div class="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+      <!-- Field Type -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Field Type
+        </label>
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+          <component
+            :is="fieldTypes[field.type]?.icon || Type"
+            class="w-5 h-5 text-gray-500"
+          />
+          <span class="text-sm font-medium text-gray-900">
+            {{ fieldTypes[field.type]?.label || field.type }}
+          </span>
+        </div>
       </div>
 
-      <!-- Field Properties Form -->
-      <div class="space-y-6">
-        <!-- Label -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Label</label
-          >
-          <input
-            v-model="selectedField.label"
-            type="text"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
+      <!-- Label -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Label
+        </label>
+        <input
+          :value="field.label"
+          @input="
+            updateField('label', ($event.target as HTMLInputElement).value)
+          "
+          type="text"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          placeholder="Enter field label"
+        />
+      </div>
 
-        <!-- Placeholder (if applicable) -->
-        <div v-if="fieldHasPlaceholder(selectedField.type)">
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Placeholder</label
-          >
-          <input
-            v-model="selectedField.placeholder"
-            type="text"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
+      <!-- Placeholder -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Placeholder
+        </label>
+        <input
+          :value="field.placeholder"
+          @input="
+            updateField(
+              'placeholder',
+              ($event.target as HTMLInputElement).value,
+            )
+          "
+          type="text"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          placeholder="Enter placeholder text"
+        />
+      </div>
 
-        <!-- Number of fields (for grouped fields) -->
-        <div v-if="selectedField.type === 'name'">
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Number of fields</label
-          >
-          <div class="flex gap-2">
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">Max</label>
-              <input
-                v-model.number="selectedField.maxFields"
-                type="number"
-                class="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">Min</label>
-              <input
-                v-model.number="selectedField.minFields"
-                type="number"
-                class="w-20 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-        </div>
+      <!-- Helper Text -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Helper Text
+        </label>
+        <textarea
+          :value="field.helperText"
+          @input="
+            updateField(
+              'helperText',
+              ($event.target as HTMLTextAreaElement).value,
+            )
+          "
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+          rows="2"
+          placeholder="Add helpful instructions"
+        />
+      </div>
 
-        <!-- Options Management (for select fields) -->
-        <div v-if="selectedField.type === 'select'">
-          <label class="block text-sm font-medium text-gray-700 mb-3"
-            >Options</label
-          >
-          <div class="space-y-2 mb-3">
-            <div
-              v-for="(option, index) in selectedField.options || []"
-              :key="index"
-              class="flex items-center gap-2"
+      <div>
+        <label class="flex items-center justify-between cursor-pointer">
+          <div>
+            <span class="text-sm font-medium text-gray-700"
+              >Required Field</span
             >
-              <input
-                v-model="option.label"
-                type="text"
-                placeholder="Option label"
-                class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <input
-                v-model="option.value"
-                type="text"
-                placeholder="Value"
-                class="w-20 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <button
-                @click="removeOption(index)"
-                class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md"
-                title="Remove option"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+            <p class="text-xs text-gray-500 mt-0.5">
+              Make this field mandatory
+            </p>
           </div>
           <button
-            @click="addOption"
-            class="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm"
+            @click="updateField('required', !field.required)"
+            :class="[
+              'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+              field.required ? 'bg-green-500' : 'bg-gray-300',
+            ]"
           >
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-            Add Option
-          </button>
-        </div>
-
-        <!-- Required -->
-        <div>
-          <label class="flex items-center gap-2">
-            <input
-              v-model="selectedField.required"
-              type="checkbox"
-              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            <span
+              :class="[
+                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                field.required ? 'translate-x-6' : 'translate-x-1',
+              ]"
             />
-            <span class="text-sm font-medium text-gray-700">Required</span>
-          </label>
-        </div>
+          </button>
+        </label>
+      </div>
 
-        <!-- Rules Section -->
-        <div class="pt-6 border-t border-gray-200">
-          <h4 class="text-sm font-medium text-gray-900 mb-4">Rules</h4>
-
-          <div>
-            <label class="block text-sm text-gray-700 mb-2">Depends on</label>
-            <select
-              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option>Select field...</option>
-              <option
-                v-for="field in fields.filter((f) => f.id !== selectedField.id)"
-                :key="field.id"
-                :value="field.id"
-              >
-                {{ field.label }}
-              </option>
-            </select>
+      <div
+        v-if="
+          field.type === 'text' ||
+          field.type === 'email' ||
+          field.type === 'number'
+        "
+      >
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Validation
+        </label>
+        <div class="space-y-2">
+          <!-- Min Length -->
+          <div v-if="field.type === 'text'" class="flex items-center gap-2">
+            <input
+              type="number"
+              placeholder="Min length"
+              class="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+            <input
+              type="number"
+              placeholder="Max length"
+              class="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
           </div>
-        </div>
 
-        <!-- Help Text -->
-        <div class="pt-6 border-t border-gray-200">
-          <div class="flex items-start gap-2 text-xs text-gray-500">
-            <svg
-              class="w-4 h-4 mt-0.5 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <!-- Pattern -->
+          <input
+            v-if="field.type === 'text'"
+            type="text"
+            placeholder="Regex pattern (optional)"
+            class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+
+      <div v-if="field.type === 'select' || field.type === 'checkbox'">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Options
+        </label>
+        <div class="space-y-2">
+          <div
+            v-for="(option, index) in field.options || []"
+            :key="index"
+            class="flex items-center gap-2"
+          >
+            <input
+              :value="option.label"
+              type="text"
+              class="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Option label"
+            />
+            <button
+              @click.prevent="removeOption(index)"
+              class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>Click the 'Esc' key to exit properties</span>
+              <span class="text-sm">×</span>
+            </button>
           </div>
+          <button
+            @click.prevent="addOption()"
+            class="w-full px-3 py-1.5 border border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-gray-400 hover:text-gray-700 transition-colors"
+          >
+            + Add Option
+          </button>
         </div>
       </div>
     </div>
-  </aside>
+
+    <!-- Footer Actions -->
+    <div class="px-6 py-4 border-t border-gray-200">
+      <div class="flex items-center gap-2">
+        <button
+          class="flex-1 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+        >
+          Delete Field
+        </button>
+        <button
+          class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+        >
+          Duplicate
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
