@@ -4,6 +4,11 @@ import RatingScaleField from "../../Fields/RatingScaleField.vue";
 import SelectField from "../../Fields/SelectField.vue";
 import TextAreaField from "../../Fields/TextAreaField.vue";
 import TextInputField from "../../Fields/TextInputField.vue";
+import CheckboxField from "../../Fields/CheckboxField.vue";
+import RadioButtonField from "../../Fields/RadioButtonField.vue";
+import FileUploadField from "../../Fields/FileUploadField.vue";
+import NumberRangeField from "../../Fields/NumberRangeField.vue";
+import ToggleSwitchField from "../../Fields/ToggleSwitchField.vue";
 import {
   useFieldDrag,
   useGridLayoutDrag,
@@ -12,16 +17,26 @@ import {
 import type { FormField, FormSchema, PageSchema } from "@/types";
 import { onMounted, ref, toRef, type Component } from "vue";
 import Properties from "../Element/Properties.vue";
+
 function getFieldComponent(fieldType: string) {
   const components: Record<any, Component> = {
     text: TextInputField,
     email: TextInputField,
     phone: TextInputField,
     name: TextInputField,
+    number: TextInputField,
+    url: TextInputField,
+    textarea: TextAreaField,
     longtext: TextAreaField,
     date: DatePickerField,
-    rating: RatingScaleField,
+    time: DatePickerField,
     select: SelectField,
+    checkbox: CheckboxField,
+    radio: RadioButtonField,
+    toggle: ToggleSwitchField,
+    rating: RatingScaleField,
+    file: FileUploadField,
+    range: NumberRangeField,
   };
 
   return components[fieldType] || TextInputField;
@@ -30,7 +45,9 @@ const props = defineProps<{
   form: FormSchema;
 }>();
 
-const emits = defineEmits();
+const emits = defineEmits<{
+  "select-field": [field: FormField];
+}>();
 const currentPage = ref<PageSchema>(props.form.pages[0]);
 const selectedField = ref<FormField | null>(null);
 const { startPageDrag, stopPageDrag } = usePageDrag(
@@ -44,14 +61,19 @@ const switchToPage = (page: PageSchema) => {
   currentPage.value = page;
 };
 const selectField = (field: FormField) => {
+  emits("select-field", field);
   selectedField.value = field;
 };
-const closeSideProperties = () => {
-  selectedField.value = null;
-};
+
 const removeField = (index: number) => {
   if (index > -1) {
     currentPage.value.fields.splice(index, 1);
+  }
+};
+
+const updateField = (index: number, updatedField: FormField) => {
+  if (index > -1 && index < currentPage.value.fields.length) {
+    currentPage.value.fields[index] = updatedField;
   }
 };
 const addNewPage = () => {
@@ -117,7 +139,6 @@ onMounted(() => {
               @dragstart="startPageDrag($event, page, index)"
               @drop.prevent="stopPageDrag($event, index)"
             >
-              <!-- Drag Handle -->
               <svg
                 class="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-move"
                 fill="currentColor"
@@ -212,8 +233,10 @@ onMounted(() => {
           @dragenter="layoutDragEnter($event)"
           @drop="layoutDrop"
         >
-          <!-- Grid Container -->
-          <div v-if="currentPage.fields.length > 0" class="grid min-h-full">
+          <div
+            v-if="currentPage.fields.length > 0"
+            class="grid gap-2 min-h-full"
+          >
             <div
               v-for="(field, fieldIndex) in currentPage.fields"
               :key="field.id"
@@ -223,16 +246,15 @@ onMounted(() => {
               @dragstart="startFieldDrag($event, field, fieldIndex)"
               @drop.prevent="dropField($event, fieldIndex)"
             >
-              <!-- Field Component with Column Span Controls -->
               <div class="relative">
-                <!-- Field Component -->
                 <component
                   :is="getFieldComponent(field.type)"
                   :field="field"
                   :is-selected="selectedField && selectedField.id === field.id"
+                  :mode="'builder'"
+                  @update:field="(updatedField) => updateField(fieldIndex, updatedField)"
                 />
 
-                <!-- Delete Button -->
                 <button
                   v-if="selectedField && selectedField.id === field.id"
                   class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
@@ -289,10 +311,4 @@ onMounted(() => {
       </div>
     </section>
   </main>
-  <Properties
-    v-if="selectedField"
-    :selected-field="selectedField"
-    :fields="currentPage.fields"
-    @close="closeSideProperties"
-  />
 </template>
