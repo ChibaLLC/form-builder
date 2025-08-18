@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "../builder/src"),
       "@chiballc/form-builder": path.resolve(__dirname, "../builder/src"),
       vue: "vue/dist/vue.esm-bundler.js",
     },
