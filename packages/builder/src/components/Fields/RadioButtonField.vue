@@ -1,16 +1,7 @@
 <script setup lang="ts">
 import type { FormField } from "@/types";
 import { ref, watch, nextTick } from "vue";
-import { Grip, ChevronDown, Edit3, List } from "lucide-vue-next";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Grip, Circle, Edit3, CircleDot } from "lucide-vue-next";
 
 interface Props {
   field: FormField;
@@ -36,7 +27,7 @@ const emit = defineEmits<{
 const isEditingLabel = ref(false);
 const labelInput = ref<HTMLInputElement>();
 const localLabel = ref(props.field.label);
-const selectedValue = ref("");
+const selectedOption = ref(1);
 const localValue = ref(props.modelValue);
 
 const startEditingLabel = async () => {
@@ -61,38 +52,7 @@ const cancelEditingLabel = () => {
   localLabel.value = props.field.label;
 };
 
-const removeOption = (index: number) => {
-  if (props.field.options && props.field.options.length > 1) {
-    props.field.options.splice(index, 1);
-  } else {
-    alert("A select field must have more than 1 option");
-  }
-};
-
-const addOptionInline = () => {
-  if (!props.field.options) {
-    props.field.options = [];
-  }
-  const newOptionNumber = props.field.options.length + 1;
-  props.field.options.push({
-    label: `Option ${newOptionNumber}`,
-    value: `option ${newOptionNumber}`,
-  });
-};
-
-const addMultipleOptions = () => {
-  for (let index = 0; index < 3; index++) {
-    addOptionInline();
-  }
-};
-
-const clearAllOptions = () => {
-  if (confirm("Are you sure you want to delete all options!")) {
-    props.field.options = [{ label: "Option 1", value: "option 1" }];
-  }
-};
-
-const handleSelectChange = (value: string) => {
+const handleRadioChange = (value: string) => {
   localValue.value = value;
   emit('update:modelValue', value);
 };
@@ -101,6 +61,7 @@ watch(() => props.modelValue, (newValue) => {
   localValue.value = newValue;
 });
 </script>
+
 <template>
   <!-- Builder Mode -->
   <div
@@ -112,7 +73,9 @@ watch(() => props.modelValue, (newValue) => {
         : 'border-slate-200 hover:border-slate-300 hover:shadow-md',
     ]"
   >
+    <!-- Field Header -->
     <div class="flex items-center justify-between px-4 pt-4 pb-2">
+      <!-- Drag Handle -->
       <div class="flex items-center gap-2">
         <div
           class="cursor-move opacity-0 group-hover:opacity-100 transition-opacity drag-handle"
@@ -120,21 +83,25 @@ watch(() => props.modelValue, (newValue) => {
           <Grip class="w-4 h-4 text-slate-400 hover:text-slate-600" />
         </div>
 
+        <!-- Field Type Icon -->
         <div
-          class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center"
+          class="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-50 to-purple-50 flex items-center justify-center"
         >
-          <List class="w-4 h-4 text-purple-600" />
+          <CircleDot class="w-4 h-4 text-violet-600" />
         </div>
       </div>
 
+      <!-- Field Type Badge -->
       <div
         class="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full"
       >
-        Dropdown
+        Radio Button
       </div>
     </div>
 
+    <!-- Field Content -->
     <div class="px-4 pb-4">
+      <!-- Editable Label -->
       <div class="mb-3">
         <div
           v-if="!isEditingLabel"
@@ -162,44 +129,45 @@ watch(() => props.modelValue, (newValue) => {
         />
       </div>
 
-      <!-- Preview Select using Radix Vue -->
+      <!-- Preview Radio Buttons -->
       <div class="relative">
-        <Select v-model="selectedValue" disabled>
-          <SelectTrigger
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm cursor-not-allowed transition-all flex items-center justify-between"
+        <div class="space-y-2">
+          <label
+            v-for="(option, index) in field.options || [
+              'Option 1',
+              'Option 2',
+              'Option 3',
+            ]"
+            :key="index"
+            class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 cursor-not-allowed"
           >
-            <SelectValue
-              :placeholder="field.placeholder || 'Choose an option'"
-            />
-            <ChevronDown class="w-4 h-4 text-slate-400" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Options</SelectLabel>
-              <SelectItem
-                v-for="(option, index) in field.options"
-                :key="index"
-                :value="option.value"
-              >
-                {{ option.label }}
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+            <div class="relative">
+              <CircleDot
+                v-if="selectedOption === index"
+                class="w-5 h-5 text-violet-500"
+              />
+              <Circle v-else class="w-5 h-5 text-slate-400" />
+            </div>
+            <span class="text-sm text-slate-700">{{ option }}</span>
+          </label>
+        </div>
         <div
           class="absolute inset-0 rounded-lg bg-slate-50/50 pointer-events-none"
         ></div>
       </div>
 
-      <!-- Options Preview -->
-      <div v-if="field.options && field.options.length > 0" class="mt-2">
+      <!-- Radio Configuration -->
+      <div class="mt-2 flex items-center gap-2">
+        <span class="text-xs text-slate-500">Options:</span>
         <div class="flex flex-wrap gap-1">
           <span
-            v-for="(option, index) in field.options?.slice(0, 3)"
+            v-for="(option, index) in (
+              field.options || ['Option 1', 'Option 2', 'Option 3']
+            ).slice(0, 3)"
             :key="index"
-            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700"
+            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700"
           >
-            {{ option.label }}
+            {{ option }}
           </span>
           <span
             v-if="field.options && field.options.length > 3"
@@ -229,19 +197,22 @@ watch(() => props.modelValue, (newValue) => {
       {{ field.label }}
       <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
     </label>
-    <select
-      class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm cursor-not-allowed"
-      disabled
-    >
-      <option value="">{{ field.placeholder || 'Choose an option' }}</option>
-      <option
-        v-for="(option, index) in field.options || []"
+    <div class="space-y-2">
+      <label
+        v-for="(option, index) in field.options || ['Option 1', 'Option 2', 'Option 3']"
         :key="index"
-        :value="typeof option === 'string' ? option : option.value"
+        class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 cursor-not-allowed"
       >
-        {{ typeof option === 'string' ? option : option.label }}
-      </option>
-    </select>
+        <input
+          type="radio"
+          :name="`preview-${field.id}`"
+          :checked="index === 1"
+          disabled
+          class="w-4 h-4 text-green-500 focus:ring-0 cursor-not-allowed"
+        />
+        <span class="text-sm text-gray-700">{{ option }}</span>
+      </label>
+    </div>
     <div v-if="field.helperText" class="mt-1 text-xs text-gray-500">
       {{ field.helperText }}
     </div>
@@ -249,26 +220,29 @@ watch(() => props.modelValue, (newValue) => {
 
   <!-- Fill Mode -->
   <div v-else class="mb-4">
-    <label :for="`field-${field.id}`" class="block text-sm font-medium text-gray-700 mb-2">
+    <label class="block text-sm font-medium text-gray-700 mb-2">
       {{ field.label }}
       <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
     </label>
-    <select
-      :id="`field-${field.id}`"
-      :value="localValue"
-      @change="handleSelectChange($event.target.value)"
-      :required="field.required"
-      class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-    >
-      <option value="">{{ field.placeholder || 'Choose an option' }}</option>
-      <option
+    <div class="space-y-2">
+      <label
         v-for="(option, index) in field.options || []"
         :key="index"
-        :value="typeof option === 'string' ? option : option.value"
+        class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
       >
-        {{ typeof option === 'string' ? option : option.label }}
-      </option>
-    </select>
+        <input
+          type="radio"
+          :id="`${field.id}-${index}`"
+          :name="field.id"
+          :value="option"
+          :checked="localValue === option"
+          @change="handleRadioChange(option)"
+          :required="field.required && index === 0"
+          class="w-4 h-4 text-green-500 focus:ring-2 focus:ring-green-200 transition-all"
+        />
+        <span class="text-sm text-gray-700">{{ option }}</span>
+      </label>
+    </div>
     <div v-if="field.helperText" class="mt-1 text-xs text-gray-500">
       {{ field.helperText }}
     </div>

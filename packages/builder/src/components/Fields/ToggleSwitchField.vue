@@ -1,32 +1,33 @@
 <script setup lang="ts">
 import type { FormField } from "@/types";
 import { ref, watch, nextTick } from "vue";
-import { Grip, FileText, Edit3 } from "lucide-vue-next";
+import { Grip, ToggleLeft, Edit3 } from "lucide-vue-next";
 
 interface Props {
   field: FormField;
   isSelected?: boolean;
   isDisabled?: boolean;
   mode?: 'builder' | 'preview' | 'fill';
-  modelValue?: any;
+  modelValue?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isSelected: false,
   isDisabled: false,
   mode: 'builder',
-  modelValue: '',
+  modelValue: false,
 });
 
 const emit = defineEmits<{
   "update:field": [field: FormField];
-  "update:modelValue": [value: any];
+  "update:modelValue": [value: boolean];
   delete: [];
 }>();
 
 const isEditingLabel = ref(false);
 const labelInput = ref<HTMLInputElement>();
 const localLabel = ref(props.field.label);
+const toggleValue = ref(true);
 const localValue = ref(props.modelValue);
 
 const startEditingLabel = async () => {
@@ -51,16 +52,16 @@ const cancelEditingLabel = () => {
   localLabel.value = props.field.label;
 };
 
-const handleInput = (event: Event) => {
-  const target = event.target as HTMLTextAreaElement;
-  localValue.value = target.value;
-  emit('update:modelValue', target.value);
+const handleToggleChange = () => {
+  localValue.value = !localValue.value;
+  emit('update:modelValue', localValue.value);
 };
 
 watch(() => props.modelValue, (newValue) => {
   localValue.value = newValue;
 });
 </script>
+
 <template>
   <!-- Builder Mode -->
   <div
@@ -77,16 +78,16 @@ watch(() => props.modelValue, (newValue) => {
       <!-- Drag Handle -->
       <div class="flex items-center gap-2">
         <div
-          class="cursor-move opacity-0 group-hover:opacity-100 transition-opacity"
+          class="cursor-move opacity-0 group-hover:opacity-100 transition-opacity drag-handle"
         >
           <Grip class="w-4 h-4 text-slate-400 hover:text-slate-600" />
         </div>
 
         <!-- Field Type Icon -->
         <div
-          class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center"
+          class="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-50 to-cyan-50 flex items-center justify-center"
         >
-          <FileText class="w-4 h-4 text-blue-600" />
+          <ToggleLeft class="w-4 h-4 text-teal-600" />
         </div>
       </div>
 
@@ -94,7 +95,7 @@ watch(() => props.modelValue, (newValue) => {
       <div
         class="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full"
       >
-        Text Area
+        Toggle Switch
       </div>
     </div>
 
@@ -128,17 +129,54 @@ watch(() => props.modelValue, (newValue) => {
         />
       </div>
 
-      <!-- Preview Textarea -->
+      <!-- Preview Toggle -->
       <div class="relative">
-        <textarea
-          :placeholder="field.placeholder || 'Enter your text here...'"
-          rows="4"
-          class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm placeholder:text-slate-400 cursor-not-allowed resize-none transition-all"
-          disabled
-        ></textarea>
+        <div
+          class="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+        >
+          <div>
+            <p class="text-sm text-slate-700">
+              {{ field.toggleLabel || "Enable this option" }}
+            </p>
+            <p
+              v-if="field.toggleDescription"
+              class="text-xs text-slate-500 mt-1"
+            >
+              {{ field.toggleDescription }}
+            </p>
+          </div>
+
+          <!-- Toggle Switch -->
+          <button
+            @click="toggleValue = !toggleValue"
+            class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-not-allowed"
+            :class="toggleValue ? 'bg-teal-500' : 'bg-slate-300'"
+            disabled
+          >
+            <span
+              class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+              :class="toggleValue ? 'translate-x-6' : 'translate-x-1'"
+            />
+          </button>
+        </div>
         <div
           class="absolute inset-0 rounded-lg bg-slate-50/50 pointer-events-none"
         ></div>
+      </div>
+
+      <!-- Toggle Configuration -->
+      <div class="mt-2 flex items-center gap-2">
+        <span
+          class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-700"
+        >
+          Default: {{ field.defaultValue ? "ON" : "OFF" }}
+        </span>
+        <span
+          v-if="field.requiredOn"
+          class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-700"
+        >
+          Must be ON
+        </span>
       </div>
 
       <!-- Helper Text -->
@@ -156,40 +194,51 @@ watch(() => props.modelValue, (newValue) => {
 
   <!-- Preview Mode -->
   <div v-else-if="mode === 'preview'" class="mb-4">
-    <label class="block text-sm font-medium text-gray-700 mb-2">
-      {{ field.label }}
-      <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
-    </label>
-    <textarea
-      :placeholder="field.placeholder || 'Enter your text here...'"
-      :rows="field.rows || 4"
-      class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm placeholder:text-gray-400 cursor-not-allowed resize-none"
-      disabled
-    ></textarea>
-    <div v-if="field.helperText" class="mt-1 text-xs text-gray-500">
-      {{ field.helperText }}
+    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+      <div>
+        <label class="text-sm font-medium text-gray-700">
+          {{ field.label }}
+          <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
+        </label>
+        <p v-if="field.helperText" class="text-xs text-gray-500 mt-1">
+          {{ field.helperText }}
+        </p>
+      </div>
+      <button
+        class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 cursor-not-allowed"
+        disabled
+      >
+        <span
+          class="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1"
+        />
+      </button>
     </div>
   </div>
 
   <!-- Fill Mode -->
   <div v-else class="mb-4">
-    <label :for="`field-${field.id}`" class="block text-sm font-medium text-gray-700 mb-2">
-      {{ field.label }}
-      <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
-    </label>
-    <textarea
-      :id="`field-${field.id}`"
-      :value="localValue"
-      @input="handleInput"
-      :placeholder="field.placeholder || 'Enter your text here...'"
-      :rows="field.rows || 4"
-      :required="field.required"
-      :minlength="field.minLength"
-      :maxlength="field.maxLength"
-      class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-y"
-    ></textarea>
-    <div v-if="field.helperText" class="mt-1 text-xs text-gray-500">
-      {{ field.helperText }}
+    <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+      <div>
+        <label :for="`field-${field.id}`" class="text-sm font-medium text-gray-700 cursor-pointer">
+          {{ field.label }}
+          <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
+        </label>
+        <p v-if="field.helperText" class="text-xs text-gray-500 mt-1">
+          {{ field.helperText }}
+        </p>
+      </div>
+      <button
+        :id="`field-${field.id}`"
+        @click="handleToggleChange"
+        type="button"
+        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:ring-2 focus:ring-green-200"
+        :class="localValue ? 'bg-green-500' : 'bg-gray-300'"
+      >
+        <span
+          class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+          :class="localValue ? 'translate-x-6' : 'translate-x-1'"
+        />
+      </button>
     </div>
   </div>
 </template>

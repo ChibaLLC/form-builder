@@ -1,42 +1,33 @@
 <script setup lang="ts">
 import type { FormField } from "@/types";
 import { ref, watch, nextTick } from "vue";
-import { Grip, ChevronDown, Edit3, List } from "lucide-vue-next";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Grip, SlidersHorizontal, Edit3 } from "lucide-vue-next";
 
 interface Props {
   field: FormField;
   isSelected?: boolean;
   isDisabled?: boolean;
   mode?: 'builder' | 'preview' | 'fill';
-  modelValue?: any;
+  modelValue?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isSelected: false,
   isDisabled: false,
   mode: 'builder',
-  modelValue: '',
+  modelValue: 50,
 });
 
 const emit = defineEmits<{
   "update:field": [field: FormField];
-  "update:modelValue": [value: any];
+  "update:modelValue": [value: number];
   delete: [];
 }>();
 
 const isEditingLabel = ref(false);
 const labelInput = ref<HTMLInputElement>();
 const localLabel = ref(props.field.label);
-const selectedValue = ref("");
+const rangeValue = ref(50);
 const localValue = ref(props.modelValue);
 
 const startEditingLabel = async () => {
@@ -61,46 +52,17 @@ const cancelEditingLabel = () => {
   localLabel.value = props.field.label;
 };
 
-const removeOption = (index: number) => {
-  if (props.field.options && props.field.options.length > 1) {
-    props.field.options.splice(index, 1);
-  } else {
-    alert("A select field must have more than 1 option");
-  }
-};
-
-const addOptionInline = () => {
-  if (!props.field.options) {
-    props.field.options = [];
-  }
-  const newOptionNumber = props.field.options.length + 1;
-  props.field.options.push({
-    label: `Option ${newOptionNumber}`,
-    value: `option ${newOptionNumber}`,
-  });
-};
-
-const addMultipleOptions = () => {
-  for (let index = 0; index < 3; index++) {
-    addOptionInline();
-  }
-};
-
-const clearAllOptions = () => {
-  if (confirm("Are you sure you want to delete all options!")) {
-    props.field.options = [{ label: "Option 1", value: "option 1" }];
-  }
-};
-
-const handleSelectChange = (value: string) => {
-  localValue.value = value;
-  emit('update:modelValue', value);
+const handleRangeChange = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  localValue.value = Number(target.value);
+  emit('update:modelValue', localValue.value);
 };
 
 watch(() => props.modelValue, (newValue) => {
   localValue.value = newValue;
 });
 </script>
+
 <template>
   <!-- Builder Mode -->
   <div
@@ -112,7 +74,9 @@ watch(() => props.modelValue, (newValue) => {
         : 'border-slate-200 hover:border-slate-300 hover:shadow-md',
     ]"
   >
+    <!-- Field Header -->
     <div class="flex items-center justify-between px-4 pt-4 pb-2">
+      <!-- Drag Handle -->
       <div class="flex items-center gap-2">
         <div
           class="cursor-move opacity-0 group-hover:opacity-100 transition-opacity drag-handle"
@@ -120,21 +84,25 @@ watch(() => props.modelValue, (newValue) => {
           <Grip class="w-4 h-4 text-slate-400 hover:text-slate-600" />
         </div>
 
+        <!-- Field Type Icon -->
         <div
-          class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center"
+          class="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center"
         >
-          <List class="w-4 h-4 text-purple-600" />
+          <SlidersHorizontal class="w-4 h-4 text-amber-600" />
         </div>
       </div>
 
+      <!-- Field Type Badge -->
       <div
         class="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full"
       >
-        Dropdown
+        Number Range
       </div>
     </div>
 
+    <!-- Field Content -->
     <div class="px-4 pb-4">
+      <!-- Editable Label -->
       <div class="mb-3">
         <div
           v-if="!isEditingLabel"
@@ -162,52 +130,57 @@ watch(() => props.modelValue, (newValue) => {
         />
       </div>
 
-      <!-- Preview Select using Radix Vue -->
+      <!-- Preview Range Slider -->
       <div class="relative">
-        <Select v-model="selectedValue" disabled>
-          <SelectTrigger
-            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm cursor-not-allowed transition-all flex items-center justify-between"
-          >
-            <SelectValue
-              :placeholder="field.placeholder || 'Choose an option'"
+        <div class="space-y-3">
+          <!-- Range Slider -->
+          <div class="relative">
+            <input
+              type="range"
+              :min="field.min || 0"
+              :max="field.max || 100"
+              :step="field.step || 1"
+              v-model="rangeValue"
+              class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-not-allowed"
+              disabled
             />
-            <ChevronDown class="w-4 h-4 text-slate-400" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Options</SelectLabel>
-              <SelectItem
-                v-for="(option, index) in field.options"
-                :key="index"
-                :value="option.value"
-              >
-                {{ option.label }}
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+            <!-- Value Display -->
+            <div
+              class="absolute -top-8 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs px-2 py-1 rounded"
+            >
+              {{ rangeValue }}
+            </div>
+          </div>
+
+          <!-- Min/Max Labels -->
+          <div class="flex justify-between text-xs text-slate-500">
+            <span>{{ field.min || 0 }}</span>
+            <span>{{ field.max || 100 }}</span>
+          </div>
+        </div>
         <div
           class="absolute inset-0 rounded-lg bg-slate-50/50 pointer-events-none"
         ></div>
       </div>
 
-      <!-- Options Preview -->
-      <div v-if="field.options && field.options.length > 0" class="mt-2">
-        <div class="flex flex-wrap gap-1">
-          <span
-            v-for="(option, index) in field.options?.slice(0, 3)"
-            :key="index"
-            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700"
-          >
-            {{ option.label }}
-          </span>
-          <span
-            v-if="field.options && field.options.length > 3"
-            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600"
-          >
-            +{{ field.options.length - 3 }} more
-          </span>
-        </div>
+      <!-- Range Configuration -->
+      <div class="mt-2 flex flex-wrap gap-1">
+        <span
+          class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700"
+        >
+          Min: {{ field.min || 0 }}
+        </span>
+        <span
+          class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700"
+        >
+          Max: {{ field.max || 100 }}
+        </span>
+        <span
+          v-if="field.step && field.step !== 1"
+          class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700"
+        >
+          Step: {{ field.step }}
+        </span>
       </div>
 
       <!-- Helper Text -->
@@ -229,19 +202,21 @@ watch(() => props.modelValue, (newValue) => {
       {{ field.label }}
       <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
     </label>
-    <select
-      class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm cursor-not-allowed"
-      disabled
-    >
-      <option value="">{{ field.placeholder || 'Choose an option' }}</option>
-      <option
-        v-for="(option, index) in field.options || []"
-        :key="index"
-        :value="typeof option === 'string' ? option : option.value"
-      >
-        {{ typeof option === 'string' ? option : option.label }}
-      </option>
-    </select>
+    <div class="space-y-3">
+      <input
+        type="range"
+        :min="field.min || 0"
+        :max="field.max || 100"
+        :step="field.step || 1"
+        :value="(field.min || 0) + ((field.max || 100) - (field.min || 0)) / 2"
+        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-not-allowed"
+        disabled
+      />
+      <div class="flex justify-between text-xs text-gray-500">
+        <span>{{ field.min || 0 }}</span>
+        <span>{{ field.max || 100 }}</span>
+      </div>
+    </div>
     <div v-if="field.helperText" class="mt-1 text-xs text-gray-500">
       {{ field.helperText }}
     </div>
@@ -253,22 +228,33 @@ watch(() => props.modelValue, (newValue) => {
       {{ field.label }}
       <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
     </label>
-    <select
-      :id="`field-${field.id}`"
-      :value="localValue"
-      @change="handleSelectChange($event.target.value)"
-      :required="field.required"
-      class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-    >
-      <option value="">{{ field.placeholder || 'Choose an option' }}</option>
-      <option
-        v-for="(option, index) in field.options || []"
-        :key="index"
-        :value="typeof option === 'string' ? option : option.value"
-      >
-        {{ typeof option === 'string' ? option : option.label }}
-      </option>
-    </select>
+    <div class="space-y-3">
+      <div class="relative">
+        <input
+          :id="`field-${field.id}`"
+          type="range"
+          :min="field.min || 0"
+          :max="field.max || 100"
+          :step="field.step || 1"
+          :value="localValue"
+          @input="handleRangeChange"
+          class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-200"
+          :style="{
+            background: `linear-gradient(to right, rgb(34 197 94) 0%, rgb(34 197 94) ${((localValue - (field.min || 0)) / ((field.max || 100) - (field.min || 0))) * 100}%, rgb(229 231 235) ${((localValue - (field.min || 0)) / ((field.max || 100) - (field.min || 0))) * 100}%, rgb(229 231 235) 100%)`
+          }"
+        />
+        <div class="absolute -top-8 px-2 py-1 bg-green-500 text-white text-xs rounded"
+             :style="{left: `${((localValue - (field.min || 0)) / ((field.max || 100) - (field.min || 0))) * 100}%`, transform: 'translateX(-50%)'}"
+        >
+          {{ localValue }}
+        </div>
+      </div>
+      <div class="flex justify-between text-xs text-gray-500">
+        <span>{{ field.min || 0 }}</span>
+        <span class="font-semibold text-gray-700">Current: {{ localValue }}</span>
+        <span>{{ field.max || 100 }}</span>
+      </div>
+    </div>
     <div v-if="field.helperText" class="mt-1 text-xs text-gray-500">
       {{ field.helperText }}
     </div>
