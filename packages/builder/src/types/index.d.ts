@@ -33,7 +33,13 @@ export interface FormSchema {
   title: string;
   description?: string;
   pages: PageSchema[];
-  settings: FormSettings;
+  price: number;
+  requireMerch: boolean;
+  allowGroups: boolean;
+  calculateTat: boolean;
+  groupAmountPayable?: number;
+  groupMemberLimit?: number;
+  infoPromptMessage?: string;
 }
 
 export interface FormSettings {

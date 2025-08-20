@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import FormPreviewFullscreen from "./FormPreviewFullscreen.vue";
-import PublishedFormRenderer from "./PublishedFormRenderer.vue";
 import type { FormField, FormSchema, Store as StoreType } from "@/types";
 import Elements from "./Form/Elements.vue";
 import Renderer from "./Form/Builder/Renderer.vue";
 import Settings from "./Settings/Settings.vue";
 import Store from "./Store/Store.vue";
-import { Eye, Download, Upload, Plus, Send, ArrowLeft, CheckCircle } from "lucide-vue-next";
+import {
+  Eye,
+  Download,
+  Upload,
+  Plus,
+  Send,
+  CheckCircle,
+} from "lucide-vue-next";
 import Properties from "./Form/Element/Properties.vue";
+import FormPreviewFullscreen from "./Preview/FormPreviewFullscreen.vue";
 
 // Data
 const form = ref<FormSchema>({
@@ -23,13 +29,6 @@ const form = ref<FormSchema>({
       fields: [] as FormField[],
     },
   ],
-  settings: {
-    submitText: "Submit",
-    resetText: "Reset",
-    layout: "vertical",
-    spacing: "normal",
-    theme: "light",
-  },
 } as FormSchema);
 
 const activeTab = ref("builder");
@@ -114,19 +113,19 @@ function handleFileImport(event: Event) {
 
 function handlePublish() {
   // Validate form has at least one field
-  const hasFields = form.value.pages.some(page => page.fields.length > 0);
-  
+  const hasFields = form.value.pages.some((page) => page.fields.length > 0);
+
   if (!hasFields) {
     alert("Please add at least one field to your form before publishing.");
     return;
   }
-  
+
   // Save the form data (in a real app, this would be sent to a server)
   publishedFormData.value = JSON.parse(JSON.stringify(form.value));
-  
+
   // Show publish success notification
   showPublishSuccess.value = true;
-  
+
   // Auto-hide success message after 3 seconds
   setTimeout(() => {
     showPublishSuccess.value = false;
@@ -134,111 +133,11 @@ function handlePublish() {
     isPublished.value = true;
   }, 2000);
 }
-
-function handleFormSubmit(data: { formData: Record<string, any>; selectedProducts: any[] }) {
-  console.log("Form submitted with data:", data);
-  
-  // Create a summary message
-  let message = "Form submitted successfully!\n\n";
-  
-  // Add form fields summary
-  const fieldCount = Object.keys(data.formData).length;
-  if (fieldCount > 0) {
-    message += `✅ ${fieldCount} form field(s) filled\n`;
-  }
-  
-  // Add selected products summary
-  if (data.selectedProducts.length > 0) {
-    message += `\n🛍️ Selected Products:\n`;
-    let totalAmount = 0;
-    data.selectedProducts.forEach(product => {
-      const subtotal = product.price * product.selectedQuantity;
-      totalAmount += subtotal;
-      message += `• ${product.name} (${product.selectedQuantity}x @ $${product.price}) = $${subtotal}\n`;
-    });
-    message += `\n💰 Total: $${totalAmount.toFixed(2)}`;
-  } else {
-    message += "\nNo products selected.";
-  }
-  
-  message += "\n\nCheck the console for detailed data.";
-  
-  alert(message);
-  
-  // Log detailed data to console
-  console.group("📋 Form Submission Details");
-  console.log("Form ID:", publishedFormData.value.id);
-  console.log("Form Title:", publishedFormData.value.title);
-  console.log("Form Data:", data.formData);
-  if (data.selectedProducts.length > 0) {
-    console.log("Selected Products:", data.selectedProducts);
-    console.table(data.selectedProducts.map(p => ({
-      Store: p.storeName,
-      Product: p.name,
-      Price: `$${p.price}`,
-      Quantity: p.selectedQuantity,
-      Subtotal: `$${(p.price * p.selectedQuantity).toFixed(2)}`
-    })));
-  }
-  console.groupEnd();
-  
-  // In a real application, you would send this data to your backend
-  // Example:
-  // await api.submitForm({
-  //   formId: publishedFormData.value.id,
-  //   data: data.formData,
-  //   products: data.selectedProducts
-  // });
-}
-
-function backToBuilder() {
-  isPublished.value = false;
-  publishedFormData.value = null;
-}
 </script>
 
 <template>
-  <!-- Published Form View -->
-  <div v-if="isPublished" class="min-h-screen bg-gray-50">
-    <!-- Header for Published View -->
-    <header class="bg-white border-b border-gray-200">
-      <div class="px-6 py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <button
-              @click="backToBuilder"
-              class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft class="w-5 h-5" />
-            </button>
-            <div>
-              <h1 class="text-lg font-semibold text-gray-900">Published Form</h1>
-              <p class="text-sm text-gray-500">This is how your form will appear to users</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full flex items-center gap-2">
-              <CheckCircle class="w-4 h-4" />
-              Published
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-    
-    <!-- Published Form Renderer -->
-    <PublishedFormRenderer
-      v-if="publishedFormData"
-      :form="publishedFormData"
-      :stores="stores"
-      :show-stores="true"
-      :show-header="true"
-      @submit="handleFormSubmit"
-    />
-  </div>
-  
   <!-- Form Builder View -->
-  <div v-else class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-50">
     <!-- Top Navigation Bar -->
     <header class="bg-white border-b border-gray-200">
       <div class="px-6 py-4">
@@ -413,7 +312,7 @@ function backToBuilder() {
       @change="handleFileImport"
       class="hidden"
     />
-    
+
     <!-- Publish Success Notification -->
     <Transition
       enter-active-class="transition ease-out duration-300"
@@ -427,11 +326,15 @@ function backToBuilder() {
         v-if="showPublishSuccess"
         class="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50"
       >
-        <div class="bg-green-600 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-3">
+        <div
+          class="bg-green-600 text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-3"
+        >
           <CheckCircle class="w-6 h-6" />
           <div>
             <p class="font-semibold">Form Published Successfully!</p>
-            <p class="text-sm text-green-100">Redirecting to published view...</p>
+            <p class="text-sm text-green-100">
+              Redirecting to published view...
+            </p>
           </div>
         </div>
       </div>
