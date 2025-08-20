@@ -8,17 +8,16 @@ import {
   ShoppingCart,
   Package,
 } from "lucide-vue-next";
-// Import field components directly
-import TextInputField from "./Fields/TextInputField.vue";
-import TextAreaField from "./Fields/TextAreaField.vue";
-import SelectField from "./Fields/SelectField.vue";
-import CheckboxField from "./Fields/CheckboxField.vue";
-import RadioButtonField from "./Fields/RadioButtonField.vue";
-import DatePickerField from "./Fields/DatePickerField.vue";
-import RatingScaleField from "./Fields/RatingScaleField.vue";
-import FileUploadField from "./Fields/FileUploadField.vue";
-import NumberRangeField from "./Fields/NumberRangeField.vue";
-import ToggleSwitchField from "./Fields/ToggleSwitchField.vue";
+import TextInputField from "../Fields/TextInputField.vue";
+import TextAreaField from "../Fields/TextAreaField.vue";
+import SelectField from "../Fields/SelectField.vue";
+import CheckboxField from "../Fields/CheckboxField.vue";
+import RadioButtonField from "../Fields/RadioButtonField.vue";
+import DatePickerField from "../Fields/DatePickerField.vue";
+import RatingScaleField from "../Fields/RatingScaleField.vue";
+import FileUploadField from "../Fields/FileUploadField.vue";
+import NumberRangeField from "../Fields/NumberRangeField.vue";
+import ToggleSwitchField from "../Fields/ToggleSwitchField.vue";
 import type { FormSchema, Store as StoreType } from "@/types";
 
 interface Props {
