@@ -4,7 +4,6 @@ import type { FormField, FormSchema, Store as StoreType } from "@/types";
 import Elements from "./Form/Elements.vue";
 import Renderer from "./Form/Builder/Renderer.vue";
 import Settings from "./Settings/Settings.vue";
-import Store from "./Store/Store.vue";
 import {
   Eye,
   Download,
@@ -15,6 +14,7 @@ import {
 } from "lucide-vue-next";
 import Properties from "./Form/Element/Properties.vue";
 import FormPreviewFullscreen from "./Preview/FormPreviewFullscreen.vue";
+import Store from "./Store/Store.vue";
 
 // Data
 const form = ref<FormSchema>({
@@ -36,10 +36,10 @@ const stores = ref<StoreType[]>([]);
 const showPreview = ref(false);
 const selectedField = ref<FormField | null>(null);
 const fileInput = ref<HTMLInputElement>();
-const isPublished = ref(false);
-const publishedFormData = ref<any>(null);
 const showPublishSuccess = ref(false);
-
+const emits = defineEmits<{
+  submit: [form: FormSchema, stores: StoreType[]];
+}>();
 const tabs = [
   { id: "builder", label: "Form Builder", icon: "📝" },
   { id: "store", label: "Store & Products", icon: "🛍️" },
@@ -47,7 +47,6 @@ const tabs = [
 ];
 
 function selectField(field: FormField) {
-  console.log(field);
   selectedField.value = field;
 }
 
@@ -111,28 +110,9 @@ function handleFileImport(event: Event) {
   }
 }
 
-function handlePublish() {
-  // Validate form has at least one field
-  const hasFields = form.value.pages.some((page) => page.fields.length > 0);
-
-  if (!hasFields) {
-    alert("Please add at least one field to your form before publishing.");
-    return;
-  }
-
-  // Save the form data (in a real app, this would be sent to a server)
-  publishedFormData.value = JSON.parse(JSON.stringify(form.value));
-
-  // Show publish success notification
-  showPublishSuccess.value = true;
-
-  // Auto-hide success message after 3 seconds
-  setTimeout(() => {
-    showPublishSuccess.value = false;
-    // Switch to published view
-    isPublished.value = true;
-  }, 2000);
-}
+const handlePublish = () => {
+  emits("submit", form.value, stores.value);
+};
 </script>
 
 <template>

@@ -1,3 +1,259 @@
+<script setup lang="ts">
+import { ref, computed, onMounted } from "vue";
+import type { FormField, FormSchema, Store, StoreItem } from "@/types";
+
+// Import existing field components
+import DatePickerField from "./Fields/DatePickerField.vue";
+import RatingScaleField from "./Fields/RatingScaleField.vue";
+import SelectField from "./Fields/SelectField.vue";
+import TextAreaField from "./Fields/TextAreaField.vue";
+import TextInputField from "./Fields/TextInputField.vue";
+
+// Props
+const props = defineProps<{
+  form: FormSchema;
+  stores?: Store[];
+  showHeader?: boolean;
+  showStores?: boolean;
+}>();
+
+// Emits
+const emit = defineEmits<{
+  submit: [data: { formData: Record<string, any>; selectedProducts: any[] }];
+  pageChange: [pageIndex: number];
+  fieldUpdate: [fieldId: string, value: any];
+}>();
+
+// Set defaults for optional props
+const showHeader = computed(() => props.showHeader !== false);
+
+// Data
+const currentPageIndex = ref(0);
+const formData = ref<FormField[]>([]);
+const errors = ref<Record<string, string>>({});
+const selectedProducts = ref<Record<string, boolean>>({});
+const productQuantities = ref<Record<string, number>>({});
+
+// Computed
+const currentPage = computed(() => props.form.pages[currentPageIndex.value]);
+
+const isCurrentPageValid = computed(() => {
+  if (!currentPage.value) return false;
+
+  return currentPage.value.fields.every((field) => {
+    if (field.required) {
+      const value = formData.value[field.id];
+      return value !== undefined && value !== null && value !== "";
+    }
+    return true;
+  });
+});
+
+const isFormValid = computed(() => {
+  return props.form.pages.every((page) => {
+    return page.fields.every((field) => {
+      if (field.required) {
+        const value = formData.value[field.id];
+        return value !== undefined && value !== null && value !== "";
+      }
+      return true;
+    });
+  });
+});
+
+const selectedProductsList = computed(() => {
+  const selected: any[] = [];
+
+  if (props.stores) {
+    props.stores.forEach((store) => {
+      store.items.forEach((item) => {
+        if (selectedProducts.value[item.id]) {
+          selected.push({
+            ...item,
+            storeId: store.id,
+            storeName: store.name,
+            selectedQuantity: productQuantities.value[item.id] || 1,
+          });
+        }
+      });
+    });
+  }
+
+  return selected;
+});
+
+// Methods
+const getFieldComponent = (fieldType: string) => {
+  const components = {
+    text: TextInputField,
+    email: TextInputField,
+    phone: TextInputField,
+    name: TextInputField,
+    longtext: TextAreaField,
+    date: DatePickerField,
+    rating: RatingScaleField,
+    select: SelectField,
+  };
+
+  return components[fieldType] || TextInputField;
+};
+
+const getFieldColumnClass = (field: any) => {
+  if (
+    field.type === "name" ||
+    field.type === "longtext" ||
+    field.type === "rating" ||
+    field.type === "file"
+  ) {
+    return "md:col-span-2";
+  }
+  return field.columnSpan ? `md:col-span-${field.columnSpan}` : "";
+};
+
+const updateField = (fieldId: string, value: any) => {
+  formData.value[fieldId] = value;
+
+  // Clear error when field is updated
+  if (errors.value[fieldId]) {
+    delete errors.value[fieldId];
+  }
+
+  emit("fieldUpdate", fieldId, value);
+};
+
+const validateField = (field: any): string | null => {
+  const value = formData.value[field.id];
+
+  if (
+    field.required &&
+    (value === undefined || value === null || value === "")
+  ) {
+    return `${field.label} is required`;
+  }
+
+  // Add more validation rules as needed
+  if (field.validation) {
+    for (const rule of field.validation) {
+      switch (rule.type) {
+        case "min":
+          if (typeof value === "string" && value.length < rule.value) {
+            return (
+              rule.message ||
+              `${field.label} must be at least ${rule.value} characters`
+            );
+          }
+          break;
+        case "max":
+          if (typeof value === "string" && value.length > rule.value) {
+            return (
+              rule.message ||
+              `${field.label} must be no more than ${rule.value} characters`
+            );
+          }
+          break;
+        case "pattern":
+          if (
+            typeof value === "string" &&
+            rule.value &&
+            !new RegExp(rule.value).test(value)
+          ) {
+            return rule.message || `${field.label} format is invalid`;
+          }
+          break;
+      }
+    }
+  }
+
+  return null;
+};
+
+const validateCurrentPage = () => {
+  const pageErrors: Record<string, string> = {};
+
+  if (currentPage.value) {
+    currentPage.value.fields.forEach((field) => {
+      const error = validateField(field);
+      if (error) {
+        pageErrors[field.id] = error;
+      }
+    });
+  }
+
+  errors.value = { ...errors.value, ...pageErrors };
+  return Object.keys(pageErrors).length === 0;
+};
+
+const nextPage = () => {
+  if (
+    validateCurrentPage() &&
+    currentPageIndex.value < props.form.pages.length - 1
+  ) {
+    currentPageIndex.value++;
+    emit("pageChange", currentPageIndex.value);
+  }
+};
+
+const previousPage = () => {
+  if (currentPageIndex.value > 0) {
+    currentPageIndex.value--;
+    emit("pageChange", currentPageIndex.value);
+  }
+};
+
+const updateSelectedProducts = (item: StoreItem) => {
+  if (selectedProducts.value[item.id]) {
+    productQuantities.value[item.id] = 1;
+  } else {
+    delete productQuantities.value[item.id];
+  }
+};
+
+const incrementQuantity = (itemId: string) => {
+  productQuantities.value[itemId] = (productQuantities.value[itemId] || 1) + 1;
+};
+
+const decrementQuantity = (itemId: string) => {
+  const current = productQuantities.value[itemId] || 1;
+  if (current > 1) {
+    productQuantities.value[itemId] = current - 1;
+  }
+};
+
+const handleSubmit = () => {
+  // Validate all pages
+  let allValid = true;
+  const allErrors: Record<string, string> = {};
+
+  props.form.pages.forEach((page) => {
+    page.fields.forEach((field) => {
+      const error = validateField(field);
+      if (error) {
+        allErrors[field.id] = error;
+        allValid = false;
+      }
+    });
+  });
+
+  errors.value = allErrors;
+
+  if (allValid) {
+    emit("submit", {
+      formData: formData.value,
+      selectedProducts: selectedProductsList.value,
+    });
+  }
+};
+
+// Initialize form data
+onMounted(() => {
+  props.form.pages.forEach((page) => {
+    page.fields.forEach((field) => {
+      formData.value.push(field);
+    });
+  });
+});
+</script>
+
 <template>
   <div class="form-renderer max-w-4xl mx-auto p-4">
     <!-- Form Header -->
@@ -291,265 +547,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import type { FormSchema, Store, StoreItem } from "@/types";
-
-// Import existing field components
-import DatePickerField from "./Fields/DatePickerField.vue";
-import RatingScaleField from "./Fields/RatingScaleField.vue";
-import SelectField from "./Fields/SelectField.vue";
-import TextAreaField from "./Fields/TextAreaField.vue";
-import TextInputField from "./Fields/TextInputField.vue";
-
-// Props
-const props = defineProps<{
-  form: FormSchema;
-  stores?: Store[];
-  showHeader?: boolean;
-  showStores?: boolean;
-}>();
-
-// Emits
-const emit = defineEmits<{
-  submit: [data: { formData: Record<string, any>; selectedProducts: any[] }];
-  pageChange: [pageIndex: number];
-  fieldUpdate: [fieldId: string, value: any];
-}>();
-
-// Set defaults for optional props
-const showHeader = computed(() => props.showHeader !== false);
-const showStores = computed(() => props.showStores !== false);
-
-// Data
-const currentPageIndex = ref(0);
-const formData = ref<Record<string, any>>({});
-const errors = ref<Record<string, string>>({});
-const selectedProducts = ref<Record<string, boolean>>({});
-const productQuantities = ref<Record<string, number>>({});
-
-// Computed
-const currentPage = computed(() => props.form.pages[currentPageIndex.value]);
-
-const isCurrentPageValid = computed(() => {
-  if (!currentPage.value) return false;
-
-  return currentPage.value.fields.every((field) => {
-    if (field.required) {
-      const value = formData.value[field.id];
-      return value !== undefined && value !== null && value !== "";
-    }
-    return true;
-  });
-});
-
-const isFormValid = computed(() => {
-  return props.form.pages.every((page) => {
-    return page.fields.every((field) => {
-      if (field.required) {
-        const value = formData.value[field.id];
-        return value !== undefined && value !== null && value !== "";
-      }
-      return true;
-    });
-  });
-});
-
-const selectedProductsList = computed(() => {
-  const selected: any[] = [];
-
-  if (props.stores) {
-    props.stores.forEach((store) => {
-      store.items.forEach((item) => {
-        if (selectedProducts.value[item.id]) {
-          selected.push({
-            ...item,
-            storeId: store.id,
-            storeName: store.name,
-            selectedQuantity: productQuantities.value[item.id] || 1,
-          });
-        }
-      });
-    });
-  }
-
-  return selected;
-});
-
-// Methods
-const getFieldComponent = (fieldType: string) => {
-  const components = {
-    text: TextInputField,
-    email: TextInputField,
-    phone: TextInputField,
-    name: TextInputField,
-    longtext: TextAreaField,
-    date: DatePickerField,
-    rating: RatingScaleField,
-    select: SelectField,
-  };
-
-  return components[fieldType] || TextInputField;
-};
-
-const getFieldColumnClass = (field: any) => {
-  if (
-    field.type === "name" ||
-    field.type === "longtext" ||
-    field.type === "rating" ||
-    field.type === "file"
-  ) {
-    return "md:col-span-2";
-  }
-  return field.columnSpan ? `md:col-span-${field.columnSpan}` : "";
-};
-
-const updateField = (fieldId: string, value: any) => {
-  formData.value[fieldId] = value;
-
-  // Clear error when field is updated
-  if (errors.value[fieldId]) {
-    delete errors.value[fieldId];
-  }
-
-  emit("fieldUpdate", fieldId, value);
-};
-
-const validateField = (field: any): string | null => {
-  const value = formData.value[field.id];
-
-  if (
-    field.required &&
-    (value === undefined || value === null || value === "")
-  ) {
-    return `${field.label} is required`;
-  }
-
-  // Add more validation rules as needed
-  if (field.validation) {
-    for (const rule of field.validation) {
-      switch (rule.type) {
-        case "min":
-          if (typeof value === "string" && value.length < rule.value) {
-            return (
-              rule.message ||
-              `${field.label} must be at least ${rule.value} characters`
-            );
-          }
-          break;
-        case "max":
-          if (typeof value === "string" && value.length > rule.value) {
-            return (
-              rule.message ||
-              `${field.label} must be no more than ${rule.value} characters`
-            );
-          }
-          break;
-        case "pattern":
-          if (
-            typeof value === "string" &&
-            rule.value &&
-            !new RegExp(rule.value).test(value)
-          ) {
-            return rule.message || `${field.label} format is invalid`;
-          }
-          break;
-      }
-    }
-  }
-
-  return null;
-};
-
-const validateCurrentPage = () => {
-  const pageErrors: Record<string, string> = {};
-
-  if (currentPage.value) {
-    currentPage.value.fields.forEach((field) => {
-      const error = validateField(field);
-      if (error) {
-        pageErrors[field.id] = error;
-      }
-    });
-  }
-
-  errors.value = { ...errors.value, ...pageErrors };
-  return Object.keys(pageErrors).length === 0;
-};
-
-const nextPage = () => {
-  if (
-    validateCurrentPage() &&
-    currentPageIndex.value < props.form.pages.length - 1
-  ) {
-    currentPageIndex.value++;
-    emit("pageChange", currentPageIndex.value);
-  }
-};
-
-const previousPage = () => {
-  if (currentPageIndex.value > 0) {
-    currentPageIndex.value--;
-    emit("pageChange", currentPageIndex.value);
-  }
-};
-
-const updateSelectedProducts = (item: StoreItem) => {
-  if (selectedProducts.value[item.id]) {
-    productQuantities.value[item.id] = 1;
-  } else {
-    delete productQuantities.value[item.id];
-  }
-};
-
-const incrementQuantity = (itemId: string) => {
-  productQuantities.value[itemId] = (productQuantities.value[itemId] || 1) + 1;
-};
-
-const decrementQuantity = (itemId: string) => {
-  const current = productQuantities.value[itemId] || 1;
-  if (current > 1) {
-    productQuantities.value[itemId] = current - 1;
-  }
-};
-
-const handleSubmit = () => {
-  // Validate all pages
-  let allValid = true;
-  const allErrors: Record<string, string> = {};
-
-  props.form.pages.forEach((page) => {
-    page.fields.forEach((field) => {
-      const error = validateField(field);
-      if (error) {
-        allErrors[field.id] = error;
-        allValid = false;
-      }
-    });
-  });
-
-  errors.value = allErrors;
-
-  if (allValid) {
-    emit("submit", {
-      formData: formData.value,
-      selectedProducts: selectedProductsList.value,
-    });
-  }
-};
-
-// Initialize form data
-onMounted(() => {
-  props.form.pages.forEach((page) => {
-    page.fields.forEach((field) => {
-      if (formData.value[field.id] === undefined) {
-        formData.value[field.id] = field.props?.defaultValue || "";
-      }
-    });
-  });
-});
-</script>
 
 <style scoped>
 .line-clamp-2 {
