@@ -7,15 +7,15 @@ interface Props {
   field: FormField;
   isSelected?: boolean;
   isDisabled?: boolean;
-  mode?: 'builder' | 'preview' | 'fill';
+  mode?: "builder" | "preview" | "fill";
   modelValue?: any;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isSelected: false,
   isDisabled: false,
-  mode: 'builder',
-  modelValue: '',
+  mode: "builder",
+  modelValue: "",
 });
 
 const emit = defineEmits<{
@@ -54,12 +54,15 @@ const cancelEditingLabel = () => {
 
 const handleRadioChange = (value: string) => {
   localValue.value = value;
-  emit('update:modelValue', value);
+  emit("update:modelValue", value);
 };
 
-watch(() => props.modelValue, (newValue) => {
-  localValue.value = newValue;
-});
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    localValue.value = newValue;
+  },
+);
 </script>
 
 <template>
@@ -133,11 +136,7 @@ watch(() => props.modelValue, (newValue) => {
       <div class="relative">
         <div class="space-y-2">
           <label
-            v-for="(option, index) in field.options || [
-              'Option 1',
-              'Option 2',
-              'Option 3',
-            ]"
+            v-for="(option, index) in field.options"
             :key="index"
             class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 cursor-not-allowed"
           >
@@ -148,7 +147,7 @@ watch(() => props.modelValue, (newValue) => {
               />
               <Circle v-else class="w-5 h-5 text-slate-400" />
             </div>
-            <span class="text-sm text-slate-700">{{ option }}</span>
+            <span class="text-sm text-slate-700">{{ option.label }}</span>
           </label>
         </div>
         <div
@@ -199,7 +198,7 @@ watch(() => props.modelValue, (newValue) => {
     </label>
     <div class="space-y-2">
       <label
-        v-for="(option, index) in field.options || ['Option 1', 'Option 2', 'Option 3']"
+        v-for="(option, index) in field.options"
         :key="index"
         class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 cursor-not-allowed"
       >
@@ -210,7 +209,7 @@ watch(() => props.modelValue, (newValue) => {
           disabled
           class="w-4 h-4 text-green-500 focus:ring-0 cursor-not-allowed"
         />
-        <span class="text-sm text-gray-700">{{ option }}</span>
+        <span class="text-sm text-gray-700">{{ option.label }}</span>
       </label>
     </div>
     <div v-if="field.helperText" class="mt-1 text-xs text-gray-500">
@@ -226,7 +225,7 @@ watch(() => props.modelValue, (newValue) => {
     </label>
     <div class="space-y-2">
       <label
-        v-for="(option, index) in field.options || []"
+        v-for="(option, index) in field.options"
         :key="index"
         class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
       >
@@ -240,7 +239,7 @@ watch(() => props.modelValue, (newValue) => {
           :required="field.required && index === 0"
           class="w-4 h-4 text-green-500 focus:ring-2 focus:ring-green-200 transition-all"
         />
-        <span class="text-sm text-gray-700">{{ option }}</span>
+        <span class="text-sm text-gray-700">{{ option.label }}</span>
       </label>
     </div>
     <div v-if="field.helperText" class="mt-1 text-xs text-gray-500">

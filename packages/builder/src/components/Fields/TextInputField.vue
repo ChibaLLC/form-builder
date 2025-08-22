@@ -17,20 +17,20 @@ interface Props {
   field: FormField;
   isSelected?: boolean;
   isDisabled?: boolean;
-  mode?: 'builder' | 'preview' | 'fill';  // New mode prop
-  modelValue?: any;  // For v-model support in fill mode
+  mode?: "builder" | "preview" | "fill"; // New mode prop
+  modelValue?: any; // For v-model support in fill mode
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isSelected: false,
   isDisabled: false,
-  mode: 'builder',
-  modelValue: '',
+  mode: "builder",
+  modelValue: "",
 });
 
 const emit = defineEmits<{
   "update:field": [field: FormField];
-  "update:modelValue": [value: any];  // For v-model support
+  "update:modelValue": [value: any]; // For v-model support
   delete: [];
 }>();
 
@@ -49,11 +49,11 @@ const startEditingLabel = async () => {
 
 const finishEditingLabel = () => {
   isEditingLabel.value = false;
-  if (localLabel.value.trim()) {
-    emit("update:field", { ...props.field, label: localLabel.value.trim() });
-  } else {
-    localLabel.value = props.field.label;
-  }
+  // if (localLabel.value.trim()) {
+  emit("update:field", { ...props.field, label: props.field.label.trim() });
+  // } else {
+  //   localLabel.value = props.field.label;
+  // }
 };
 
 const cancelEditingLabel = () => {
@@ -125,13 +125,16 @@ const fieldConfig = computed(() => {
 const handleInput = (event: Event) => {
   const target = event.target as HTMLInputElement;
   localValue.value = target.value;
-  emit('update:modelValue', target.value);
+  emit("update:modelValue", target.value);
 };
 
 // Watch for external value changes
-watch(() => props.modelValue, (newValue) => {
-  localValue.value = newValue;
-});
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    localValue.value = newValue;
+  },
+);
 </script>
 
 <template>
@@ -183,7 +186,7 @@ watch(() => props.modelValue, (newValue) => {
       <div
         class="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full"
       >
-        {{ fieldConfig.label }}
+        {{ field.label }}
       </div>
     </div>
 
@@ -340,7 +343,10 @@ watch(() => props.modelValue, (newValue) => {
 
   <!-- Fill Mode -->
   <div v-else class="mb-4">
-    <label :for="`field-${field.id}`" class="block text-sm font-medium text-gray-700 mb-2">
+    <label
+      :for="`field-${field.id}`"
+      class="block text-sm font-medium text-gray-700 mb-2"
+    >
       {{ field.label }}
       <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
     </label>
@@ -357,7 +363,7 @@ watch(() => props.modelValue, (newValue) => {
         :minlength="field.minLength"
         :maxlength="field.maxLength"
         :pattern="field.pattern"
-        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm placeholder:text-gray-400 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+        class="w-full px-4 py-2.5 bg-white border border-green-300 rounded-lg text-sm placeholder:text-gray-400 focus:border-transparent transition-all"
         :class="{
           'pl-10':
             field.inputType === 'email' ||

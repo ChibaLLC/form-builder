@@ -6,13 +6,13 @@ import { Grip, CheckSquare, Edit3, Square } from "lucide-vue-next";
 interface Props {
   field: FormField;
   isSelected?: boolean;
-  mode?: 'builder' | 'preview' | 'fill';
+  mode?: "builder" | "preview" | "fill";
   modelValue?: any[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isSelected: false,
-  mode: 'builder',
+  mode: "builder",
   modelValue: () => [],
 });
 
@@ -38,11 +38,11 @@ const startEditingLabel = async () => {
 
 const finishEditingLabel = () => {
   isEditingLabel.value = false;
-  if (localLabel.value.trim()) {
-    emit("update:field", { ...props.field, label: localLabel.value.trim() });
-  } else {
-    localLabel.value = props.field.label;
-  }
+  // if (localLabel.value.trim()) {
+  emit("update:field", { ...props.field });
+  // } else {
+  //   localLabel.value = props.field.label;
+  // }
 };
 
 const cancelEditingLabel = () => {
@@ -56,14 +56,17 @@ const handleCheckboxChange = (option: string, checked: boolean) => {
       localValue.value = [...localValue.value, option];
     }
   } else {
-    localValue.value = localValue.value.filter(v => v !== option);
+    localValue.value = localValue.value.filter((v) => v !== option);
   }
-  emit('update:modelValue', localValue.value);
+  emit("update:modelValue", localValue.value);
 };
 
-watch(() => props.modelValue, (newValue) => {
-  localValue.value = newValue || [];
-});
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    localValue.value = newValue || [];
+  },
+);
 </script>
 
 <template>
@@ -124,7 +127,7 @@ watch(() => props.modelValue, (newValue) => {
         <input
           v-else
           ref="labelInput"
-          v-model="localLabel"
+          v-model="field.label"
           @blur="finishEditingLabel"
           @keyup.enter="finishEditingLabel"
           @keyup.escape="cancelEditingLabel"
@@ -136,22 +139,19 @@ watch(() => props.modelValue, (newValue) => {
       <!-- Preview Checkboxes -->
       <div class="relative">
         <div class="space-y-2">
-          <label 
-            v-for="(option, index) in (field.options || ['Option 1', 'Option 2', 'Option 3'])" 
+          <label
+            v-for="(option, index) in field.options"
             :key="index"
             class="flex items-center gap-2 p-2 rounded-lg bg-slate-50 cursor-not-allowed"
           >
             <div class="relative">
-              <CheckSquare 
+              <CheckSquare
                 v-if="previewChecked[index]"
                 class="w-5 h-5 text-emerald-500"
               />
-              <Square 
-                v-else
-                class="w-5 h-5 text-slate-400"
-              />
+              <Square v-else class="w-5 h-5 text-slate-400" />
             </div>
-            <span class="text-sm text-slate-700">{{ option }}</span>
+            <span class="text-sm text-slate-700">{{ option.label }}</span>
           </label>
         </div>
         <div
@@ -163,14 +163,14 @@ watch(() => props.modelValue, (newValue) => {
       <div class="mt-2 flex items-center gap-2">
         <span class="text-xs text-slate-500">Options:</span>
         <div class="flex flex-wrap gap-1">
-          <span 
-            v-for="(option, index) in (field.options || ['Option 1', 'Option 2', 'Option 3']).slice(0, 3)" 
+          <span
+            v-for="(option, index) in field.options"
             :key="index"
             class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700"
           >
-            {{ option }}
+            {{ option.label }}
           </span>
-          <span 
+          <span
             v-if="field.options && field.options.length > 3"
             class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600"
           >
@@ -199,18 +199,18 @@ watch(() => props.modelValue, (newValue) => {
       <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
     </label>
     <div class="space-y-2">
-      <label 
-        v-for="(option, index) in (field.options || ['Option 1', 'Option 2', 'Option 3'])" 
+      <label
+        v-for="(option, index) in field.options"
         :key="index"
         class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 cursor-not-allowed"
       >
-        <input 
-          type="checkbox" 
+        <input
+          type="checkbox"
           :checked="previewChecked[index]"
-          disabled 
+          disabled
           class="w-4 h-4 text-green-500 rounded focus:ring-0 cursor-not-allowed"
         />
-        <span class="text-sm text-gray-700">{{ option }}</span>
+        <span class="text-sm text-gray-700">{{ option.label }}</span>
       </label>
     </div>
     <div v-if="field.helperText" class="mt-1 text-xs text-gray-500">
@@ -225,19 +225,19 @@ watch(() => props.modelValue, (newValue) => {
       <span v-if="field.required" class="text-red-500 ml-0.5">*</span>
     </label>
     <div class="space-y-2">
-      <label 
-        v-for="(option, index) in (field.options || [])" 
+      <label
+        v-for="(option, index) in field.options || []"
         :key="index"
         class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
       >
-        <input 
-          type="checkbox" 
+        <input
+          type="checkbox"
           :id="`${field.id}-${index}`"
           :checked="localValue.includes(option)"
           @change="handleCheckboxChange(option, $event.target.checked)"
           class="w-4 h-4 text-green-500 rounded focus:ring-2 focus:ring-green-200 transition-all"
         />
-        <span class="text-sm text-gray-700">{{ option }}</span>
+        <span class="text-sm text-gray-700">{{ option.label }}</span>
       </label>
     </div>
     <div v-if="field.helperText" class="mt-1 text-xs text-gray-500">
