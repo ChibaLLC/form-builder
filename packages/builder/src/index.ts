@@ -14,12 +14,12 @@ export { default as Sidebar } from "./components/ui/Sidebar.vue";
 
 // Types
 export type {
-  FormSchema,
-  Store as StoreType,
-  StoreItem,
-  FormField,
-  PageSchema,
-  FormSettings,
+	FormSchema,
+	Store as StoreType,
+	StoreItem,
+	FormField,
+	PageSchema,
+	FormSettings,
 } from "./types/index.d";
 
 // Field Components (for developers who want to use individual fields)
